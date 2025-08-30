@@ -1,0 +1,23 @@
+{
+  "notion": {
+    "apiKey": "secret_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "databaseId": "your-notion-database-id-here"
+  },
+  "dropbox": {
+    "localPath": "~/Dropbox (Personal)/LinkedIn_Videos"
+  },
+  "server": {
+    "port": 8765,
+    "host": "localhost"
+  },
+  "video": {
+    "maxSize": "50MB",
+    "formats": ["mp4", "webm"],
+    "compression": "medium",
+    "outputFormat": "mp4"
+  },
+  "linkedin": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "timeout": 30000
+  }
+}
