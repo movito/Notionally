@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.4.4
+// @version      1.4.5
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -20,7 +20,7 @@
         captureMenuHTML: false,  // Set to true to log menu HTML for debugging
         convertImagesToBase64: true,  // Enable image conversion to save to Dropbox
         useTestEndpoint: false,  // Set to true to use /test-save instead of /save-post
-        unfurlLinks: false,  // Disabled by default due to cross-origin restrictions
+        unfurlLinks: true,  // Enable URL unfurling for LinkedIn shortened links
         unfurlTimeout: 5000  // Timeout for URL unfurling in milliseconds
     };
     
@@ -170,194 +170,122 @@
     async function unfurlUrl(shortUrl) {
         log(`🔗 Attempting to unfurl: ${shortUrl}`);
         
+        // Method 1: Try XMLHttpRequest first (sometimes works better than fetch)
         try {
-            // Try with regular fetch first (without no-cors)
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), CONFIG.unfurlTimeout);
-            
+            const finalUrl = await unfurlViaXHR(shortUrl);
+            if (finalUrl && finalUrl !== shortUrl && !finalUrl.includes('lnkd.in')) {
+                return finalUrl;
+            }
+        } catch (e) {
+            log(`  XHR method didn't work: ${e.message}`);
+        }
+        
+        // Method 2: Try fetch with cors mode
+        try {
             const response = await fetch(shortUrl, {
-                method: 'HEAD',
-                credentials: 'include',
+                method: 'GET',  // Changed from HEAD to GET
                 redirect: 'follow',
-                signal: controller.signal
-                // Removed mode: 'no-cors' to allow reading the final URL
+                credentials: 'omit'  // Don't send cookies - might avoid some CORS issues
             });
             
-            clearTimeout(timeout);
-            
-            // Get the final URL from the response
             const finalUrl = response.url;
-            log(`  Fetch response status: ${response.status}`);
-            log(`  Final URL from fetch: ${finalUrl}`);
+            log(`  Fetch got URL: ${finalUrl}`);
             
-            // Check if we actually got a different URL
             if (finalUrl && finalUrl !== shortUrl && !finalUrl.includes('lnkd.in')) {
-                log(`  ✅ Successfully resolved to: ${finalUrl}`);
+                log(`  ✅ Successfully resolved via fetch: ${finalUrl}`);
                 return finalUrl;
-            } else {
-                log(`  Fetch didn't fully resolve URL, trying window.open method...`);
-                return await unfurlViaWindowOpen(shortUrl);
             }
-            
         } catch (error) {
-            log(`  ⚠️ Fetch failed: ${error.message}`);
-            
-            // Check if it's a CORS error
-            if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-                log(`  Trying window.open method due to CORS...`);
-                try {
-                    return await unfurlViaWindowOpen(shortUrl);
-                } catch (windowError) {
-                    log(`  Window.open also failed, trying iframe...`);
-                    return await unfurlViaIframe(shortUrl);
-                }
-            }
-            
-            // For other errors, try iframe method
+            log(`  Fetch failed: ${error.message}`);
+        }
+        
+        // Method 3: Simple window.open as last resort
+        if (CONFIG.unfurlLinks) {
             try {
-                return await unfurlViaIframe(shortUrl);
-            } catch (iframeError) {
-                log(`  ❌ All unfurl methods failed: ${iframeError.message}`);
-                return shortUrl; // Return original URL if all methods fail
+                const finalUrl = await unfurlViaSimpleWindow(shortUrl);
+                if (finalUrl && finalUrl !== shortUrl) {
+                    return finalUrl;
+                }
+            } catch (e) {
+                log(`  Window method failed: ${e.message}`);
             }
         }
+        
+        log(`  ❌ Could not unfurl ${shortUrl}`);
+        return shortUrl;
     }
     
-    // Unfurl URL using window.open (works better for LinkedIn)
-    function unfurlViaWindowOpen(url) {
-        return new Promise((resolve) => {
-            log(`  🪟 Trying window.open unfurl for: ${url}`);
+    // Try XMLHttpRequest method
+    function unfurlViaXHR(url) {
+        return new Promise((resolve, reject) => {
+            log(`  📡 Trying XMLHttpRequest for: ${url}`);
+            
+            const xhr = new XMLHttpRequest();
+            xhr.timeout = CONFIG.unfurlTimeout;
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    // Try to get the final URL from response
+                    const finalUrl = xhr.responseURL;
+                    log(`    XHR final URL: ${finalUrl}`);
+                    
+                    if (finalUrl && finalUrl !== url && !finalUrl.includes('lnkd.in')) {
+                        log(`    ✅ XHR resolved to: ${finalUrl}`);
+                        resolve(finalUrl);
+                    } else {
+                        reject(new Error('No redirect detected'));
+                    }
+                }
+            };
+            
+            xhr.onerror = () => reject(new Error('XHR failed'));
+            xhr.ontimeout = () => reject(new Error('XHR timeout'));
             
             try {
-                // Open in a new tab/window
-                const newWindow = window.open(url, '_blank', 'width=1,height=1,left=-9999,top=-9999');
-                
-                if (!newWindow) {
-                    log(`    ❌ Popup blocked`);
-                    resolve(url);
-                    return;
-                }
-                
-                // Set a timeout for the unfurl attempt
-                const timeout = setTimeout(() => {
-                    try {
-                        const finalUrl = newWindow.location.href;
-                        log(`    Timeout reached, current URL: ${finalUrl}`);
-                        newWindow.close();
-                        resolve(finalUrl && finalUrl !== 'about:blank' ? finalUrl : url);
-                    } catch (e) {
-                        log(`    ❌ Couldn't read URL after timeout`);
-                        try { newWindow.close(); } catch {}
-                        resolve(url);
-                    }
-                }, 2000);
-                
-                // Try to detect when the redirect is complete
-                let checkCount = 0;
-                const checkInterval = setInterval(() => {
-                    checkCount++;
-                    try {
-                        const currentUrl = newWindow.location.href;
-                        
-                        // Check if we've navigated away from the short URL
-                        if (currentUrl && 
-                            currentUrl !== 'about:blank' && 
-                            currentUrl !== url &&
-                            !currentUrl.includes('lnkd.in')) {
-                            
-                            log(`    ✅ Window resolved to: ${currentUrl}`);
-                            clearInterval(checkInterval);
-                            clearTimeout(timeout);
-                            newWindow.close();
-                            resolve(currentUrl);
-                        }
-                        
-                        // Give up after 20 checks (2 seconds)
-                        if (checkCount > 20) {
-                            log(`    Max checks reached, final URL: ${currentUrl}`);
-                            clearInterval(checkInterval);
-                            clearTimeout(timeout);
-                            newWindow.close();
-                            resolve(currentUrl !== 'about:blank' ? currentUrl : url);
-                        }
-                    } catch (e) {
-                        // Cross-origin error - the redirect happened but we can't read it
-                        log(`    Cross-origin block after redirect`);
-                        clearInterval(checkInterval);
-                        clearTimeout(timeout);
-                        
-                        // Wait a bit more then close
-                        setTimeout(() => {
-                            try { newWindow.close(); } catch {}
-                        }, 500);
-                        
-                        // We can't get the final URL, return original
-                        resolve(url);
-                    }
-                }, 100);
-                
-            } catch (error) {
-                log(`    ❌ Window.open error: ${error.message}`);
-                resolve(url);
+                xhr.open('GET', url, true);
+                xhr.send();
+            } catch (e) {
+                reject(e);
             }
         });
     }
     
-    // Unfurl URL using hidden iframe (fallback method)
-    function unfurlViaIframe(url) {
-        return new Promise((resolve, reject) => {
-            log(`  🖼️ Trying iframe unfurl for: ${url}`);
+    // Simplified window.open method
+    function unfurlViaSimpleWindow(url) {
+        return new Promise((resolve) => {
+            log(`  🪟 Simple window.open for: ${url}`);
             
-            const timeout = setTimeout(() => {
-                cleanup();
-                reject(new Error('Iframe unfurl timeout'));
-            }, CONFIG.unfurlTimeout);
+            // Open URL in background tab
+            const newTab = window.open(url, '_blank');
             
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.style.width = '1px';
-            iframe.style.height = '1px';
-            iframe.style.position = 'absolute';
-            iframe.style.left = '-9999px';
+            if (!newTab) {
+                log(`    Popup blocked`);
+                resolve(url);
+                return;
+            }
             
-            const cleanup = () => {
-                clearTimeout(timeout);
-                if (iframe.parentNode) {
-                    iframe.parentNode.removeChild(iframe);
-                }
-            };
-            
-            // Handle successful load
-            iframe.onload = () => {
+            // Give it time to redirect
+            setTimeout(() => {
                 try {
-                    // Try to get the final URL
-                    const finalUrl = iframe.contentWindow?.location?.href;
+                    const finalUrl = newTab.location.href;
+                    newTab.close();
+                    
                     if (finalUrl && finalUrl !== 'about:blank') {
-                        log(`    ✅ Iframe resolved to: ${finalUrl}`);
-                        cleanup();
+                        log(`    Got URL: ${finalUrl}`);
                         resolve(finalUrl);
                     } else {
-                        throw new Error('Could not access iframe URL');
+                        resolve(url);
                     }
                 } catch (e) {
-                    // Cross-origin, can't access - but we tried
-                    log(`    ⚠️ Cross-origin block, returning original`);
-                    cleanup();
+                    // Cross-origin - can't read it
+                    log(`    Cross-origin block`);
+                    newTab.close();
                     resolve(url);
                 }
-            };
-            
-            // Handle errors
-            iframe.onerror = () => {
-                log(`    ❌ Iframe load error`);
-                cleanup();
-                resolve(url); // Return original on error
-            };
-            
-            document.body.appendChild(iframe);
-            iframe.src = url;
+            }, 1500);
         });
     }
+    
     
     // Process all URLs in post data
     async function processUrls(urls) {
