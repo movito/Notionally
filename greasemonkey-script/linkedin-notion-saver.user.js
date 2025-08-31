@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.4.1
+// @version      1.4.2
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -380,6 +380,40 @@
             const author = authorElement ? authorElement.textContent.trim() : 'Unknown Author';
             log('Extracted author:', author);
             
+            // Extract author profile URL
+            let authorProfileUrl = null;
+            const profileLinkSelectors = [
+                '.update-components-actor__container a[href*="/in/"]',
+                '.update-components-actor__meta a[href*="/in/"]',
+                '.feed-shared-actor__container-link[href*="/in/"]',
+                'a.app-aware-link[href*="/in/"]',
+                'a[href*="/company/"]' // For company posts
+            ];
+            
+            for (const selector of profileLinkSelectors) {
+                const linkElement = postElement.querySelector(selector);
+                if (linkElement) {
+                    const href = linkElement.getAttribute('href');
+                    if (href) {
+                        // Clean up the URL - remove query parameters and ensure it's absolute
+                        const cleanUrl = href.split('?')[0];
+                        if (cleanUrl.startsWith('http')) {
+                            authorProfileUrl = cleanUrl;
+                        } else if (cleanUrl.startsWith('/')) {
+                            authorProfileUrl = `https://www.linkedin.com${cleanUrl}`;
+                        } else {
+                            authorProfileUrl = `https://www.linkedin.com/${cleanUrl}`;
+                        }
+                        log(`Found author profile URL: ${authorProfileUrl}`);
+                        break;
+                    }
+                }
+            }
+            
+            if (!authorProfileUrl) {
+                log('Could not extract author profile URL');
+            }
+            
             // Use provided URL or try to extract
             if (!postUrl) {
                 // Check for activity ID in data attributes
@@ -508,6 +542,7 @@
             const result = {
                 text: postText,
                 author: author,
+                authorProfileUrl: authorProfileUrl,  // Add author profile URL
                 url: postUrl,
                 timestamp: timestamp,
                 media: {

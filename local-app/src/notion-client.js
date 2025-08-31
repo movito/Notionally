@@ -71,6 +71,9 @@ class NotionClient {
                             }
                         ]
                     },
+                    'Author Profile': {
+                        url: pageData.authorProfileUrl || null
+                    },
                     'Has Video': {
                         checkbox: pageData.videos && pageData.videos.length > 0
                     },
@@ -501,20 +504,62 @@ class NotionClient {
             divider: {}
         });
 
+        // Build metadata footer with rich text formatting
+        const metadataRichText = [
+            {
+                type: 'text',
+                text: {
+                    content: `📊 Saved via Notionally on ${new Date().toLocaleString()}\n`
+                }
+            },
+            {
+                type: 'text',
+                text: {
+                    content: 'Original LinkedIn post: '
+                }
+            },
+            {
+                type: 'text',
+                text: {
+                    content: pageData.sourceUrl,
+                    link: {
+                        url: pageData.sourceUrl
+                    }
+                }
+            },
+            {
+                type: 'text',
+                text: {
+                    content: '\nAuthor: '
+                }
+            }
+        ];
+        
+        // Add author with profile link if available
+        if (pageData.authorProfileUrl) {
+            metadataRichText.push({
+                type: 'text',
+                text: {
+                    content: pageData.author,
+                    link: {
+                        url: pageData.authorProfileUrl
+                    }
+                }
+            });
+        } else {
+            metadataRichText.push({
+                type: 'text',
+                text: {
+                    content: pageData.author
+                }
+            });
+        }
+        
         blocks.push({
             object: 'block',
             type: 'callout',
             callout: {
-                rich_text: [
-                    {
-                        type: 'text',
-                        text: {
-                            content: `📊 Saved via Notionally on ${new Date().toLocaleString()}\\n` +
-                                   `Original LinkedIn post: ${pageData.sourceUrl}\\n` +
-                                   `Author: ${pageData.author}`
-                        }
-                    }
-                ],
+                rich_text: metadataRichText,
                 icon: {
                     emoji: '🤖'
                 },

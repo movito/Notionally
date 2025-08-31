@@ -244,6 +244,7 @@ app.post('/save-post', async (req, res) => {
             title: postData.text.substring(0, 100) || `LinkedIn post from ${postData.author}`,
             content: postData.text,
             author: postData.author,
+            authorProfileUrl: postData.authorProfileUrl, // Pass through author profile URL
             sourceUrl: postData.url,
             timestamp: postData.timestamp,
             videos: processedVideos,
