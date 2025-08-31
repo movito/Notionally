@@ -237,29 +237,166 @@ app.post('/save-post', async (req, res) => {
         // Step 3: Create Notion page (without images first)
         console.log('📋 Creating Notion page...');
         
-        // Process URLs server-side (unfurl shortened links)
+        // Process URLs server-side
         let processedUrls = [];
         if (postData.urls?.length > 0) {
             console.log(`🔗 Processing ${postData.urls.length} URL(s)...`);
             
             for (const url of postData.urls) {
+                // Simply mark LinkedIn shortened URLs without trying to unfurl them
+                // LinkedIn's shortener requires browser interaction and has anti-bot measures
+                if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
+                    console.log(`  Found LinkedIn shortened URL: ${url}`);
+                    processedUrls.push({
+                        original: url,
+                        resolved: url,  // Keep original
+                        wasShortened: true,
+                        isLinkedInShortener: true
+                    });
+                } else {
+                    // Regular URL, no processing needed
+                    processedUrls.push({
+                        original: url,
+                        resolved: url,
+                        wasShortened: false
+                    });
+                }
+            }
+            
+            console.log(`✅ Processed ${processedUrls.length} URL(s)`);
+        } else if (postData.processedUrls?.length > 0) {
+            // Use pre-processed URLs if provided (backwards compatibility)
+            processedUrls = postData.processedUrls;
+        }
+        
+        /* REMOVED COMPLEX UNFURLING CODE - LinkedIn shortener needs browser interaction
+        for (const url of postData.urls) {
                 try {
                     // Check if it's a shortened URL
                     if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
                         console.log(`  Unfurling: ${url}`);
                         
                         // Follow redirects server-side
-                        const response = await fetch(url, {
-                            method: 'HEAD',
+                        let response = await fetch(url, {
+                            method: 'GET',
                             redirect: 'follow',
                             headers: {
-                                'User-Agent': 'Mozilla/5.0 (compatible; Notionally/1.0)'
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                'Accept-Language': 'en-US,en;q=0.5'
                             }
                         });
                         
-                        const resolvedUrl = response.url;
+                        let resolvedUrl = response.url;
+                        console.log(`    First response status: ${response.status}`);
+                        console.log(`    First response URL: ${resolvedUrl}`);
                         
-                        if (resolvedUrl && resolvedUrl !== url) {
+                        // If we got redirected to a LinkedIn page (not the shortener), 
+                        // this is the intermediate page - we need to parse it
+                        if (resolvedUrl.includes('linkedin.com') && !resolvedUrl.includes('lnkd.in')) {
+                            console.log(`    Got LinkedIn intermediate page, looking for actual destination...`);
+                            
+                            const html = await response.text();
+                            
+                            // Look for the actual destination URL in the LinkedIn page
+                            // LinkedIn shows the destination URL in various ways
+                            
+                            // Method 1: Look for "You are being redirected to" pattern
+                            const redirectPattern = /You are being redirected to[^>]*>([^<]+)</i;
+                            const redirectMatch = html.match(redirectPattern);
+                            if (redirectMatch && redirectMatch[1]) {
+                                resolvedUrl = redirectMatch[1].trim();
+                                console.log(`    Found redirect text: ${resolvedUrl}`);
+                            }
+                            
+                            // Method 2: Look for the URL in a link that's not LinkedIn
+                            if (!resolvedUrl || resolvedUrl.includes('linkedin.com')) {
+                                const linkPattern = /<a[^>]*href=["']([^"']+)["'][^>]*>(?:Continue|Proceed|Visit|Go to)/i;
+                                const linkMatch = html.match(linkPattern);
+                                if (linkMatch && linkMatch[1] && !linkMatch[1].includes('linkedin.com')) {
+                                    resolvedUrl = linkMatch[1];
+                                    console.log(`    Found continue link: ${resolvedUrl}`);
+                                }
+                            }
+                            
+                            // Method 3: Look for any external link
+                            if (!resolvedUrl || resolvedUrl.includes('linkedin.com')) {
+                                const externalPattern = /href=["'](https?:\/\/(?!.*linkedin\.com)[^"']+)["']/i;
+                                const externalMatch = html.match(externalPattern);
+                                if (externalMatch && externalMatch[1]) {
+                                    resolvedUrl = externalMatch[1];
+                                    console.log(`    Found external link: ${resolvedUrl}`);
+                                }
+                            }
+                            
+                            // Method 4: Check URL parameters for the destination
+                            const urlObj = new URL(response.url);
+                            const destination = urlObj.searchParams.get('url') || 
+                                              urlObj.searchParams.get('dest') || 
+                                              urlObj.searchParams.get('target');
+                            if (destination && !destination.includes('linkedin.com')) {
+                                resolvedUrl = decodeURIComponent(destination);
+                                console.log(`    Found URL in parameters: ${resolvedUrl}`);
+                            }
+                        }
+                        // Original parsing for when we stay on lnkd.in
+                        else if (resolvedUrl === url || resolvedUrl.includes('lnkd.in')) {
+                            console.log(`    No redirect detected, parsing response body...`);
+                            
+                            try {
+                                const html = await response.text();
+                                
+                                // Debug: Show first 500 chars of response
+                                console.log(`    Response preview: ${html.substring(0, 500)}...`);
+                                
+                                // Look for LinkedIn's specific redirect pattern
+                                // LinkedIn uses a script that does: window.location.replace("actual-url")
+                                const replaceMatch = html.match(/window\.location\.replace\(["']([^"']+)["']\)/);
+                                if (replaceMatch && replaceMatch[1]) {
+                                    resolvedUrl = replaceMatch[1];
+                                    console.log(`    Found location.replace URL: ${resolvedUrl}`);
+                                }
+                                
+                                // Look for meta refresh tag
+                                if (resolvedUrl === url || resolvedUrl.includes('lnkd.in')) {
+                                    const metaRefreshMatch = html.match(/<meta[^>]*http-equiv=["']refresh["'][^>]*content=["']0;url=([^"']+)["']/i);
+                                    if (metaRefreshMatch && metaRefreshMatch[1]) {
+                                        resolvedUrl = metaRefreshMatch[1];
+                                        console.log(`    Found meta refresh URL: ${resolvedUrl}`);
+                                    }
+                                }
+                                
+                                // Look for any href that's not linkedin.com
+                                if (resolvedUrl === url || resolvedUrl.includes('lnkd.in') || resolvedUrl === 'https://www.linkedin.com') {
+                                    const hrefPattern = /href=["']([^"']+)["']/gi;
+                                    let match;
+                                    while ((match = hrefPattern.exec(html)) !== null) {
+                                        const foundUrl = match[1];
+                                        if (foundUrl.startsWith('http') && 
+                                            !foundUrl.includes('linkedin.com') && 
+                                            !foundUrl.includes('lnkd.in')) {
+                                            resolvedUrl = foundUrl;
+                                            console.log(`    Found non-LinkedIn href: ${resolvedUrl}`);
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // Look for data attributes that might contain the URL
+                                if (resolvedUrl === url || resolvedUrl.includes('lnkd.in') || resolvedUrl === 'https://www.linkedin.com') {
+                                    const dataUrlMatch = html.match(/data-[a-z-]*url=["']([^"']+)["']/i);
+                                    if (dataUrlMatch && dataUrlMatch[1] && !dataUrlMatch[1].includes('linkedin')) {
+                                        resolvedUrl = dataUrlMatch[1];
+                                        console.log(`    Found data-url attribute: ${resolvedUrl}`);
+                                    }
+                                }
+                                
+                            } catch (parseError) {
+                                console.log(`    Error parsing response: ${parseError.message}`);
+                            }
+                        }
+                        
+                        if (resolvedUrl && resolvedUrl !== url && !resolvedUrl.includes('lnkd.in')) {
                             console.log(`    ✅ Resolved to: ${resolvedUrl}`);
                             processedUrls.push({
                                 original: url,
@@ -267,7 +404,7 @@ app.post('/save-post', async (req, res) => {
                                 wasShortened: true
                             });
                         } else {
-                            console.log(`    ⚠️ Could not resolve, using original`);
+                            console.log(`    ⚠️ Could not resolve shortened URL`);
                             processedUrls.push({
                                 original: url,
                                 resolved: url,
