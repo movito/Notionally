@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.6
+// @version      1.5.7
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.5.7 - Added comprehensive debugging for redirect page detection
  * Version 1.5.6 - Capture URLs directly from LinkedIn redirect page
  * Version 1.5.5 - Improved URL unfurling with multiple capture methods and longer wait
  * Version 1.5.4 - Added comprehensive debugging for URL extraction and processing
@@ -20,15 +21,30 @@
 (function() {
     'use strict';
     
+    // Log script loading on every page
+    console.log('[Notionally] Script loaded on:', window.location.href);
+    
     // Check if we're on a LinkedIn redirect page
     if (window.location.hostname === 'www.linkedin.com' && 
         (window.location.pathname.includes('/redir/') || 
          window.location.pathname.includes('/safety/go'))) {
         
-        console.log('[Notionally] Detected LinkedIn redirect page');
+        console.log('[Notionally] ✅ Redirect page detected!');
+        console.log('[Notionally] Full URL:', window.location.href);
+        console.log('[Notionally] Pathname:', window.location.pathname);
         
         // Look for the actual destination URL on the page
         const findDestinationUrl = () => {
+            console.log('[Notionally] findDestinationUrl called');
+            
+            // Log all anchors on the page for debugging
+            const allAnchors = document.querySelectorAll('a[href]');
+            console.log('[Notionally] Total anchors found:', allAnchors.length);
+            allAnchors.forEach((a, index) => {
+                if (!a.href.includes('linkedin.com')) {
+                    console.log(`[Notionally] Non-LinkedIn anchor ${index}:`, a.href, 'data-tracking:', a.getAttribute('data-tracking-control-name'));
+                }
+            });
             // LinkedIn shows the destination URL in an anchor tag with specific attributes
             // Priority 1: Look for the button with external_url_click tracking
             const externalUrlButton = document.querySelector('a[data-tracking-control-name="external_url_click"]');
@@ -78,12 +94,16 @@
         
         // Try multiple times as the page loads
         // LinkedIn redirect pages may take a moment to render
+        console.log('[Notionally] Starting URL capture attempts...');
         const attempts = [0, 100, 300, 500, 800, 1200, 1800, 2500];
         attempts.forEach(delay => {
             setTimeout(() => {
+                console.log(`[Notionally] Attempt at ${delay}ms`);
                 const url = findDestinationUrl();
                 if (url) {
-                    console.log(`[Notionally] URL captured after ${delay}ms: ${url}`);
+                    console.log(`[Notionally] ✅ URL captured after ${delay}ms: ${url}`);
+                } else {
+                    console.log(`[Notionally] ❌ No URL found after ${delay}ms`);
                 }
             }, delay);
         });
@@ -862,10 +882,14 @@
                                     let resolved = false;
                                     
                                     // Method 0: Check if our redirect page script captured the URL
+                                    log('[Notionally] Checking localStorage for captured URL...');
                                     const capturedUrl = localStorage.getItem('notionally_last_redirect_url');
                                     const captureTime = localStorage.getItem('notionally_last_redirect_time');
+                                    log(`[Notionally] localStorage check - URL: ${capturedUrl}, Time: ${captureTime}`);
+                                    
                                     if (capturedUrl && captureTime) {
                                         const timeDiff = Date.now() - parseInt(captureTime);
+                                        log(`[Notionally] Time difference: ${timeDiff}ms`);
                                         if (timeDiff < 10000) { // Within last 10 seconds
                                             finalUrl = capturedUrl;
                                             resolved = true;
@@ -874,7 +898,11 @@
                                             // Clean up
                                             localStorage.removeItem('notionally_last_redirect_url');
                                             localStorage.removeItem('notionally_last_redirect_time');
+                                        } else {
+                                            log('[Notionally] ❌ Captured URL is too old (>10s)');
                                         }
+                                    } else {
+                                        log('[Notionally] ❌ No URL captured in localStorage');
                                     }
                                     
                                     // Method 1: Try to read location (might work on same origin)
