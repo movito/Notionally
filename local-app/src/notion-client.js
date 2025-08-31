@@ -27,8 +27,8 @@ class NotionClient {
                     database_id: this.databaseId,
                 },
                 properties: {
-                    // These property names should match your Notion database schema
-                    'Title': {
+                    // Using hybrid schema: existing fields + new Notionally fields
+                    'Name': {
                         title: [
                             {
                                 text: {
@@ -37,6 +37,31 @@ class NotionClient {
                             }
                         ]
                     },
+                    'URL': {
+                        url: pageData.sourceUrl
+                    },
+                    'Created': {
+                        date: {
+                            start: new Date(pageData.timestamp).toISOString()
+                        }
+                    },
+                    'Type ': {
+                        select: {
+                            name: 'LinkedIn Post'
+                        }
+                    },
+                    'Tags': {
+                        multi_select: [
+                            {
+                                name: 'LinkedIn'
+                            },
+                            ...(pageData.videos && pageData.videos.length > 0 ? [{ name: 'Video' }] : []),
+                            {
+                                name: pageData.author.replace(/[^a-zA-Z0-9\s]/g, '').substring(0, 30)
+                            }
+                        ]
+                    },
+                    // New Notionally-specific fields
                     'Author': {
                         rich_text: [
                             {
@@ -46,24 +71,30 @@ class NotionClient {
                             }
                         ]
                     },
-                    'Source URL': {
-                        url: pageData.sourceUrl
-                    },
-                    'Date': {
-                        date: {
-                            start: new Date(pageData.timestamp).toISOString()
-                        }
-                    },
                     'Has Video': {
                         checkbox: pageData.videos && pageData.videos.length > 0
                     },
                     'Video Count': {
                         number: pageData.videos ? pageData.videos.length : 0
                     },
+                    'Source Platform': {
+                        select: {
+                            name: 'LinkedIn'
+                        }
+                    },
                     'Status': {
                         select: {
                             name: 'Saved'
                         }
+                    },
+                    'Content preview': {
+                        rich_text: [
+                            {
+                                text: {
+                                    content: pageData.content ? pageData.content.substring(0, 200) + (pageData.content.length > 200 ? '...' : '') : ''
+                                }
+                            }
+                        ]
                     }
                 },
                 children: contentBlocks
@@ -94,6 +125,154 @@ class NotionClient {
     }
 
     /**
+     * Add image blocks to an existing Notion page
+     * @param {String} pageId - The Notion page ID
+     * @param {Array} images - Array of image objects with base64 data
+     * @param {String} sourceUrl - The original LinkedIn post URL
+     */
+    async addImagesToPage(pageId, images, sourceUrl = null) {
+        console.log(`📸 Adding ${images.length} image(s) to Notion page...`);
+        
+        const blocks = [];
+        
+        // Add a divider before images
+        blocks.push({
+            object: 'block',
+            type: 'divider',
+            divider: {}
+        });
+        
+        // Add heading for images section
+        blocks.push({
+            object: 'block',
+            type: 'heading_3',
+            heading_3: {
+                rich_text: [
+                    {
+                        type: 'text',
+                        text: {
+                            content: `🖼️ Images (${images.length})`
+                        }
+                    }
+                ]
+            }
+        });
+        
+        for (const image of images) {
+            if (image.shareableUrl && image.shareableUrl.viewUrl && image.shareableUrl.viewUrl.startsWith('https://www.dropbox.com')) {
+                // Use real Dropbox URL for embedding
+                blocks.push({
+                    object: 'block',
+                    type: 'image',
+                    image: {
+                        type: 'external',
+                        external: {
+                            url: image.shareableUrl.streamingUrl
+                        },
+                        caption: image.alt ? [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: image.alt
+                                }
+                            }
+                        ] : []
+                    }
+                });
+                
+                // Add metadata about the image
+                blocks.push({
+                    object: 'block',
+                    type: 'callout',
+                    callout: {
+                        rich_text: [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: `✅ Image saved to Dropbox: ${image.dropboxPath}`
+                                }
+                            }
+                        ],
+                        icon: {
+                            emoji: '💾'
+                        },
+                        color: 'gray_background'
+                    }
+                });
+            } else if (image.dropboxPath) {
+                // Fallback: Since localhost URLs don't work in Notion, we'll add a descriptive block
+                blocks.push({
+                    object: 'block',
+                    type: 'callout',
+                    callout: {
+                        rich_text: [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: `📸 Image ${images.indexOf(image) + 1}: ${image.filename || 'LinkedIn Image'}\n`
+                                }
+                            },
+                            {
+                                type: 'text', 
+                                text: {
+                                    content: image.alt ? `Alt text: "${image.alt}"\n` : ''
+                                }
+                            },
+                            {
+                                type: 'text',
+                                text: {
+                                    content: `💾 Saved to Dropbox: ${image.dropboxPath}\n`
+                                }
+                            },
+                            {
+                                type: 'text',
+                                text: {
+                                    content: `📂 Location: ~/Dropbox (Personal)/LinkedIn_Videos/${image.dropboxPath}`
+                                }
+                            }
+                        ],
+                        icon: {
+                            emoji: '🖼️'
+                        },
+                        color: 'blue_background'
+                    }
+                });
+                
+                // Add a note about viewing the image
+                blocks.push({
+                    object: 'block',
+                    type: 'paragraph',
+                    paragraph: {
+                        rich_text: [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: '💡 Image saved locally in your Dropbox folder. To embed in Notion, wait for Dropbox sync and use the share link.'
+                                }
+                            }
+                        ]
+                    }
+                });
+            }
+        }
+        
+        try {
+            // Append blocks to the existing page
+            await this.notion.blocks.children.append({
+                block_id: pageId,
+                children: blocks
+            });
+            
+            console.log(`✅ Successfully added ${images.length} image(s) to Notion page`);
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Failed to add images to Notion page:', error.message);
+            throw new Error(`Failed to add images: ${error.message}`);
+        }
+    }
+
+    /**
      * Build content blocks for the Notion page
      */
     buildContentBlocks(pageData) {
@@ -105,15 +284,109 @@ class NotionClient {
             const paragraphs = pageData.content.split('\\n\\n').filter(p => p.trim());
             
             paragraphs.forEach(paragraph => {
+                // Notion has a 2000 character limit per text block
+                // Split long paragraphs into chunks
+                const maxLength = 2000;
+                const trimmedParagraph = paragraph.trim();
+                
+                if (trimmedParagraph.length <= maxLength) {
+                    blocks.push({
+                        object: 'block',
+                        type: 'paragraph',
+                        paragraph: {
+                            rich_text: [
+                                {
+                                    type: 'text',
+                                    text: {
+                                        content: trimmedParagraph
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                } else {
+                    // Split long paragraph into multiple blocks
+                    let remainingText = trimmedParagraph;
+                    while (remainingText.length > 0) {
+                        // Try to split at a sentence or word boundary
+                        let splitPoint = maxLength;
+                        if (remainingText.length > maxLength) {
+                            // Look for sentence end
+                            const sentenceEnd = remainingText.lastIndexOf('. ', maxLength);
+                            if (sentenceEnd > maxLength * 0.7) {
+                                splitPoint = sentenceEnd + 1;
+                            } else {
+                                // Look for word boundary
+                                const wordEnd = remainingText.lastIndexOf(' ', maxLength);
+                                if (wordEnd > maxLength * 0.7) {
+                                    splitPoint = wordEnd;
+                                }
+                            }
+                        }
+                        
+                        const chunk = remainingText.substring(0, splitPoint).trim();
+                        remainingText = remainingText.substring(splitPoint).trim();
+                        
+                        blocks.push({
+                            object: 'block',
+                            type: 'paragraph',
+                            paragraph: {
+                                rich_text: [
+                                    {
+                                        type: 'text',
+                                        text: {
+                                            content: chunk
+                                        }
+                                    }
+                                ]
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // Add URLs/Links section if present
+        if (pageData.processedUrls?.length > 0) {
+            blocks.push({
+                object: 'block',
+                type: 'divider',
+                divider: {}
+            });
+            
+            blocks.push({
+                object: 'block',
+                type: 'heading_3',
+                heading_3: {
+                    rich_text: [
+                        {
+                            type: 'text',
+                            text: {
+                                content: `🔗 Links (${pageData.processedUrls.length})`
+                            }
+                        }
+                    ]
+                }
+            });
+            
+            // Add each URL as a bulleted list item
+            pageData.processedUrls.forEach(urlInfo => {
+                const displayText = urlInfo.wasShortened ? 
+                    `${urlInfo.resolved} (shortened from: ${urlInfo.original})` : 
+                    urlInfo.resolved;
+                
                 blocks.push({
                     object: 'block',
-                    type: 'paragraph',
-                    paragraph: {
+                    type: 'bulleted_list_item',
+                    bulleted_list_item: {
                         rich_text: [
                             {
                                 type: 'text',
                                 text: {
-                                    content: paragraph.trim()
+                                    content: displayText,
+                                    link: {
+                                        url: urlInfo.resolved
+                                    }
                                 }
                             }
                         ]
@@ -121,7 +394,7 @@ class NotionClient {
                 });
             });
         }
-
+        
         // Add divider before media
         if (pageData.videos?.length > 0 || pageData.images?.length > 0) {
             blocks.push({
@@ -149,73 +422,68 @@ class NotionClient {
             });
 
             pageData.videos.forEach((video, index) => {
-                // Add video embed block
-                blocks.push({
-                    object: 'block',
-                    type: 'video',
-                    video: {
-                        type: 'external',
-                        external: {
-                            url: video.shareableUrl.streamingUrl
-                        }
-                    }
-                });
-
-                // Add video details as a callout
-                blocks.push({
-                    object: 'block',
-                    type: 'callout',
-                    callout: {
-                        rich_text: [
-                            {
-                                type: 'text',
-                                text: {
-                                    content: `Video ${index + 1}: ${video.filename}\\n` +
-                                           `Size: ${this.formatFileSize(video.size)}\\n` +
-                                           `Dropbox: ${video.dropboxPath}\\n` +
-                                           `Share Link: ${video.shareableUrl.viewUrl}`
+                if (video.failed) {
+                    // Add note about failed video download
+                    blocks.push({
+                        object: 'block',
+                        type: 'callout',
+                        callout: {
+                            rich_text: [
+                                {
+                                    type: 'text',
+                                    text: {
+                                        content: `⚠️ Video ${index + 1} could not be downloaded\n` +
+                                                `LinkedIn videos are often protected and cannot be saved automatically.\n` +
+                                                `Original URL: ${video.originalUrl?.substring(0, 50)}...`
+                                    }
                                 }
-                            }
-                        ],
-                        icon: {
-                            emoji: '🎬'
-                        },
-                        color: 'blue_background'
-                    }
-                });
-            });
-        }
-
-        // Add images
-        if (pageData.images?.length > 0) {
-            blocks.push({
-                object: 'block',
-                type: 'heading_3',
-                heading_3: {
-                    rich_text: [
-                        {
-                            type: 'text',
-                            text: {
-                                content: `🖼️ Images (${pageData.images.length})`
+                            ],
+                            icon: {
+                                emoji: '🎥'
+                            },
+                            color: 'yellow_background'
+                        }
+                    });
+                } else {
+                    // Add video embed block
+                    blocks.push({
+                        object: 'block',
+                        type: 'video',
+                        video: {
+                            type: 'external',
+                            external: {
+                                url: video.shareableUrl.streamingUrl
                             }
                         }
-                    ]
+                    });
+
+                    // Add video details as a callout
+                    blocks.push({
+                        object: 'block',
+                        type: 'callout',
+                        callout: {
+                            rich_text: [
+                                {
+                                    type: 'text',
+                                    text: {
+                                        content: `Video ${index + 1}: ${video.filename}\\n` +
+                                               `Size: ${this.formatFileSize(video.size)}\\n` +
+                                               `Dropbox: ${video.dropboxPath}\\n` +
+                                               `Share Link: ${video.shareableUrl.viewUrl}`
+                                    }
+                                }
+                            ],
+                            icon: {
+                                emoji: '🎬'
+                            },
+                            color: 'blue_background'
+                        }
+                    });
                 }
             });
-
-            pageData.images.forEach((image) => {
-                blocks.push({
-                    object: 'block',
-                    type: 'image',
-                    image: {
-                        type: 'external',
-                        external: {
-                            url: image.src
-                        }
-                    }
-                });
-            });
         }
+
+        // Images will be added in a separate step after page creation
 
         // Add metadata footer
         blocks.push({
@@ -317,7 +585,7 @@ class NotionClient {
             const response = await this.notion.databases.query({
                 database_id: this.databaseId,
                 filter: {
-                    property: 'Source URL',
+                    property: 'URL',
                     url: {
                         equals: sourceUrl
                     }

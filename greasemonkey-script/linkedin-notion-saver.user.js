@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.3.6
+// @version      1.4.0
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -19,7 +19,9 @@
         debug: true,
         captureMenuHTML: false,  // Set to true to log menu HTML for debugging
         convertImagesToBase64: true,  // Enable image conversion to save to Dropbox
-        useTestEndpoint: false  // Set to true to use /test-save instead of /save-post
+        useTestEndpoint: false,  // Set to true to use /test-save instead of /save-post
+        unfurlLinks: true,  // Enable URL unfurling for LinkedIn shortened links
+        unfurlTimeout: 5000  // Timeout for URL unfurling in milliseconds
     };
     
     // Store captured video URLs
@@ -119,6 +121,177 @@
             log('Error converting image to base64:', err);
             return null;
         }
+    }
+    
+    // Extract URLs from text content
+    function extractUrls(text) {
+        if (!text) return [];
+        
+        // Regex to match URLs (including LinkedIn shortened ones)
+        const urlRegex = /(?:https?:\/\/)?(?:[\w-]+\.)+[\w-]+(?:\/[^\s]*)?/gi;
+        const matches = text.match(urlRegex) || [];
+        
+        // Filter and clean up URLs
+        const urls = matches
+            .map(url => {
+                // Add protocol if missing
+                if (!url.startsWith('http')) {
+                    url = 'https://' + url;
+                }
+                return url;
+            })
+            .filter(url => {
+                try {
+                    new URL(url);
+                    // Filter out common non-link matches
+                    return !url.includes('@') && // Not an email
+                           !url.endsWith('.') &&   // Not end of sentence
+                           url.length > 10;        // Not too short
+                } catch {
+                    return false;
+                }
+            });
+        
+        // Remove duplicates
+        return [...new Set(urls)];
+    }
+    
+    // Unfurl a shortened URL to get the final destination
+    async function unfurlUrl(shortUrl) {
+        log(`🔗 Attempting to unfurl: ${shortUrl}`);
+        
+        try {
+            // First try with fetch
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), CONFIG.unfurlTimeout);
+            
+            const response = await fetch(shortUrl, {
+                method: 'HEAD',
+                credentials: 'include',
+                redirect: 'follow',
+                signal: controller.signal,
+                mode: 'no-cors' // Avoid CORS issues
+            });
+            
+            clearTimeout(timeout);
+            
+            // Try to get the final URL from the response
+            // Note: Due to no-cors, we might not get the actual URL
+            log(`  Fetch response status: ${response.status}`);
+            
+            // If fetch doesn't give us the URL, try an alternative method
+            if (!response.url || response.url === shortUrl) {
+                log(`  Fetch didn't resolve URL, trying iframe method...`);
+                return await unfurlViaIframe(shortUrl);
+            }
+            
+            log(`  ✅ Resolved to: ${response.url}`);
+            return response.url;
+            
+        } catch (error) {
+            log(`  ⚠️ Fetch failed: ${error.message}, trying iframe method...`);
+            
+            // Fallback to iframe method
+            try {
+                return await unfurlViaIframe(shortUrl);
+            } catch (iframeError) {
+                log(`  ❌ All unfurl methods failed: ${iframeError.message}`);
+                return shortUrl; // Return original URL if all methods fail
+            }
+        }
+    }
+    
+    // Unfurl URL using hidden iframe (fallback method)
+    function unfurlViaIframe(url) {
+        return new Promise((resolve, reject) => {
+            log(`  🖼️ Trying iframe unfurl for: ${url}`);
+            
+            const timeout = setTimeout(() => {
+                cleanup();
+                reject(new Error('Iframe unfurl timeout'));
+            }, CONFIG.unfurlTimeout);
+            
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.style.width = '1px';
+            iframe.style.height = '1px';
+            iframe.style.position = 'absolute';
+            iframe.style.left = '-9999px';
+            
+            const cleanup = () => {
+                clearTimeout(timeout);
+                if (iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            };
+            
+            // Handle successful load
+            iframe.onload = () => {
+                try {
+                    // Try to get the final URL
+                    const finalUrl = iframe.contentWindow?.location?.href;
+                    if (finalUrl && finalUrl !== 'about:blank') {
+                        log(`    ✅ Iframe resolved to: ${finalUrl}`);
+                        cleanup();
+                        resolve(finalUrl);
+                    } else {
+                        throw new Error('Could not access iframe URL');
+                    }
+                } catch (e) {
+                    // Cross-origin, can't access - but we tried
+                    log(`    ⚠️ Cross-origin block, returning original`);
+                    cleanup();
+                    resolve(url);
+                }
+            };
+            
+            // Handle errors
+            iframe.onerror = () => {
+                log(`    ❌ Iframe load error`);
+                cleanup();
+                resolve(url); // Return original on error
+            };
+            
+            document.body.appendChild(iframe);
+            iframe.src = url;
+        });
+    }
+    
+    // Process all URLs in post data
+    async function processUrls(urls) {
+        if (!CONFIG.unfurlLinks || !urls || urls.length === 0) {
+            return [];
+        }
+        
+        log(`📎 Processing ${urls.length} URLs...`);
+        
+        const processedUrls = [];
+        
+        for (const url of urls) {
+            // Check if it's a LinkedIn shortened URL or redirect
+            const isLinkedInShort = url.includes('lnkd.in') || 
+                                    url.includes('linkedin.com/redir') ||
+                                    url.includes('linkedin.com/r/');
+            
+            if (isLinkedInShort) {
+                log(`  Found LinkedIn shortened URL: ${url}`);
+                const resolvedUrl = await unfurlUrl(url);
+                processedUrls.push({
+                    original: url,
+                    resolved: resolvedUrl,
+                    wasShortened: true
+                });
+            } else {
+                processedUrls.push({
+                    original: url,
+                    resolved: url,
+                    wasShortened: false
+                });
+            }
+        }
+        
+        log(`✅ Processed ${processedUrls.length} URLs`);
+        return processedUrls;
     }
     
     // Extract post data from LinkedIn DOM
@@ -318,6 +491,10 @@
                             (timeElement.getAttribute('datetime') || new Date().toISOString()) : 
                             new Date().toISOString();
             
+            // Extract URLs from the post text
+            const extractedUrls = extractUrls(postText);
+            log('Extracted URLs from post:', extractedUrls);
+            
             const result = {
                 text: postText,
                 author: author,
@@ -327,7 +504,8 @@
                     videos: videos,
                     images: images
                 },
-                hasVideo: videos.length > 0
+                hasVideo: videos.length > 0,
+                urls: extractedUrls  // Add extracted URLs
             };
             
             log('Final extracted data:', result);
@@ -587,6 +765,24 @@
                         videos: postData.media?.videos
                     });
                     throw new Error('Post must have text content or videos');
+                }
+                
+                // Process URLs (unfurl shortened links)
+                if (CONFIG.unfurlLinks && postData.urls?.length > 0) {
+                    showToast('Processing links...', 'info');
+                    log(`Processing ${postData.urls.length} URLs...`);
+                    
+                    const processedUrls = await processUrls(postData.urls);
+                    postData.processedUrls = processedUrls;
+                    
+                    // Log results for debugging
+                    processedUrls.forEach(urlInfo => {
+                        if (urlInfo.wasShortened) {
+                            log(`  Unfurled: ${urlInfo.original} → ${urlInfo.resolved}`);
+                        } else {
+                            log(`  Direct URL: ${urlInfo.original}`);
+                        }
+                    });
                 }
                 
                 // Convert images to base64 for transfer (if enabled)

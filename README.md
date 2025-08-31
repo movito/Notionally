@@ -28,7 +28,7 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 ### Prerequisites
 
 - Firefox with Greasemonkey extension
-- Node.js (v16+)
+- Node.js (v22.0.0+) - **Required for native fetch support**
 - ffmpeg for video processing
 - Dropbox desktop app
 - Notion account with API access
@@ -55,6 +55,10 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 
 4. Start the local processing app:
    ```bash
+   # Option 1: Use the start script (auto-selects Node 22)
+   ./start.sh
+   
+   # Option 2: Manual start (requires Node 22+)
    npm start
    ```
 

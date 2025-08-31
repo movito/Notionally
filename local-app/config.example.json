@@ -4,7 +4,8 @@
     "databaseId": "your-notion-database-id-here"
   },
   "dropbox": {
-    "localPath": "~/Dropbox (Personal)/LinkedIn_Videos"
+    "localPath": "~/Dropbox (Personal)/LinkedIn_Videos",
+    "accessToken": "YOUR_DROPBOX_ACCESS_TOKEN_HERE"
   },
   "server": {
     "port": 8765,

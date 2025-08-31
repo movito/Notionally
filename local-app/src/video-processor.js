@@ -1,7 +1,10 @@
 const fs = require('fs-extra');
 const path = require('path');
-const fetch = require('node-fetch');
+// Using native fetch in Node 22+ instead of node-fetch
 const ffmpeg = require('fluent-ffmpeg');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
 
 class VideoProcessor {
     constructor(config) {
@@ -10,6 +13,24 @@ class VideoProcessor {
         
         // Ensure temp directory exists
         fs.ensureDirSync(this.tempDir);
+        
+        // Check for ffmpeg on startup
+        this.checkFfmpeg();
+    }
+    
+    /**
+     * Check if ffmpeg is installed
+     */
+    async checkFfmpeg() {
+        try {
+            await execAsync('ffmpeg -version');
+            console.log('✅ FFmpeg is installed');
+            return true;
+        } catch (error) {
+            console.warn('⚠️  FFmpeg not found - video processing will be limited');
+            console.warn('   Install ffmpeg for full video support: brew install ffmpeg');
+            return false;
+        }
     }
 
     /**
@@ -69,15 +90,23 @@ class VideoProcessor {
     }
 
     /**
-     * Download video from URL
+     * Download video from URL (supports HLS/m3u8 streams)
      */
     async downloadVideo(url, outputPath) {
         console.log(`  📥 Downloading from: ${url}`);
         
         try {
+            // Check if it's an HLS stream
+            if (url.includes('.m3u8')) {
+                console.log('  🎬 Detected HLS stream, using ffmpeg to download...');
+                return await this.downloadHLSStream(url, outputPath);
+            }
+            
+            // Regular download for direct MP4 files
             const response = await fetch(url, {
                 headers: {
-                    'User-Agent': this.config.linkedin.userAgent
+                    'User-Agent': this.config.linkedin.userAgent,
+                    'Referer': 'https://www.linkedin.com/'
                 },
                 timeout: this.config.linkedin.timeout
             });
@@ -95,6 +124,43 @@ class VideoProcessor {
         } catch (error) {
             throw new Error(`Download failed: ${error.message}`);
         }
+    }
+    
+    /**
+     * Download HLS/m3u8 stream using ffmpeg
+     */
+    async downloadHLSStream(url, outputPath) {
+        return new Promise((resolve, reject) => {
+            const ffmpegCommand = ffmpeg(url)
+                .inputOptions([
+                    '-user_agent', this.config.linkedin.userAgent,
+                    '-referer', 'https://www.linkedin.com/',
+                    '-protocol_whitelist', 'file,http,https,tcp,tls'
+                ])
+                .outputOptions([
+                    '-c', 'copy',  // Copy streams without re-encoding
+                    '-bsf:a', 'aac_adtstoasc'  // Fix for AAC audio
+                ])
+                .output(outputPath)
+                .on('start', (cmd) => {
+                    console.log('  🎬 FFmpeg command:', cmd);
+                })
+                .on('progress', (progress) => {
+                    if (progress.percent) {
+                        console.log(`  ⏳ Progress: ${Math.round(progress.percent)}%`);
+                    }
+                })
+                .on('end', () => {
+                    console.log('  ✅ HLS stream downloaded successfully');
+                    resolve(outputPath);
+                })
+                .on('error', (err) => {
+                    console.error('  ❌ FFmpeg error:', err.message);
+                    reject(new Error(`HLS download failed: ${err.message}`));
+                });
+            
+            ffmpegCommand.run();
+        });
     }
 
     /**

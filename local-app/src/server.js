@@ -1,3 +1,21 @@
+// Node version check
+const nodeVersion = process.versions.node;
+const majorVersion = parseInt(nodeVersion.split('.')[0]);
+
+if (majorVersion < 22) {
+    console.error(`❌ Node.js version ${nodeVersion} is not supported.`);
+    console.error('📦 This application requires Node.js version 22.0.0 or higher.');
+    console.error('💡 Please upgrade Node.js to version 22 or higher.');
+    console.error('');
+    console.error('To install Node.js 22, you can:');
+    console.error('  • Use nvm: nvm install 22 && nvm use 22');
+    console.error('  • Use Homebrew: brew install node@22');
+    console.error('  • Download from: https://nodejs.org/');
+    process.exit(1);
+}
+
+console.log(`✅ Running with Node.js ${nodeVersion}`);
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -53,6 +71,46 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Test endpoint - saves post data without using Notion
+app.post('/test-save', async (req, res) => {
+    try {
+        console.log('📥 TEST MODE: Received save request');
+        const postData = req.body;
+        
+        // Log the received data
+        console.log('Post Data:', {
+            author: postData.author,
+            textLength: postData.text?.length || 0,
+            url: postData.url,
+            hasImages: postData.media?.images?.length > 0,
+            imageCount: postData.media?.images?.length || 0,
+            hasVideos: postData.media?.videos?.length > 0,
+            videoCount: postData.media?.videos?.length || 0
+        });
+        
+        // Save to a test file for inspection
+        const testFile = path.join(__dirname, '..', 'temp', `test-post-${Date.now()}.json`);
+        await fs.writeJson(testFile, postData, { spaces: 2 });
+        console.log(`✅ Test data saved to: ${testFile}`);
+        
+        res.json({
+            success: true,
+            message: 'Test save successful',
+            data: {
+                file: testFile,
+                textPreview: postData.text?.substring(0, 100),
+                imageCount: postData.media?.images?.length || 0
+            }
+        });
+    } catch (error) {
+        console.error('❌ Test save error:', error);
+        res.status(500).json({
+            error: 'Test save failed',
+            message: error.message
+        });
+    }
+});
+
 // Main endpoint to save LinkedIn posts
 app.post('/save-post', async (req, res) => {
     try {
@@ -99,12 +157,79 @@ app.post('/save-post', async (req, res) => {
                     console.log(`  ✅ Video ${i + 1} processed and saved to Dropbox`);
                 } catch (videoError) {
                     console.error(`  ❌ Error processing video ${i + 1}:`, videoError.message);
+                    
+                    // Add note about failed video
+                    processedVideos.push({
+                        originalUrl: video.src,
+                        error: videoError.message,
+                        failed: true
+                    });
+                    
                     // Continue with other videos even if one fails
                 }
             }
         }
 
-        // Step 2: Create Notion page
+        // Step 2: Process and save images to Dropbox
+        let processedImages = [];
+        if (postData.media?.images?.length > 0) {
+            console.log(`🖼️ Processing ${postData.media.images.length} image(s)...`);
+            
+            for (let i = 0; i < postData.media.images.length; i++) {
+                const image = postData.media.images[i];
+                console.log(`  📥 Processing image ${i + 1}/${postData.media.images.length}`);
+                
+                try {
+                    if (image.base64) {
+                        // Convert base64 to buffer
+                        const base64Data = image.base64.split(',')[1];
+                        const buffer = Buffer.from(base64Data, 'base64');
+                        
+                        // Determine file extension from mime type
+                        const mimeMatch = image.base64.match(/data:image\/(\w+);/);
+                        const extension = mimeMatch ? mimeMatch[1] : 'jpg';
+                        
+                        // Create filename
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const filename = `linkedin_image_${timestamp}_${i}.${extension}`;
+                        
+                        // Save to Dropbox
+                        const dropboxInfo = await dropboxHandler.saveImage(buffer, filename, postData);
+                        
+                        // Create local server URL for the image
+                        const localServerUrl = `http://${config.server.host}:${config.server.port}/media/${dropboxInfo.relativePath}`;
+                        
+                        processedImages.push({
+                            originalSrc: image.src,
+                            alt: image.alt || '',
+                            dropboxPath: dropboxInfo.relativePath,
+                            shareableUrl: dropboxInfo.shareableUrl,
+                            localServerUrl: localServerUrl,
+                            filename: filename
+                        });
+                        
+                        console.log(`  ✅ Image ${i + 1} saved to Dropbox`);
+                    } else {
+                        // No base64, just note the image exists
+                        processedImages.push({
+                            originalSrc: image.src,
+                            alt: image.alt || '',
+                            noBase64: true
+                        });
+                        console.log(`  ⚠️ Image ${i + 1} not downloaded (no base64)`);
+                    }
+                } catch (imageError) {
+                    console.error(`  ❌ Error processing image ${i + 1}:`, imageError.message);
+                    processedImages.push({
+                        originalSrc: image.src,
+                        alt: image.alt || '',
+                        error: imageError.message
+                    });
+                }
+            }
+        }
+
+        // Step 3: Create Notion page (without images first)
         console.log('📋 Creating Notion page...');
         const notionPage = await notionClient.createPage({
             title: postData.text.substring(0, 100) || `LinkedIn post from ${postData.author}`,
@@ -113,8 +238,17 @@ app.post('/save-post', async (req, res) => {
             sourceUrl: postData.url,
             timestamp: postData.timestamp,
             videos: processedVideos,
-            images: postData.media?.images || []
+            images: [] // Don't include images in initial creation
         });
+
+        console.log(`✅ Notion page created: ${notionPage.url}`);
+        
+        // Step 4: Add images to the page if present
+        if (processedImages.length > 0) {
+            console.log('📸 Adding images to Notion page...');
+            await notionClient.addImagesToPage(notionPage.id, processedImages, postData.url);
+            console.log(`✅ Added ${processedImages.length} image(s) to Notion page`);
+        }
 
         console.log(`✅ Successfully saved post to Notion: ${notionPage.url}`);
 
@@ -178,8 +312,31 @@ app.get('/test-dropbox', async (req, res) => {
     }
 });
 
-// Static file serving for processed videos (optional)
+// Static file serving for media files
 app.use('/videos', express.static(path.join(__dirname, '..', 'temp')));
+
+// Serve Dropbox files (images and videos)
+app.use('/media', (req, res, next) => {
+    const requestedPath = req.path;
+    // Expand the dropbox path if it starts with ~
+    const expandedDropboxPath = config.dropbox.localPath.startsWith('~/') 
+        ? path.join(require('os').homedir(), config.dropbox.localPath.slice(2))
+        : config.dropbox.localPath;
+    
+    const fullPath = path.join(expandedDropboxPath, requestedPath);
+    
+    // Security check - ensure we're only serving from Dropbox folder
+    if (!fullPath.startsWith(path.resolve(expandedDropboxPath))) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    res.sendFile(fullPath, (err) => {
+        if (err) {
+            console.error('Error serving file:', err.message);
+            res.status(404).json({ error: 'File not found' });
+        }
+    });
+});
 
 // Error handling middleware
 app.use((error, req, res, next) => {
@@ -198,8 +355,8 @@ app.use('*', (req, res) => {
     });
 });
 
-// Start server
-app.listen(port, config.server.host, () => {
+// Start server with error handling
+const server = app.listen(port, config.server.host, () => {
     console.log('🚀 Notionally Local App Started');
     console.log(`📡 Server running at http://${config.server.host}:${port}`);
     console.log(`📂 Dropbox folder: ${config.dropbox.localPath}`);
@@ -207,6 +364,22 @@ app.listen(port, config.server.host, () => {
     console.log('');
     console.log('✨ Ready to receive requests from Greasemonkey script!');
     console.log('   Visit LinkedIn and look for "Save to Notion" buttons');
+});
+
+// Handle port in use error
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${port} is already in use`);
+        console.error('');
+        console.error('To fix this, you can:');
+        console.error(`  1. Kill the process using port ${port}:`);
+        console.error(`     lsof -i :${port} | grep LISTEN | awk '{print $2}' | xargs kill`);
+        console.error(`  2. Or use a different port in config.json`);
+        console.error('');
+        process.exit(1);
+    } else {
+        throw error;
+    }
 });
 
 // Graceful shutdown
