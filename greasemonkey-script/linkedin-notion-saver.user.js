@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.4.2
+// @version      1.4.3
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -382,21 +382,42 @@
             
             // Extract author profile URL
             let authorProfileUrl = null;
+            
+            // Try multiple strategies to find the author profile link
             const profileLinkSelectors = [
+                // Primary selectors for author links
                 '.update-components-actor__container a[href*="/in/"]',
+                '.update-components-actor__container a[href*="/company/"]',
                 '.update-components-actor__meta a[href*="/in/"]',
+                '.update-components-actor__meta a[href*="/company/"]',
                 '.feed-shared-actor__container-link[href*="/in/"]',
+                '.feed-shared-actor__container-link[href*="/company/"]',
+                
+                // More general selectors
                 'a.app-aware-link[href*="/in/"]',
-                'a[href*="/company/"]' // For company posts
+                'a.app-aware-link[href*="/company/"]',
+                
+                // Try to find any link near the author name
+                '.update-components-actor a[href*="/in/"]',
+                '.update-components-actor a[href*="/company/"]',
+                
+                // Even more general - any profile link in the header area
+                '[data-test-id="main-feed-activity-card__entity"] a[href*="/in/"]',
+                '[data-test-id="main-feed-activity-card__entity"] a[href*="/company/"]'
             ];
+            
+            log('Searching for author profile URL...');
             
             for (const selector of profileLinkSelectors) {
                 const linkElement = postElement.querySelector(selector);
                 if (linkElement) {
                     const href = linkElement.getAttribute('href');
-                    if (href) {
+                    log(`  Testing selector: ${selector}`);
+                    log(`  Found href: ${href}`);
+                    
+                    if (href && (href.includes('/in/') || href.includes('/company/'))) {
                         // Clean up the URL - remove query parameters and ensure it's absolute
-                        const cleanUrl = href.split('?')[0];
+                        const cleanUrl = href.split('?')[0].split('#')[0];
                         if (cleanUrl.startsWith('http')) {
                             authorProfileUrl = cleanUrl;
                         } else if (cleanUrl.startsWith('/')) {
@@ -404,14 +425,42 @@
                         } else {
                             authorProfileUrl = `https://www.linkedin.com/${cleanUrl}`;
                         }
-                        log(`Found author profile URL: ${authorProfileUrl}`);
+                        log(`✅ Found author profile URL: ${authorProfileUrl}`);
                         break;
                     }
                 }
             }
             
+            // Fallback: Try to find any anchor tag that wraps or is near the author element
+            if (!authorProfileUrl && authorElement) {
+                log('Trying fallback: searching near author element...');
+                
+                // Check if author element is wrapped in a link
+                const parentLink = authorElement.closest('a[href*="/in/"], a[href*="/company/"]');
+                if (parentLink) {
+                    const href = parentLink.getAttribute('href');
+                    log(`  Found parent link: ${href}`);
+                    const cleanUrl = href.split('?')[0].split('#')[0];
+                    if (cleanUrl.startsWith('http')) {
+                        authorProfileUrl = cleanUrl;
+                    } else if (cleanUrl.startsWith('/')) {
+                        authorProfileUrl = `https://www.linkedin.com${cleanUrl}`;
+                    } else {
+                        authorProfileUrl = `https://www.linkedin.com/${cleanUrl}`;
+                    }
+                    log(`✅ Found author profile URL via parent: ${authorProfileUrl}`);
+                }
+            }
+            
             if (!authorProfileUrl) {
-                log('Could not extract author profile URL');
+                log('❌ Could not extract author profile URL - no matching selectors found');
+                
+                // Debug: Log all links found in the post header area
+                const allLinks = postElement.querySelectorAll('.update-components-actor a, .feed-shared-actor a');
+                log(`  Debug: Found ${allLinks.length} links in author area:`);
+                allLinks.forEach((link, i) => {
+                    log(`    Link ${i + 1}: ${link.getAttribute('href')}`);
+                });
             }
             
             // Use provided URL or try to extract

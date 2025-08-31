@@ -126,6 +126,11 @@ app.post('/save-post', async (req, res) => {
         }
 
         console.log(`📝 Processing post from ${postData.author}`);
+        if (postData.authorProfileUrl) {
+            console.log(`   Author profile: ${postData.authorProfileUrl}`);
+        } else {
+            console.log(`   ⚠️ No author profile URL received`);
+        }
         console.log(`📄 Text preview: ${postData.text.substring(0, 100)}...`);
         console.log(`🎬 Videos found: ${postData.media?.videos?.length || 0}`);
 
