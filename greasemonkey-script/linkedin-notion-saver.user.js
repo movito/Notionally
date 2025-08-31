@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.7
+// @version      1.5.8
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.5.8 - Implement URL polling to track redirects while on same origin
  * Version 1.5.7 - Added comprehensive debugging for redirect page detection
  * Version 1.5.6 - Capture URLs directly from LinkedIn redirect page
  * Version 1.5.5 - Improved URL unfurling with multiple capture methods and longer wait
@@ -873,66 +874,86 @@
                                     localStorage.removeItem('notionally_last_redirect_url');
                                     localStorage.removeItem('notionally_last_redirect_time');
                                     
-                                    // Wait longer for LinkedIn's two-step redirect to complete
-                                    // LinkedIn does: lnkd.in -> linkedin.com/redir -> final URL
-                                    await new Promise(resolve => setTimeout(resolve, 5000));
-                                    
-                                    // Try multiple methods to get the URL
+                                    // Poll the tab's URL to catch the redirect
+                                    // This works while the tab is still on linkedin.com domain
                                     let finalUrl = url;
-                                    let resolved = false;
+                                    let lastSeenUrl = url;
+                                    let pollCount = 0;
+                                    const maxPolls = 50; // 5 seconds total
                                     
-                                    // Method 0: Check if our redirect page script captured the URL
-                                    log('[Notionally] Checking localStorage for captured URL...');
-                                    const capturedUrl = localStorage.getItem('notionally_last_redirect_url');
-                                    const captureTime = localStorage.getItem('notionally_last_redirect_time');
-                                    log(`[Notionally] localStorage check - URL: ${capturedUrl}, Time: ${captureTime}`);
+                                    const pollInterval = setInterval(() => {
+                                        pollCount++;
+                                        try {
+                                            // This will work as long as we're on linkedin.com
+                                            const currentUrl = newTab.location.href;
+                                            if (currentUrl !== lastSeenUrl) {
+                                                log(`    URL changed to: ${currentUrl}`);
+                                                lastSeenUrl = currentUrl;
+                                                
+                                                // If it's the redirect page, keep polling
+                                                if (currentUrl.includes('/redir/') || currentUrl.includes('/safety/go')) {
+                                                    log(`    On redirect page, continuing to poll...`);
+                                                } 
+                                                // If it's not LinkedIn anymore, we've reached the destination
+                                                else if (!currentUrl.includes('linkedin.com') && !currentUrl.includes('lnkd.in')) {
+                                                    log(`    ✅ Reached final destination: ${currentUrl}`);
+                                                    finalUrl = currentUrl;
+                                                    clearInterval(pollInterval);
+                                                    newTab.close();
+                                                }
+                                            }
+                                        } catch (e) {
+                                            // Cross-origin error means we've left linkedin.com
+                                            // The last URL we saw before the error is likely the redirect page
+                                            // with the destination URL visible
+                                            log(`    Cross-origin detected after ${pollCount * 100}ms`);
+                                            log(`    Last seen URL: ${lastSeenUrl}`);
+                                            clearInterval(pollInterval);
+                                        }
+                                        
+                                        if (pollCount >= maxPolls) {
+                                            log(`    Polling timeout after ${maxPolls * 100}ms`);
+                                            clearInterval(pollInterval);
+                                            newTab.close();
+                                        }
+                                    }, 100);
                                     
-                                    if (capturedUrl && captureTime) {
-                                        const timeDiff = Date.now() - parseInt(captureTime);
-                                        log(`[Notionally] Time difference: ${timeDiff}ms`);
-                                        if (timeDiff < 10000) { // Within last 10 seconds
-                                            finalUrl = capturedUrl;
-                                            resolved = true;
-                                            log(`    ✅ Got URL from redirect page: ${finalUrl}`);
-                                            
-                                            // Clean up
-                                            localStorage.removeItem('notionally_last_redirect_url');
-                                            localStorage.removeItem('notionally_last_redirect_time');
+                                    // Wait for polling to complete
+                                    await new Promise(resolve => {
+                                        const checkInterval = setInterval(() => {
+                                            if (pollCount >= maxPolls || !pollInterval._destroyed) {
+                                                clearInterval(checkInterval);
+                                                resolve();
+                                            }
+                                        }, 100);
+                                    });
+                                    
+                                    // Check if we got a resolved URL from polling
+                                    let resolved = finalUrl !== url && !finalUrl.includes('lnkd.in');
+                                    
+                                    if (!resolved) {
+                                        // Fallback: Check if our redirect page script captured the URL
+                                        log('[Notionally] Polling did not resolve, checking localStorage...');
+                                        const capturedUrl = localStorage.getItem('notionally_last_redirect_url');
+                                        const captureTime = localStorage.getItem('notionally_last_redirect_time');
+                                        log(`[Notionally] localStorage check - URL: ${capturedUrl}, Time: ${captureTime}`);
+                                        
+                                        if (capturedUrl && captureTime) {
+                                            const timeDiff = Date.now() - parseInt(captureTime);
+                                            log(`[Notionally] Time difference: ${timeDiff}ms`);
+                                            if (timeDiff < 10000) { // Within last 10 seconds
+                                                finalUrl = capturedUrl;
+                                                resolved = true;
+                                                log(`    ✅ Got URL from localStorage: ${finalUrl}`);
+                                                
+                                                // Clean up
+                                                localStorage.removeItem('notionally_last_redirect_url');
+                                                localStorage.removeItem('notionally_last_redirect_time');
+                                            } else {
+                                                log('[Notionally] ❌ Captured URL is too old (>10s)');
+                                            }
                                         } else {
-                                            log('[Notionally] ❌ Captured URL is too old (>10s)');
-                                        }
-                                    } else {
-                                        log('[Notionally] ❌ No URL captured in localStorage');
-                                    }
-                                    
-                                    // Method 1: Try to read location (might work on same origin)
-                                    if (!resolved) {
-                                        try {
-                                            finalUrl = newTab.location.href;
-                                            if (finalUrl && !finalUrl.includes('lnkd.in')) {
-                                                resolved = true;
-                                                log(`    ✅ Got URL via location: ${finalUrl}`);
-                                            }
-                                        } catch (e) {
-                                            log(`    ⚠️ Cannot read location (cross-origin)`);
-                                        }
-                                    }
-                                    
-                                    // Method 2: Execute script to copy URL to clipboard
-                                    if (!resolved) {
-                                        try {
-                                            // Try to inject a script that copies the URL
-                                            newTab.eval(`navigator.clipboard.writeText(window.location.href)`);
-                                            await new Promise(resolve => setTimeout(resolve, 500));
-                                            
-                                            const clipboardUrl = await navigator.clipboard.readText();
-                                            if (clipboardUrl && clipboardUrl !== originalClipboard && !clipboardUrl.includes('lnkd.in')) {
-                                                finalUrl = clipboardUrl;
-                                                resolved = true;
-                                                log(`    ✅ Got URL via clipboard: ${finalUrl}`);
-                                            }
-                                        } catch (e) {
-                                            log(`    ⚠️ Cannot inject script`);
+                                            log('[Notionally] ❌ No URL captured in localStorage');
                                         }
                                     }
                                     
