@@ -369,27 +369,36 @@ class NotionClient {
                 }
             });
             
-            // Add each URL as a bulleted list item
+            // Add each URL as a bulleted list item with clickable link
             pageData.processedUrls.forEach(urlInfo => {
-                const displayText = urlInfo.wasShortened ? 
-                    `${urlInfo.resolved} (shortened from: ${urlInfo.original})` : 
-                    urlInfo.resolved;
+                const richTextElements = [];
+                
+                // Add the clickable URL
+                richTextElements.push({
+                    type: 'text',
+                    text: {
+                        content: urlInfo.resolved,
+                        link: {
+                            url: urlInfo.resolved
+                        }
+                    }
+                });
+                
+                // Add note about shortening if applicable
+                if (urlInfo.wasShortened) {
+                    richTextElements.push({
+                        type: 'text',
+                        text: {
+                            content: ` (expanded from: ${urlInfo.original})`
+                        }
+                    });
+                }
                 
                 blocks.push({
                     object: 'block',
                     type: 'bulleted_list_item',
                     bulleted_list_item: {
-                        rich_text: [
-                            {
-                                type: 'text',
-                                text: {
-                                    content: displayText,
-                                    link: {
-                                        url: urlInfo.resolved
-                                    }
-                                }
-                            }
-                        ]
+                        rich_text: richTextElements
                     }
                 });
             });

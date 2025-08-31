@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
+// @version      1.4.1
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -127,33 +127,43 @@
     function extractUrls(text) {
         if (!text) return [];
         
-        // Regex to match URLs (including LinkedIn shortened ones)
-        const urlRegex = /(?:https?:\/\/)?(?:[\w-]+\.)+[\w-]+(?:\/[^\s]*)?/gi;
-        const matches = text.match(urlRegex) || [];
+        // More precise regex for URLs
+        // Matches http(s) URLs and common shortened URLs
+        const urlRegex = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/gi;
         
-        // Filter and clean up URLs
-        const urls = matches
-            .map(url => {
-                // Add protocol if missing
-                if (!url.startsWith('http')) {
-                    url = 'https://' + url;
-                }
-                return url;
-            })
+        // Also look for common short domains without protocol
+        const shortDomainRegex = /(?:^|\s)((?:lnkd\.in|bit\.ly|tinyurl\.com|ow\.ly|buff\.ly)\/[^\s]+)/gi;
+        
+        const httpMatches = text.match(urlRegex) || [];
+        const shortMatches = text.match(shortDomainRegex) || [];
+        
+        // Combine and clean matches
+        const allMatches = [
+            ...httpMatches,
+            ...shortMatches.map(m => 'https://' + m.trim())
+        ];
+        
+        // Filter and validate URLs
+        const urls = allMatches
+            .map(url => url.trim())
             .filter(url => {
                 try {
-                    new URL(url);
+                    const urlObj = new URL(url);
                     // Filter out common non-link matches
                     return !url.includes('@') && // Not an email
                            !url.endsWith('.') &&   // Not end of sentence
-                           url.length > 10;        // Not too short
+                           url.length > 10 &&       // Not too short
+                           urlObj.hostname !== 'localhost'; // Not localhost
                 } catch {
                     return false;
                 }
             });
         
         // Remove duplicates
-        return [...new Set(urls)];
+        const uniqueUrls = [...new Set(urls)];
+        
+        log(`Extracted ${uniqueUrls.length} unique URLs from text`);
+        return uniqueUrls;
     }
     
     // Unfurl a shortened URL to get the final destination

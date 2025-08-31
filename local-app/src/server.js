@@ -231,6 +231,15 @@ app.post('/save-post', async (req, res) => {
 
         // Step 3: Create Notion page (without images first)
         console.log('📋 Creating Notion page...');
+        
+        // Log if we have URLs to process
+        if (postData.processedUrls?.length > 0) {
+            console.log(`🔗 Including ${postData.processedUrls.length} URL(s) in Notion page`);
+            postData.processedUrls.forEach(url => {
+                console.log(`  - ${url.original} → ${url.resolved}`);
+            });
+        }
+        
         const notionPage = await notionClient.createPage({
             title: postData.text.substring(0, 100) || `LinkedIn post from ${postData.author}`,
             content: postData.text,
@@ -238,7 +247,8 @@ app.post('/save-post', async (req, res) => {
             sourceUrl: postData.url,
             timestamp: postData.timestamp,
             videos: processedVideos,
-            images: [] // Don't include images in initial creation
+            images: [], // Don't include images in initial creation
+            processedUrls: postData.processedUrls || [] // Pass through the URLs
         });
 
         console.log(`✅ Notion page created: ${notionPage.url}`);
