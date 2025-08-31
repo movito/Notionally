@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.3
+// @version      1.5.4
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.5.4 - Added comprehensive debugging for URL extraction and processing
  * Version 1.5.3 - Fixed handling of direct URLs (non-shortened links)
  * Version 1.5.2 - Added browser-based URL unfurling for LinkedIn shortened links
  */
@@ -128,7 +129,12 @@
     
     // Extract URLs from text content
     function extractUrls(text) {
-        if (!text) return [];
+        if (!text) {
+            log('extractUrls: No text provided');
+            return [];
+        }
+        
+        log('extractUrls: Searching for URLs in text:', text.substring(0, 200) + '...');
         
         // More precise regex for URLs
         // Matches http(s) URLs and common shortened URLs
@@ -139,6 +145,9 @@
         
         const httpMatches = text.match(urlRegex) || [];
         const shortMatches = text.match(shortDomainRegex) || [];
+        
+        log(`extractUrls: Found ${httpMatches.length} HTTP URLs:`, httpMatches);
+        log(`extractUrls: Found ${shortMatches.length} short domain URLs:`, shortMatches);
         
         // Combine and clean matches
         const allMatches = [
@@ -165,7 +174,7 @@
         // Remove duplicates
         const uniqueUrls = [...new Set(urls)];
         
-        log(`Extracted ${uniqueUrls.length} unique URLs from text`);
+        log(`extractUrls: Returning ${uniqueUrls.length} unique URLs:`, uniqueUrls);
         return uniqueUrls;
     }
     
@@ -451,8 +460,13 @@
                             new Date().toISOString();
             
             // Extract URLs from the post text
+            log('\n==== URL EXTRACTION DEBUG ====');
+            log('Post text length:', postText?.length || 0);
+            log('Post text preview:', postText?.substring(0, 300));
             const extractedUrls = extractUrls(postText);
-            log('Extracted URLs from post:', extractedUrls);
+            log('URLs extracted from post text:', extractedUrls);
+            log('Number of URLs extracted:', extractedUrls.length);
+            log('==== END URL EXTRACTION ====\n');
             
             const result = {
                 text: postText,
@@ -728,11 +742,19 @@
                 }
                 
                 // Unfurl URLs in browser before sending to server
+                log('\n==== URL PROCESSING DEBUG ====');
+                log('postData.urls:', postData.urls);
+                log('Number of URLs to process:', postData.urls?.length || 0);
+                
                 if (postData.urls?.length > 0) {
                     log(`Found ${postData.urls.length} URLs to process`);
+                    postData.urls.forEach((url, i) => {
+                        log(`  URL ${i + 1}: ${url}`);
+                    });
                     
                     // Check if we have any shortened URLs that need resolving
                     const hasShortened = postData.urls.some(url => url.includes('lnkd.in'));
+                    log('Has shortened URLs:', hasShortened);
                     if (hasShortened) {
                         showToast('Resolving shortened URLs...', 'info');
                     }
@@ -809,7 +831,11 @@
                     delete postData.urls; // Remove raw URLs
                     
                     log(`Processed ${resolvedUrls.length} URLs`);
+                    log('ProcessedUrls being sent to server:', postData.processedUrls);
+                } else {
+                    log('No URLs found in post to process');
                 }
+                log('==== END URL PROCESSING ====\n');
                 
                 // Convert images to base64 for transfer (if enabled)
                 if (CONFIG.convertImagesToBase64 && postData.media?.images?.length > 0) {
@@ -833,8 +859,19 @@
                 }
                 
                 // Use test endpoint if configured
+                log('\n==== SENDING TO SERVER ====');
                 const endpoint = CONFIG.useTestEndpoint ? '/test-save' : '/save-post';
+                log('Endpoint:', endpoint);
+                log('Post data keys:', Object.keys(postData));
+                log('Has processedUrls:', !!postData.processedUrls);
+                log('ProcessedUrls count:', postData.processedUrls?.length || 0);
+                if (postData.processedUrls?.length > 0) {
+                    log('ProcessedUrls details:', JSON.stringify(postData.processedUrls, null, 2));
+                }
+                
                 const result = await saveToNotion(postData, endpoint);
+                log('Server response:', result);
+                log('==== END SERVER SEND ====\n');
                 log('Save successful:', result);
                 showToast('✅ Saved to Notion!', 'success');
                 
