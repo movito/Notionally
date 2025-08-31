@@ -1,13 +1,18 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.2
+// @version      1.5.3
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=notion.so
 // @grant        none
 // ==/UserScript==
+
+/**
+ * Version 1.5.3 - Fixed handling of direct URLs (non-shortened links)
+ * Version 1.5.2 - Added browser-based URL unfurling for LinkedIn shortened links
+ */
 
 (function() {
     'use strict';
@@ -725,7 +730,12 @@
                 // Unfurl URLs in browser before sending to server
                 if (postData.urls?.length > 0) {
                     log(`Found ${postData.urls.length} URLs to process`);
-                    showToast('Resolving shortened URLs...', 'info');
+                    
+                    // Check if we have any shortened URLs that need resolving
+                    const hasShortened = postData.urls.some(url => url.includes('lnkd.in'));
+                    if (hasShortened) {
+                        showToast('Resolving shortened URLs...', 'info');
+                    }
                     
                     const resolvedUrls = [];
                     for (const url of postData.urls) {
@@ -784,6 +794,8 @@
                                 });
                             }
                         } else {
+                            // Direct URL that doesn't need unfurling
+                            log(`  Direct URL (no unfurling needed): ${url}`);
                             resolvedUrls.push({
                                 original: url,
                                 resolved: url,
