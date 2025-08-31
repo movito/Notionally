@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.4.3
+// @version      1.4.4
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -20,7 +20,7 @@
         captureMenuHTML: false,  // Set to true to log menu HTML for debugging
         convertImagesToBase64: true,  // Enable image conversion to save to Dropbox
         useTestEndpoint: false,  // Set to true to use /test-save instead of /save-post
-        unfurlLinks: true,  // Enable URL unfurling for LinkedIn shortened links
+        unfurlLinks: false,  // Disabled by default due to cross-origin restrictions
         unfurlTimeout: 5000  // Timeout for URL unfurling in milliseconds
     };
     
@@ -171,7 +171,7 @@
         log(`🔗 Attempting to unfurl: ${shortUrl}`);
         
         try {
-            // First try with fetch
+            // Try with regular fetch first (without no-cors)
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), CONFIG.unfurlTimeout);
             
@@ -179,29 +179,41 @@
                 method: 'HEAD',
                 credentials: 'include',
                 redirect: 'follow',
-                signal: controller.signal,
-                mode: 'no-cors' // Avoid CORS issues
+                signal: controller.signal
+                // Removed mode: 'no-cors' to allow reading the final URL
             });
             
             clearTimeout(timeout);
             
-            // Try to get the final URL from the response
-            // Note: Due to no-cors, we might not get the actual URL
+            // Get the final URL from the response
+            const finalUrl = response.url;
             log(`  Fetch response status: ${response.status}`);
+            log(`  Final URL from fetch: ${finalUrl}`);
             
-            // If fetch doesn't give us the URL, try an alternative method
-            if (!response.url || response.url === shortUrl) {
-                log(`  Fetch didn't resolve URL, trying iframe method...`);
-                return await unfurlViaIframe(shortUrl);
+            // Check if we actually got a different URL
+            if (finalUrl && finalUrl !== shortUrl && !finalUrl.includes('lnkd.in')) {
+                log(`  ✅ Successfully resolved to: ${finalUrl}`);
+                return finalUrl;
+            } else {
+                log(`  Fetch didn't fully resolve URL, trying window.open method...`);
+                return await unfurlViaWindowOpen(shortUrl);
             }
             
-            log(`  ✅ Resolved to: ${response.url}`);
-            return response.url;
-            
         } catch (error) {
-            log(`  ⚠️ Fetch failed: ${error.message}, trying iframe method...`);
+            log(`  ⚠️ Fetch failed: ${error.message}`);
             
-            // Fallback to iframe method
+            // Check if it's a CORS error
+            if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                log(`  Trying window.open method due to CORS...`);
+                try {
+                    return await unfurlViaWindowOpen(shortUrl);
+                } catch (windowError) {
+                    log(`  Window.open also failed, trying iframe...`);
+                    return await unfurlViaIframe(shortUrl);
+                }
+            }
+            
+            // For other errors, try iframe method
             try {
                 return await unfurlViaIframe(shortUrl);
             } catch (iframeError) {
@@ -209,6 +221,86 @@
                 return shortUrl; // Return original URL if all methods fail
             }
         }
+    }
+    
+    // Unfurl URL using window.open (works better for LinkedIn)
+    function unfurlViaWindowOpen(url) {
+        return new Promise((resolve) => {
+            log(`  🪟 Trying window.open unfurl for: ${url}`);
+            
+            try {
+                // Open in a new tab/window
+                const newWindow = window.open(url, '_blank', 'width=1,height=1,left=-9999,top=-9999');
+                
+                if (!newWindow) {
+                    log(`    ❌ Popup blocked`);
+                    resolve(url);
+                    return;
+                }
+                
+                // Set a timeout for the unfurl attempt
+                const timeout = setTimeout(() => {
+                    try {
+                        const finalUrl = newWindow.location.href;
+                        log(`    Timeout reached, current URL: ${finalUrl}`);
+                        newWindow.close();
+                        resolve(finalUrl && finalUrl !== 'about:blank' ? finalUrl : url);
+                    } catch (e) {
+                        log(`    ❌ Couldn't read URL after timeout`);
+                        try { newWindow.close(); } catch {}
+                        resolve(url);
+                    }
+                }, 2000);
+                
+                // Try to detect when the redirect is complete
+                let checkCount = 0;
+                const checkInterval = setInterval(() => {
+                    checkCount++;
+                    try {
+                        const currentUrl = newWindow.location.href;
+                        
+                        // Check if we've navigated away from the short URL
+                        if (currentUrl && 
+                            currentUrl !== 'about:blank' && 
+                            currentUrl !== url &&
+                            !currentUrl.includes('lnkd.in')) {
+                            
+                            log(`    ✅ Window resolved to: ${currentUrl}`);
+                            clearInterval(checkInterval);
+                            clearTimeout(timeout);
+                            newWindow.close();
+                            resolve(currentUrl);
+                        }
+                        
+                        // Give up after 20 checks (2 seconds)
+                        if (checkCount > 20) {
+                            log(`    Max checks reached, final URL: ${currentUrl}`);
+                            clearInterval(checkInterval);
+                            clearTimeout(timeout);
+                            newWindow.close();
+                            resolve(currentUrl !== 'about:blank' ? currentUrl : url);
+                        }
+                    } catch (e) {
+                        // Cross-origin error - the redirect happened but we can't read it
+                        log(`    Cross-origin block after redirect`);
+                        clearInterval(checkInterval);
+                        clearTimeout(timeout);
+                        
+                        // Wait a bit more then close
+                        setTimeout(() => {
+                            try { newWindow.close(); } catch {}
+                        }, 500);
+                        
+                        // We can't get the final URL, return original
+                        resolve(url);
+                    }
+                }, 100);
+                
+            } catch (error) {
+                log(`    ❌ Window.open error: ${error.message}`);
+                resolve(url);
+            }
+        });
     }
     
     // Unfurl URL using hidden iframe (fallback method)

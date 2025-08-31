@@ -387,12 +387,20 @@ class NotionClient {
                     }
                 });
                 
-                // Add note about shortening if applicable
-                if (urlInfo.wasShortened) {
+                // Add note about shortening if applicable AND if it was actually expanded
+                if (urlInfo.wasShortened && urlInfo.original !== urlInfo.resolved) {
                     richTextElements.push({
                         type: 'text',
                         text: {
                             content: ` (expanded from: ${urlInfo.original})`
+                        }
+                    });
+                } else if (urlInfo.wasShortened) {
+                    // URL was detected as shortened but couldn't be expanded
+                    richTextElements.push({
+                        type: 'text',
+                        text: {
+                            content: ` (LinkedIn shortened URL)`
                         }
                     });
                 }
