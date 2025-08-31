@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.5
+// @version      1.5.6
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.5.6 - Capture URLs directly from LinkedIn redirect page
  * Version 1.5.5 - Improved URL unfurling with multiple capture methods and longer wait
  * Version 1.5.4 - Added comprehensive debugging for URL extraction and processing
  * Version 1.5.3 - Fixed handling of direct URLs (non-shortened links)
@@ -18,6 +19,78 @@
 
 (function() {
     'use strict';
+    
+    // Check if we're on a LinkedIn redirect page
+    if (window.location.hostname === 'www.linkedin.com' && 
+        (window.location.pathname.includes('/redir/') || 
+         window.location.pathname.includes('/safety/go'))) {
+        
+        console.log('[Notionally] Detected LinkedIn redirect page');
+        
+        // Look for the actual destination URL on the page
+        const findDestinationUrl = () => {
+            // LinkedIn shows the destination URL in an anchor tag with specific attributes
+            // Priority 1: Look for the button with external_url_click tracking
+            const externalUrlButton = document.querySelector('a[data-tracking-control-name="external_url_click"]');
+            if (externalUrlButton && externalUrlButton.href && !externalUrlButton.href.includes('linkedin.com')) {
+                console.log('[Notionally] Found destination URL in external link button:', externalUrlButton.href);
+                localStorage.setItem('notionally_last_redirect_url', externalUrlButton.href);
+                localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
+                return externalUrlButton.href;
+            }
+            
+            // Priority 2: Look for any artdeco-button with non-LinkedIn href
+            const artdecoButtons = document.querySelectorAll('a.artdeco-button[href]');
+            for (const button of artdecoButtons) {
+                if (button.href && !button.href.includes('linkedin.com') && button.href.startsWith('http')) {
+                    console.log('[Notionally] Found destination URL in button:', button.href);
+                    localStorage.setItem('notionally_last_redirect_url', button.href);
+                    localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
+                    return button.href;
+                }
+            }
+            
+            // Priority 3: General search for any non-LinkedIn links
+            const urlElements = document.querySelectorAll('a[href]');
+            for (const elem of urlElements) {
+                const href = elem.href;
+                if (href && !href.includes('linkedin.com') && !href.includes('lnkd.in') && href.startsWith('http')) {
+                    console.log('[Notionally] Found destination URL:', href);
+                    
+                    // Store it for the main script to retrieve
+                    localStorage.setItem('notionally_last_redirect_url', href);
+                    localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
+                    
+                    return href;
+                }
+            }
+            
+            // Also check for URLs in the page text
+            const pageText = document.body.innerText;
+            const urlMatch = pageText.match(/https?:\/\/(?!.*linkedin\.com)[^\s]+/);
+            if (urlMatch) {
+                console.log('[Notionally] Found URL in page text:', urlMatch[0]);
+                localStorage.setItem('notionally_last_redirect_url', urlMatch[0]);
+                localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
+                return urlMatch[0];
+            }
+        };
+        
+        // Try multiple times as the page loads
+        // LinkedIn redirect pages may take a moment to render
+        const attempts = [0, 100, 300, 500, 800, 1200, 1800, 2500];
+        attempts.forEach(delay => {
+            setTimeout(() => {
+                const url = findDestinationUrl();
+                if (url) {
+                    console.log(`[Notionally] URL captured after ${delay}ms: ${url}`);
+                }
+            }, delay);
+        });
+        
+        // Don't run the rest of the script on redirect pages
+        return;
+    }
     
     // Configuration
     const CONFIG = {
@@ -776,6 +849,10 @@
                                     log(`    Tab opened, waiting for redirect...`);
                                     showToast(`Resolving URL ${postData.urls.indexOf(url) + 1}/${postData.urls.length}...`, 'info');
                                     
+                                    // Clear localStorage before opening
+                                    localStorage.removeItem('notionally_last_redirect_url');
+                                    localStorage.removeItem('notionally_last_redirect_time');
+                                    
                                     // Wait longer for LinkedIn's two-step redirect to complete
                                     // LinkedIn does: lnkd.in -> linkedin.com/redir -> final URL
                                     await new Promise(resolve => setTimeout(resolve, 5000));
@@ -784,15 +861,33 @@
                                     let finalUrl = url;
                                     let resolved = false;
                                     
-                                    // Method 1: Try to read location (might work on same origin)
-                                    try {
-                                        finalUrl = newTab.location.href;
-                                        if (finalUrl && !finalUrl.includes('lnkd.in')) {
+                                    // Method 0: Check if our redirect page script captured the URL
+                                    const capturedUrl = localStorage.getItem('notionally_last_redirect_url');
+                                    const captureTime = localStorage.getItem('notionally_last_redirect_time');
+                                    if (capturedUrl && captureTime) {
+                                        const timeDiff = Date.now() - parseInt(captureTime);
+                                        if (timeDiff < 10000) { // Within last 10 seconds
+                                            finalUrl = capturedUrl;
                                             resolved = true;
-                                            log(`    ✅ Got URL via location: ${finalUrl}`);
+                                            log(`    ✅ Got URL from redirect page: ${finalUrl}`);
+                                            
+                                            // Clean up
+                                            localStorage.removeItem('notionally_last_redirect_url');
+                                            localStorage.removeItem('notionally_last_redirect_time');
                                         }
-                                    } catch (e) {
-                                        log(`    ⚠️ Cannot read location (cross-origin)`);
+                                    }
+                                    
+                                    // Method 1: Try to read location (might work on same origin)
+                                    if (!resolved) {
+                                        try {
+                                            finalUrl = newTab.location.href;
+                                            if (finalUrl && !finalUrl.includes('lnkd.in')) {
+                                                resolved = true;
+                                                log(`    ✅ Got URL via location: ${finalUrl}`);
+                                            }
+                                        } catch (e) {
+                                            log(`    ⚠️ Cannot read location (cross-origin)`);
+                                        }
                                     }
                                     
                                     // Method 2: Execute script to copy URL to clipboard
