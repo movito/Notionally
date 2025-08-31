@@ -50,8 +50,13 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 3. Configure your settings:
    ```bash
    cp config.example.json config.json
-   # Edit config.json with your Notion API key and Dropbox path
+   # Edit config.json with your Notion API key and Dropbox settings
    ```
+   
+   **Dropbox Setup (Important!):**
+   - For long-term access, use a refresh token instead of access token
+   - Run `npm run setup:dropbox` for an interactive setup
+   - Or see [docs/DROPBOX_SETUP.md](local-app/docs/DROPBOX_SETUP.md) for manual setup
 
 4. Start the local processing app:
    ```bash

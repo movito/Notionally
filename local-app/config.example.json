@@ -5,7 +5,9 @@
   },
   "dropbox": {
     "localPath": "~/Dropbox (Personal)/LinkedIn_Videos",
-    "accessToken": "YOUR_DROPBOX_ACCESS_TOKEN_HERE"
+    "comment_1": "For security, put sensitive values in .env file instead:",
+    "comment_2": "DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN",
+    "comment_3": "See .env.example for details"
   },
   "server": {
     "port": 8765,

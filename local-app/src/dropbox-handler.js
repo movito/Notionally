@@ -7,16 +7,92 @@ class DropboxHandler {
     constructor(config) {
         this.config = config;
         this.dropboxPath = this.expandPath(config.dropbox.localPath);
+        this.tokenRefreshInterval = null;
         
-        // Initialize Dropbox API client if access token is provided
-        if (config.dropbox.accessToken && config.dropbox.accessToken !== 'YOUR_DROPBOX_ACCESS_TOKEN') {
+        // Initialize Dropbox API client with refresh token support
+        if (config.dropbox.refreshToken && config.dropbox.refreshToken !== 'YOUR_DROPBOX_REFRESH_TOKEN') {
+            // Use refresh token for long-lived access
+            this.dbx = new Dropbox({
+                clientId: config.dropbox.appKey || 'lxx59je81bsuya4',
+                clientSecret: config.dropbox.appSecret,
+                refreshToken: config.dropbox.refreshToken
+            });
+            this.hasApiAccess = true;
+            this.hasRefreshToken = true;
+            console.log('✅ Dropbox API initialized with refresh token');
+            
+            // Proactively refresh token on startup
+            this.refreshAccessToken();
+            
+            // Set up periodic refresh (every 3 hours - tokens expire after 4 hours)
+            this.tokenRefreshInterval = setInterval(() => {
+                this.refreshAccessToken();
+            }, 3 * 60 * 60 * 1000); // 3 hours in milliseconds
+            
+        } else if (config.dropbox.accessToken && config.dropbox.accessToken !== 'YOUR_DROPBOX_ACCESS_TOKEN') {
+            // Fallback to access token (will expire)
             this.dbx = new Dropbox({ accessToken: config.dropbox.accessToken });
             this.hasApiAccess = true;
-            console.log('✅ Dropbox API initialized');
+            this.hasRefreshToken = false;
+            console.log('⚠️  Dropbox API initialized with access token (will expire)');
         } else {
             this.hasApiAccess = false;
+            this.hasRefreshToken = false;
             console.log('⚠️  Dropbox API not configured - using local folder only');
         }
+    }
+    
+    /**
+     * Proactively refresh the access token
+     */
+    async refreshAccessToken() {
+        if (!this.hasRefreshToken) {
+            return;
+        }
+        
+        try {
+            console.log('🔄 Refreshing Dropbox access token...');
+            
+            // The Dropbox SDK handles the refresh internally when we make an API call
+            // We'll make a simple API call to trigger the refresh
+            await this.dbx.usersGetCurrentAccount();
+            
+            console.log('✅ Dropbox access token refreshed successfully');
+            
+            // Update the last refresh time
+            this.lastTokenRefresh = new Date();
+        } catch (error) {
+            console.error('❌ Failed to refresh Dropbox token:', error.message);
+            
+            // If refresh fails, log but don't crash - uploads will still work with fallback
+            if (error.status === 401) {
+                console.log('⚠️  Refresh token may be invalid. Please run: npm run setup:dropbox');
+            }
+        }
+    }
+    
+    /**
+     * Clean up intervals when shutting down
+     */
+    cleanup() {
+        if (this.tokenRefreshInterval) {
+            clearInterval(this.tokenRefreshInterval);
+            this.tokenRefreshInterval = null;
+            console.log('🧹 Cleaned up Dropbox token refresh interval');
+        }
+    }
+    
+    /**
+     * Get status information about the Dropbox connection
+     */
+    getStatus() {
+        return {
+            hasApiAccess: this.hasApiAccess,
+            hasRefreshToken: this.hasRefreshToken,
+            lastTokenRefresh: this.lastTokenRefresh || null,
+            nextRefreshIn: this.tokenRefreshInterval ? '3 hours' : null,
+            localPath: this.dropboxPath
+        };
     }
 
     /**
@@ -52,14 +128,34 @@ class DropboxHandler {
                     console.log(`📤 Uploading to Dropbox API: ${dropboxPath}`);
                     console.log(`   File size: ${this.formatFileSize(imageBuffer.length)}`);
                     
-                    // Upload file directly via API
-                    const uploadResult = await this.dbx.filesUpload({
-                        path: dropboxPath,
-                        contents: imageBuffer,
-                        mode: { '.tag': 'overwrite' },
-                        autorename: false,
-                        mute: true
-                    });
+                    // Upload file directly via API (with automatic retry)
+                    let uploadResult;
+                    let retryCount = 0;
+                    const maxRetries = 2;
+                    
+                    while (retryCount <= maxRetries) {
+                        try {
+                            uploadResult = await this.dbx.filesUpload({
+                                path: dropboxPath,
+                                contents: imageBuffer,
+                                mode: { '.tag': 'overwrite' },
+                                autorename: false,
+                                mute: true
+                            });
+                            break; // Success, exit the retry loop
+                            
+                        } catch (uploadError) {
+                            // Check if it's a token expiry error and we have a refresh token
+                            if (uploadError.status === 401 && this.hasRefreshToken && retryCount < maxRetries) {
+                                console.log('🔄 Access token expired, refreshing and retrying...');
+                                await this.refreshAccessToken();
+                                retryCount++;
+                            } else {
+                                // Not a token error or max retries reached
+                                throw uploadError;
+                            }
+                        }
+                    }
                     
                     console.log('✅ Uploaded to Dropbox via API');
                     console.log(`   Uploaded path: ${uploadResult.result.path_display}`);

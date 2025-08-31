@@ -16,6 +16,9 @@ if (majorVersion < 22) {
 
 console.log(`✅ Running with Node.js ${nodeVersion}`);
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -31,7 +34,57 @@ let config;
 
 try {
     config = require(configPath);
+    
+    // Override sensitive values with environment variables if present
+    if (process.env.DROPBOX_APP_SECRET) {
+        config.dropbox.appSecret = process.env.DROPBOX_APP_SECRET;
+    }
+    if (process.env.DROPBOX_REFRESH_TOKEN) {
+        config.dropbox.refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+    }
+    if (process.env.NOTION_API_KEY) {
+        config.notion.apiKey = process.env.NOTION_API_KEY;
+    }
+    if (process.env.DROPBOX_APP_KEY) {
+        config.dropbox.appKey = process.env.DROPBOX_APP_KEY;
+    }
+    
     console.log('✅ Configuration loaded from config.json');
+    
+    // Log which env vars are being used (without revealing values)
+    const envVarsInUse = [];
+    if (process.env.DROPBOX_APP_SECRET) envVarsInUse.push('DROPBOX_APP_SECRET');
+    if (process.env.DROPBOX_REFRESH_TOKEN) envVarsInUse.push('DROPBOX_REFRESH_TOKEN');
+    if (process.env.NOTION_API_KEY) envVarsInUse.push('NOTION_API_KEY');
+    if (process.env.DROPBOX_APP_KEY) envVarsInUse.push('DROPBOX_APP_KEY');
+    
+    if (envVarsInUse.length > 0) {
+        console.log('🔐 Using secrets from environment variables:', envVarsInUse.join(', '));
+    }
+    
+    // Validate required environment variables for Dropbox if refresh token is being used
+    if (config.dropbox.refreshToken || process.env.DROPBOX_REFRESH_TOKEN) {
+        const requiredForRefreshToken = ['DROPBOX_APP_SECRET'];
+        const missing = [];
+        
+        for (const envVar of requiredForRefreshToken) {
+            if (!process.env[envVar] && !config.dropbox.appSecret) {
+                missing.push(envVar);
+            }
+        }
+        
+        if (missing.length > 0) {
+            console.error('❌ Missing required environment variables for Dropbox refresh token:');
+            missing.forEach(v => console.error(`   • ${v}`));
+            console.error('\n📝 Please add these to your .env file:');
+            console.error('   cp .env.example .env');
+            console.error('   Then edit .env with your actual values\n');
+            console.error('💡 To get these values:');
+            console.error('   1. Create a Dropbox app at https://www.dropbox.com/developers/apps');
+            console.error('   2. Run: npm run setup:dropbox\n');
+            process.exit(1);
+        }
+    }
 } catch (error) {
     console.error('❌ Could not load config.json');
     console.error('Please copy config.example.json to config.json and fill in your details');
@@ -70,6 +123,39 @@ app.get('/health', (req, res) => {
         version: '1.0.0'
     });
 });
+
+// Status endpoint with Dropbox info
+app.get('/status', (req, res) => {
+    const dropboxStatus = dropboxHandler.getStatus();
+    
+    res.json({
+        server: {
+            status: 'running',
+            uptime: Math.floor(process.uptime()),
+            uptimeHuman: formatUptime(process.uptime()),
+            timestamp: new Date().toISOString()
+        },
+        dropbox: dropboxStatus,
+        notion: {
+            configured: !!config.notion.apiKey && config.notion.apiKey !== 'YOUR_NOTION_API_KEY'
+        }
+    });
+});
+
+// Helper function to format uptime
+function formatUptime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (hours > 0) {
+        return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+    } else {
+        return `${secs}s`;
+    }
+}
 
 // Test endpoint - saves post data without using Notion
 app.post('/test-save', async (req, res) => {
@@ -583,8 +669,37 @@ server.on('error', (error) => {
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-    console.log('\\n🛑 Shutting down gracefully...');
-    process.exit(0);
+    console.log('\n🛑 Shutting down gracefully...');
+    
+    // Clean up Dropbox handler intervals
+    if (dropboxHandler && dropboxHandler.cleanup) {
+        dropboxHandler.cleanup();
+    }
+    
+    // Close server
+    server.close(() => {
+        console.log('✅ Server closed');
+        process.exit(0);
+    });
+    
+    // Force exit after 5 seconds if graceful shutdown fails
+    setTimeout(() => {
+        console.log('⚠️  Forcing shutdown...');
+        process.exit(1);
+    }, 5000);
+});
+
+process.on('SIGTERM', () => {
+    console.log('\n🛑 Received SIGTERM, shutting down...');
+    
+    // Clean up Dropbox handler intervals
+    if (dropboxHandler && dropboxHandler.cleanup) {
+        dropboxHandler.cleanup();
+    }
+    
+    server.close(() => {
+        process.exit(0);
+    });
 });
 
 process.on('unhandledRejection', (reason, promise) => {
