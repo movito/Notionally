@@ -237,12 +237,66 @@ app.post('/save-post', async (req, res) => {
         // Step 3: Create Notion page (without images first)
         console.log('📋 Creating Notion page...');
         
-        // Log if we have URLs to process
-        if (postData.processedUrls?.length > 0) {
-            console.log(`🔗 Including ${postData.processedUrls.length} URL(s) in Notion page`);
-            postData.processedUrls.forEach(url => {
-                console.log(`  - ${url.original} → ${url.resolved}`);
-            });
+        // Process URLs server-side (unfurl shortened links)
+        let processedUrls = [];
+        if (postData.urls?.length > 0) {
+            console.log(`🔗 Processing ${postData.urls.length} URL(s)...`);
+            
+            for (const url of postData.urls) {
+                try {
+                    // Check if it's a shortened URL
+                    if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
+                        console.log(`  Unfurling: ${url}`);
+                        
+                        // Follow redirects server-side
+                        const response = await fetch(url, {
+                            method: 'HEAD',
+                            redirect: 'follow',
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (compatible; Notionally/1.0)'
+                            }
+                        });
+                        
+                        const resolvedUrl = response.url;
+                        
+                        if (resolvedUrl && resolvedUrl !== url) {
+                            console.log(`    ✅ Resolved to: ${resolvedUrl}`);
+                            processedUrls.push({
+                                original: url,
+                                resolved: resolvedUrl,
+                                wasShortened: true
+                            });
+                        } else {
+                            console.log(`    ⚠️ Could not resolve, using original`);
+                            processedUrls.push({
+                                original: url,
+                                resolved: url,
+                                wasShortened: true
+                            });
+                        }
+                    } else {
+                        // Not a shortened URL
+                        processedUrls.push({
+                            original: url,
+                            resolved: url,
+                            wasShortened: false
+                        });
+                    }
+                } catch (error) {
+                    console.log(`    ❌ Error unfurling ${url}: ${error.message}`);
+                    processedUrls.push({
+                        original: url,
+                        resolved: url,
+                        wasShortened: url.includes('lnkd.in'),
+                        error: error.message
+                    });
+                }
+            }
+            
+            console.log(`✅ Processed ${processedUrls.length} URL(s)`);
+        } else if (postData.processedUrls?.length > 0) {
+            // Use pre-processed URLs if provided (backwards compatibility)
+            processedUrls = postData.processedUrls;
         }
         
         const notionPage = await notionClient.createPage({
@@ -254,7 +308,7 @@ app.post('/save-post', async (req, res) => {
             timestamp: postData.timestamp,
             videos: processedVideos,
             images: [], // Don't include images in initial creation
-            processedUrls: postData.processedUrls || [] // Pass through the URLs
+            processedUrls: processedUrls // Pass the server-processed URLs
         });
 
         console.log(`✅ Notion page created: ${notionPage.url}`);

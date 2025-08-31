@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.4.5
+// @version      1.5.0
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -19,9 +19,7 @@
         debug: true,
         captureMenuHTML: false,  // Set to true to log menu HTML for debugging
         convertImagesToBase64: true,  // Enable image conversion to save to Dropbox
-        useTestEndpoint: false,  // Set to true to use /test-save instead of /save-post
-        unfurlLinks: true,  // Enable URL unfurling for LinkedIn shortened links
-        unfurlTimeout: 5000  // Timeout for URL unfurling in milliseconds
+        useTestEndpoint: false  // Set to true to use /test-save instead of /save-post
     };
     
     // Store captured video URLs
@@ -166,163 +164,6 @@
         return uniqueUrls;
     }
     
-    // Unfurl a shortened URL to get the final destination
-    async function unfurlUrl(shortUrl) {
-        log(`🔗 Attempting to unfurl: ${shortUrl}`);
-        
-        // Method 1: Try XMLHttpRequest first (sometimes works better than fetch)
-        try {
-            const finalUrl = await unfurlViaXHR(shortUrl);
-            if (finalUrl && finalUrl !== shortUrl && !finalUrl.includes('lnkd.in')) {
-                return finalUrl;
-            }
-        } catch (e) {
-            log(`  XHR method didn't work: ${e.message}`);
-        }
-        
-        // Method 2: Try fetch with cors mode
-        try {
-            const response = await fetch(shortUrl, {
-                method: 'GET',  // Changed from HEAD to GET
-                redirect: 'follow',
-                credentials: 'omit'  // Don't send cookies - might avoid some CORS issues
-            });
-            
-            const finalUrl = response.url;
-            log(`  Fetch got URL: ${finalUrl}`);
-            
-            if (finalUrl && finalUrl !== shortUrl && !finalUrl.includes('lnkd.in')) {
-                log(`  ✅ Successfully resolved via fetch: ${finalUrl}`);
-                return finalUrl;
-            }
-        } catch (error) {
-            log(`  Fetch failed: ${error.message}`);
-        }
-        
-        // Method 3: Simple window.open as last resort
-        if (CONFIG.unfurlLinks) {
-            try {
-                const finalUrl = await unfurlViaSimpleWindow(shortUrl);
-                if (finalUrl && finalUrl !== shortUrl) {
-                    return finalUrl;
-                }
-            } catch (e) {
-                log(`  Window method failed: ${e.message}`);
-            }
-        }
-        
-        log(`  ❌ Could not unfurl ${shortUrl}`);
-        return shortUrl;
-    }
-    
-    // Try XMLHttpRequest method
-    function unfurlViaXHR(url) {
-        return new Promise((resolve, reject) => {
-            log(`  📡 Trying XMLHttpRequest for: ${url}`);
-            
-            const xhr = new XMLHttpRequest();
-            xhr.timeout = CONFIG.unfurlTimeout;
-            
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    // Try to get the final URL from response
-                    const finalUrl = xhr.responseURL;
-                    log(`    XHR final URL: ${finalUrl}`);
-                    
-                    if (finalUrl && finalUrl !== url && !finalUrl.includes('lnkd.in')) {
-                        log(`    ✅ XHR resolved to: ${finalUrl}`);
-                        resolve(finalUrl);
-                    } else {
-                        reject(new Error('No redirect detected'));
-                    }
-                }
-            };
-            
-            xhr.onerror = () => reject(new Error('XHR failed'));
-            xhr.ontimeout = () => reject(new Error('XHR timeout'));
-            
-            try {
-                xhr.open('GET', url, true);
-                xhr.send();
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
-    
-    // Simplified window.open method
-    function unfurlViaSimpleWindow(url) {
-        return new Promise((resolve) => {
-            log(`  🪟 Simple window.open for: ${url}`);
-            
-            // Open URL in background tab
-            const newTab = window.open(url, '_blank');
-            
-            if (!newTab) {
-                log(`    Popup blocked`);
-                resolve(url);
-                return;
-            }
-            
-            // Give it time to redirect
-            setTimeout(() => {
-                try {
-                    const finalUrl = newTab.location.href;
-                    newTab.close();
-                    
-                    if (finalUrl && finalUrl !== 'about:blank') {
-                        log(`    Got URL: ${finalUrl}`);
-                        resolve(finalUrl);
-                    } else {
-                        resolve(url);
-                    }
-                } catch (e) {
-                    // Cross-origin - can't read it
-                    log(`    Cross-origin block`);
-                    newTab.close();
-                    resolve(url);
-                }
-            }, 1500);
-        });
-    }
-    
-    
-    // Process all URLs in post data
-    async function processUrls(urls) {
-        if (!CONFIG.unfurlLinks || !urls || urls.length === 0) {
-            return [];
-        }
-        
-        log(`📎 Processing ${urls.length} URLs...`);
-        
-        const processedUrls = [];
-        
-        for (const url of urls) {
-            // Check if it's a LinkedIn shortened URL or redirect
-            const isLinkedInShort = url.includes('lnkd.in') || 
-                                    url.includes('linkedin.com/redir') ||
-                                    url.includes('linkedin.com/r/');
-            
-            if (isLinkedInShort) {
-                log(`  Found LinkedIn shortened URL: ${url}`);
-                const resolvedUrl = await unfurlUrl(url);
-                processedUrls.push({
-                    original: url,
-                    resolved: resolvedUrl,
-                    wasShortened: true
-                });
-            } else {
-                processedUrls.push({
-                    original: url,
-                    resolved: url,
-                    wasShortened: false
-                });
-            }
-        }
-        
-        log(`✅ Processed ${processedUrls.length} URLs`);
-        return processedUrls;
-    }
     
     // Extract post data from LinkedIn DOM
     function extractPostData(postElement, postUrl = null) {
@@ -881,22 +722,13 @@
                     throw new Error('Post must have text content or videos');
                 }
                 
-                // Process URLs (unfurl shortened links)
-                if (CONFIG.unfurlLinks && postData.urls?.length > 0) {
-                    showToast('Processing links...', 'info');
-                    log(`Processing ${postData.urls.length} URLs...`);
-                    
-                    const processedUrls = await processUrls(postData.urls);
-                    postData.processedUrls = processedUrls;
-                    
-                    // Log results for debugging
-                    processedUrls.forEach(urlInfo => {
-                        if (urlInfo.wasShortened) {
-                            log(`  Unfurled: ${urlInfo.original} → ${urlInfo.resolved}`);
-                        } else {
-                            log(`  Direct URL: ${urlInfo.original}`);
-                        }
+                // Just send raw URLs to server for processing
+                if (postData.urls?.length > 0) {
+                    log(`Found ${postData.urls.length} URLs to send to server for processing`);
+                    postData.urls.forEach(url => {
+                        log(`  - ${url}`);
                     });
+                    // Server will handle unfurling
                 }
                 
                 // Convert images to base64 for transfer (if enabled)
