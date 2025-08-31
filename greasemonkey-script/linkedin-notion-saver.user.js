@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.4
+// @version      1.5.5
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.5.5 - Improved URL unfurling with multiple capture methods and longer wait
  * Version 1.5.4 - Added comprehensive debugging for URL extraction and processing
  * Version 1.5.3 - Fixed handling of direct URLs (non-shortened links)
  * Version 1.5.2 - Added browser-based URL unfurling for LinkedIn shortened links
@@ -765,54 +766,91 @@
                             log(`  Unfurling: ${url}`);
                             
                             try {
-                                // Open in a background tab
+                                // Save current clipboard
+                                const originalClipboard = await navigator.clipboard.readText().catch(() => '');
+                                
+                                // Open the URL in a new tab
                                 const newTab = window.open(url, '_blank');
                                 
                                 if (newTab) {
-                                    // Wait for redirect to complete
-                                    await new Promise(resolve => setTimeout(resolve, 2000));
+                                    log(`    Tab opened, waiting for redirect...`);
+                                    showToast(`Resolving URL ${postData.urls.indexOf(url) + 1}/${postData.urls.length}...`, 'info');
                                     
+                                    // Wait longer for LinkedIn's two-step redirect to complete
+                                    // LinkedIn does: lnkd.in -> linkedin.com/redir -> final URL
+                                    await new Promise(resolve => setTimeout(resolve, 5000));
+                                    
+                                    // Try multiple methods to get the URL
+                                    let finalUrl = url;
+                                    let resolved = false;
+                                    
+                                    // Method 1: Try to read location (might work on same origin)
                                     try {
-                                        const finalUrl = newTab.location.href;
-                                        if (finalUrl && !finalUrl.includes('lnkd.in') && finalUrl !== 'about:blank') {
-                                            log(`    ✅ Resolved to: ${finalUrl}`);
-                                            resolvedUrls.push({
-                                                original: url,
-                                                resolved: finalUrl,
-                                                wasShortened: true
-                                            });
-                                        } else {
-                                            log(`    ⚠️ Could not get final URL`);
-                                            resolvedUrls.push({
-                                                original: url,
-                                                resolved: url,
-                                                wasShortened: true
-                                            });
+                                        finalUrl = newTab.location.href;
+                                        if (finalUrl && !finalUrl.includes('lnkd.in')) {
+                                            resolved = true;
+                                            log(`    ✅ Got URL via location: ${finalUrl}`);
                                         }
                                     } catch (e) {
-                                        log(`    ⚠️ Cross-origin block: ${e.message}`);
-                                        resolvedUrls.push({
-                                            original: url,
-                                            resolved: url,
-                                            wasShortened: true
-                                        });
-                                    } finally {
+                                        log(`    ⚠️ Cannot read location (cross-origin)`);
+                                    }
+                                    
+                                    // Method 2: Execute script to copy URL to clipboard
+                                    if (!resolved) {
+                                        try {
+                                            // Try to inject a script that copies the URL
+                                            newTab.eval(`navigator.clipboard.writeText(window.location.href)`);
+                                            await new Promise(resolve => setTimeout(resolve, 500));
+                                            
+                                            const clipboardUrl = await navigator.clipboard.readText();
+                                            if (clipboardUrl && clipboardUrl !== originalClipboard && !clipboardUrl.includes('lnkd.in')) {
+                                                finalUrl = clipboardUrl;
+                                                resolved = true;
+                                                log(`    ✅ Got URL via clipboard: ${finalUrl}`);
+                                            }
+                                        } catch (e) {
+                                            log(`    ⚠️ Cannot inject script`);
+                                        }
+                                    }
+                                    
+                                    // Close the tab
+                                    try {
                                         newTab.close();
+                                    } catch (e) {
+                                        log(`    ⚠️ Could not close tab`);
+                                    }
+                                    
+                                    // Restore original clipboard
+                                    if (originalClipboard) {
+                                        navigator.clipboard.writeText(originalClipboard).catch(() => {});
+                                    }
+                                    
+                                    resolvedUrls.push({
+                                        original: url,
+                                        resolved: finalUrl,
+                                        wasShortened: true,
+                                        wasResolved: resolved
+                                    });
+                                    
+                                    if (!resolved) {
+                                        log(`    ⚠️ Could not resolve URL, using original`);
                                     }
                                 } else {
                                     log(`    ❌ Popup blocked`);
                                     resolvedUrls.push({
                                         original: url,
                                         resolved: url,
-                                        wasShortened: true
+                                        wasShortened: true,
+                                        wasResolved: false
                                     });
                                 }
                             } catch (err) {
-                                log(`    Error unfurling: ${err.message}`);
+                                log(`    Error during unfurling: ${err.message}`);
                                 resolvedUrls.push({
                                     original: url,
                                     resolved: url,
-                                    wasShortened: true
+                                    wasShortened: true,
+                                    wasResolved: false
                                 });
                             }
                         } else {
