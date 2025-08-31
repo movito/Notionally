@@ -247,20 +247,81 @@ app.post('/save-post', async (req, res) => {
                     if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
                         console.log(`  Unfurling LinkedIn shortened URL: ${url}`);
                         
+                        // First, try simple approach - just follow all redirects
+                        try {
+                            const simpleResponse = await fetch(url, {
+                                method: 'GET',
+                                redirect: 'follow', // Auto-follow all redirects
+                                headers: {
+                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                                }
+                            });
+                            
+                            const finalUrl = simpleResponse.url;
+                            console.log(`    Simple fetch final URL: ${finalUrl}`);
+                            
+                            // If we got a non-LinkedIn URL, we're done!
+                            if (finalUrl && !finalUrl.includes('linkedin.com') && !finalUrl.includes('lnkd.in')) {
+                                console.log(`    ✅ Resolved to: ${finalUrl}`);
+                                processedUrls.push({
+                                    original: url,
+                                    resolved: finalUrl,
+                                    wasShortened: true
+                                });
+                                continue; // Skip to next URL
+                            }
+                        } catch (simpleError) {
+                            console.log(`    Simple fetch failed: ${simpleError.message}`);
+                        }
+                        
                         // Step 1: Follow the initial redirect
                         const response = await fetch(url, {
                             method: 'GET',
                             redirect: 'manual', // Don't auto-follow, we want to see each step
                             headers: {
-                                'User-Agent': 'Mozilla/5.0 (compatible; Notionally/1.0)',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                'Accept-Language': 'en-US,en;q=0.5',
                             }
                         });
                         
+                        console.log(`    Response status: ${response.status}`);
+                        console.log(`    Response headers:`, [...response.headers.entries()].slice(0, 5));
+                        
                         // Check if we got a redirect
                         let intermediateUrl = url;
-                        if (response.status === 301 || response.status === 302 || response.status === 307) {
+                        if (response.status === 301 || response.status === 302 || response.status === 303 || response.status === 307 || response.status === 308) {
                             intermediateUrl = response.headers.get('location');
                             console.log(`    Redirected to: ${intermediateUrl}`);
+                        } else if (response.status === 200) {
+                            // LinkedIn might return 200 with the redirect in the body
+                            console.log(`    Got 200 response, checking body for redirect...`);
+                            const html = await response.text();
+                            
+                            // Look for meta refresh or JavaScript redirects
+                            const patterns = [
+                                /<meta[^>]*http-equiv=["']refresh["'][^>]*content=["']0;url=([^"']+)["']/i,
+                                /window\.location\.href\s*=\s*["']([^"']+)["']/,
+                                /window\.location\.replace\(["']([^"']+)["']\)/,
+                            ];
+                            
+                            for (const pattern of patterns) {
+                                const match = html.match(pattern);
+                                if (match && match[1]) {
+                                    intermediateUrl = match[1];
+                                    console.log(`    Found redirect in HTML: ${intermediateUrl}`);
+                                    break;
+                                }
+                            }
+                            
+                            // If still no redirect found, look for any LinkedIn redir URL
+                            if (intermediateUrl === url) {
+                                const redirMatch = html.match(/https:\/\/www\.linkedin\.com\/redir[^"'\s]*/);
+                                if (redirMatch) {
+                                    intermediateUrl = redirMatch[0];
+                                    console.log(`    Found LinkedIn redir URL in content: ${intermediateUrl}`);
+                                }
+                            }
                         }
                         
                         // Step 2: If we got redirected to LinkedIn's warning page, extract the actual URL

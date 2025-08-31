@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.1
+// @version      1.5.2
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -722,13 +722,81 @@
                     throw new Error('Post must have text content or videos');
                 }
                 
-                // Just send raw URLs to server for processing
+                // Unfurl URLs in browser before sending to server
                 if (postData.urls?.length > 0) {
-                    log(`Found ${postData.urls.length} URLs to send to server for processing`);
-                    postData.urls.forEach(url => {
-                        log(`  - ${url}`);
-                    });
-                    // Server will handle unfurling
+                    log(`Found ${postData.urls.length} URLs to process`);
+                    showToast('Resolving shortened URLs...', 'info');
+                    
+                    const resolvedUrls = [];
+                    for (const url of postData.urls) {
+                        if (url.includes('lnkd.in')) {
+                            log(`  Unfurling: ${url}`);
+                            
+                            try {
+                                // Open in a background tab
+                                const newTab = window.open(url, '_blank');
+                                
+                                if (newTab) {
+                                    // Wait for redirect to complete
+                                    await new Promise(resolve => setTimeout(resolve, 2000));
+                                    
+                                    try {
+                                        const finalUrl = newTab.location.href;
+                                        if (finalUrl && !finalUrl.includes('lnkd.in') && finalUrl !== 'about:blank') {
+                                            log(`    ✅ Resolved to: ${finalUrl}`);
+                                            resolvedUrls.push({
+                                                original: url,
+                                                resolved: finalUrl,
+                                                wasShortened: true
+                                            });
+                                        } else {
+                                            log(`    ⚠️ Could not get final URL`);
+                                            resolvedUrls.push({
+                                                original: url,
+                                                resolved: url,
+                                                wasShortened: true
+                                            });
+                                        }
+                                    } catch (e) {
+                                        log(`    ⚠️ Cross-origin block: ${e.message}`);
+                                        resolvedUrls.push({
+                                            original: url,
+                                            resolved: url,
+                                            wasShortened: true
+                                        });
+                                    } finally {
+                                        newTab.close();
+                                    }
+                                } else {
+                                    log(`    ❌ Popup blocked`);
+                                    resolvedUrls.push({
+                                        original: url,
+                                        resolved: url,
+                                        wasShortened: true
+                                    });
+                                }
+                            } catch (err) {
+                                log(`    Error unfurling: ${err.message}`);
+                                resolvedUrls.push({
+                                    original: url,
+                                    resolved: url,
+                                    wasShortened: true
+                                });
+                            }
+                        } else {
+                            resolvedUrls.push({
+                                original: url,
+                                resolved: url,
+                                wasShortened: false
+                            });
+                        }
+                    }
+                    
+                    // Replace urls with processedUrls for server
+                    postData.processedUrls = resolvedUrls;
+                    delete postData.urls; // Remove raw URLs
+                    
+                    log(`Processed ${resolvedUrls.length} URLs`);
                 }
                 
                 // Convert images to base64 for transfer (if enabled)
