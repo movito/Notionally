@@ -5,12 +5,14 @@
 
 const { FileUtils, ValidationUtils, RetryUtils, PerformanceUtils } = require('../utils');
 const { ApplicationError, ValidationError } = require('../utils/errors');
+const URLResolutionService = require('./URLResolutionService');
 
 class PostProcessingService {
     constructor(videoProcessor, dropboxHandler, notionClient) {
         this.videoProcessor = videoProcessor;
         this.dropboxHandler = dropboxHandler;
         this.notionClient = notionClient;
+        this.urlResolver = new URLResolutionService();
         this.debugLogs = [];
     }
     
@@ -199,47 +201,14 @@ class PostProcessingService {
         
         this.log('INFO', `Processing ${urls.length} URL(s)`);
         
-        const processedUrls = [];
+        // Use the URL resolution service
+        const processedUrls = await this.urlResolver.processUrls(urls);
         
-        for (const url of urls) {
-            try {
-                // Check if URL needs resolution
-                if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
-                    const resolved = await this.resolveShortUrl(url);
-                    processedUrls.push({
-                        original: url,
-                        resolved: resolved,
-                        wasShortened: true,
-                        wasResolved: resolved !== url
-                    });
-                } else {
-                    processedUrls.push({
-                        original: url,
-                        resolved: url,
-                        wasShortened: false
-                    });
-                }
-            } catch (error) {
-                this.log('ERROR', `Failed to process URL ${url}: ${error.message}`);
-                processedUrls.push({
-                    original: url,
-                    resolved: url,
-                    wasShortened: url.includes('lnkd.in'),
-                    error: error.message
-                });
-            }
-        }
+        // Merge URL resolver debug logs with our logs
+        const urlDebugLogs = this.urlResolver.getDebugLogs();
+        this.debugLogs.push(...urlDebugLogs);
         
         return processedUrls;
-    }
-    
-    /**
-     * Resolve shortened URL
-     */
-    async resolveShortUrl(url) {
-        // This would contain the URL resolution logic from server.js
-        // Keeping it simple for now to avoid breaking existing functionality
-        return url; // Placeholder - actual implementation would be moved here
     }
     
     /**
