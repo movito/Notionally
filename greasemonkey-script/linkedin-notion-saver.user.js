@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.8
+// @version      1.5.9
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.5.9 - Skip client-side URL resolution, let server handle it to avoid CORS
  * Version 1.5.8 - Implement URL polling to track redirects while on same origin
  * Version 1.5.7 - Added comprehensive debugging for redirect page detection
  * Version 1.5.6 - Capture URLs directly from LinkedIn redirect page
@@ -851,9 +852,14 @@
                     const hasShortened = postData.urls.some(url => url.includes('lnkd.in'));
                     log('Has shortened URLs:', hasShortened);
                     if (hasShortened) {
-                        showToast('Resolving shortened URLs...', 'info');
+                        showToast('Server will resolve shortened URLs...', 'info');
                     }
                     
+                    // Skip client-side URL resolution - let server handle it
+                    // Server has better ability to follow redirects without CORS issues
+                    log('Sending raw URLs to server for resolution');
+                    
+                    /* DISABLED: Client-side URL resolution - keeping code for reference
                     const resolvedUrls = [];
                     for (const url of postData.urls) {
                         if (url.includes('lnkd.in')) {
@@ -883,32 +889,49 @@
                                     
                                     const pollInterval = setInterval(() => {
                                         pollCount++;
+                                        log(`    Poll #${pollCount} at ${pollCount * 100}ms`);
                                         try {
-                                            // This will work as long as we're on linkedin.com
+                                            // This will work as long as we're on same origin
                                             const currentUrl = newTab.location.href;
+                                            log(`      Current URL: ${currentUrl}`);
+                                            
                                             if (currentUrl !== lastSeenUrl) {
-                                                log(`    URL changed to: ${currentUrl}`);
+                                                log(`      ➡️ URL changed from: ${lastSeenUrl}`);
+                                                log(`      ➡️ URL changed to: ${currentUrl}`);
                                                 lastSeenUrl = currentUrl;
                                                 
-                                                // If it's the redirect page, keep polling
+                                                // Check if we've reached a final destination
+                                                // lnkd.in redirects to linkedin.com/redir which then goes to final URL
                                                 if (currentUrl.includes('/redir/') || currentUrl.includes('/safety/go')) {
-                                                    log(`    On redirect page, continuing to poll...`);
+                                                    log(`      📍 On LinkedIn redirect page, waiting for final redirect...`);
+                                                    // Don't close yet, keep polling
                                                 } 
-                                                // If it's not LinkedIn anymore, we've reached the destination
-                                                else if (!currentUrl.includes('linkedin.com') && !currentUrl.includes('lnkd.in')) {
-                                                    log(`    ✅ Reached final destination: ${currentUrl}`);
+                                                // If it's not LinkedIn or lnkd.in anymore, we've reached the destination
+                                                else if (!currentUrl.includes('linkedin.com') && 
+                                                         !currentUrl.includes('lnkd.in') && 
+                                                         currentUrl.startsWith('http')) {
+                                                    log(`      ✅ Reached final destination: ${currentUrl}`);
                                                     finalUrl = currentUrl;
                                                     clearInterval(pollInterval);
-                                                    newTab.close();
+                                                    setTimeout(() => newTab.close(), 100); // Small delay before closing
                                                 }
                                             }
                                         } catch (e) {
-                                            // Cross-origin error means we've left linkedin.com
-                                            // The last URL we saw before the error is likely the redirect page
-                                            // with the destination URL visible
-                                            log(`    Cross-origin detected after ${pollCount * 100}ms`);
-                                            log(`    Last seen URL: ${lastSeenUrl}`);
-                                            clearInterval(pollInterval);
+                                            // Cross-origin error means we've left the origin
+                                            log(`      ❌ Cross-origin error after ${pollCount * 100}ms: ${e.message}`);
+                                            log(`      Last accessible URL was: ${lastSeenUrl}`);
+                                            
+                                            // If we were on a redirect page, wait a bit to see if localStorage gets populated
+                                            if (lastSeenUrl.includes('/redir/') || lastSeenUrl.includes('/safety/go')) {
+                                                log(`      Waiting 2s for redirect page script to capture URL...`);
+                                                setTimeout(() => {
+                                                    clearInterval(pollInterval);
+                                                    newTab.close();
+                                                }, 2000);
+                                            } else {
+                                                clearInterval(pollInterval);
+                                                newTab.close();
+                                            }
                                         }
                                         
                                         if (pollCount >= maxPolls) {
@@ -1014,6 +1037,7 @@
                     
                     log(`Processed ${resolvedUrls.length} URLs`);
                     log('ProcessedUrls being sent to server:', postData.processedUrls);
+                    */ // END DISABLED CLIENT-SIDE URL RESOLUTION
                 } else {
                     log('No URLs found in post to process');
                 }
