@@ -479,14 +479,45 @@ app.post('/save-post', async (req, res) => {
                                 /<meta[^>]*http-equiv=["']refresh["'][^>]*content=["']0;url=([^"']+)["']/i,
                                 /window\.location\.href\s*=\s*["']([^"']+)["']/,
                                 /window\.location\.replace\(["']([^"']+)["']\)/,
+                                // LinkedIn-specific patterns
+                                /data-external-url=["']([^"']+)["']/,
+                                /externalUrl["']\s*:\s*["']([^"']+)["']/,
+                                /"url"\s*:\s*"(https?:\/\/[^"]+)"/,
+                                /href=["'](https?:\/\/(?!(?:www\.)?linkedin\.com)[^"']+)["']/i,
+                                // Look for base64 encoded URLs
+                                /[?&]url=([^&]+)/,
                             ];
                             
                             for (const pattern of patterns) {
                                 const match = html.match(pattern);
                                 if (match && match[1]) {
-                                    intermediateUrl = match[1];
-                                    console.log(`    Found redirect in HTML: ${intermediateUrl}`);
-                                    break;
+                                    let foundUrl = match[1];
+                                    
+                                    // If it's URL encoded, decode it
+                                    if (foundUrl.includes('%3A%2F%2F') || foundUrl.includes('%2F')) {
+                                        foundUrl = decodeURIComponent(foundUrl);
+                                    }
+                                    
+                                    // Skip if it's a LinkedIn URL
+                                    if (!foundUrl.includes('linkedin.com') && !foundUrl.includes('lnkd.in')) {
+                                        intermediateUrl = foundUrl;
+                                        console.log(`    Found redirect in HTML: ${intermediateUrl}`);
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Also check for LinkedIn's specific redirect page structure
+                            if (intermediateUrl === url) {
+                                // Look for the actual URL in the page that warns about external links
+                                const externalLinkMatch = html.match(/You are being redirected to[^<]*<[^>]*>([^<]+)</);
+                                if (!externalLinkMatch) {
+                                    // Try another pattern - look for any non-LinkedIn URL in an anchor tag
+                                    const anchorMatch = html.match(/<a[^>]+href=["'](https?:\/\/(?!(?:www\.)?linkedin\.com|lnkd\.in)[^"']+)["'][^>]*>/i);
+                                    if (anchorMatch && anchorMatch[1]) {
+                                        intermediateUrl = anchorMatch[1];
+                                        console.log(`    Found external URL in anchor: ${intermediateUrl}`);
+                                    }
                                 }
                             }
                             
@@ -497,12 +528,24 @@ app.post('/save-post', async (req, res) => {
                                     intermediateUrl = redirMatch[0];
                                     console.log(`    Found LinkedIn redir URL in content: ${intermediateUrl}`);
                                 } else {
-                                    // Log first 500 chars of HTML for debugging
+                                    // Log more HTML for debugging to find where the URL might be
                                     debugLog('DEBUG', 'No redirect found in HTML', {
-                                        htmlPreview: html.substring(0, 500),
-                                        url: url
+                                        htmlPreview: html.substring(0, 2000),
+                                        url: url,
+                                        htmlLength: html.length
                                     });
-                                    console.log(`    ⚠️ No redirect found`);
+                                    
+                                    // Also search for any external URLs in the entire HTML
+                                    const allUrlsPattern = /https?:\/\/(?!(?:www\.)?linkedin\.com|lnkd\.in)[a-zA-Z0-9][a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+/g;
+                                    const foundUrls = html.match(allUrlsPattern);
+                                    if (foundUrls && foundUrls.length > 0) {
+                                        debugLog('INFO', `Found ${foundUrls.length} external URL(s) in page:`, foundUrls);
+                                        // Use the first non-LinkedIn URL found
+                                        intermediateUrl = foundUrls[0];
+                                        console.log(`    Found external URL in page: ${intermediateUrl}`);
+                                    } else {
+                                        console.log(`    ⚠️ No redirect found`);
+                                    }
                                 }
                             }
                         }
