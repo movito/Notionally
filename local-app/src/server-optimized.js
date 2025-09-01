@@ -152,14 +152,22 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-const PORT = config.get('server.port') || 8765;
-const HOST = config.get('server.host') || 'localhost';
+// Allow running optimized version on different port for testing
+const PORT = process.env.OPTIMIZED_PORT || process.env.PORT || config.get('server.port') || 8765;
+const HOST = process.env.HOST || config.get('server.host') || 'localhost';
 
-const server = app.listen(PORT, HOST, () => {
+// If running alongside original server, use different port
+const isTestMode = process.env.TEST_OPTIMIZED === 'true';
+const actualPort = isTestMode ? (parseInt(PORT) + 1) : PORT;
+
+const server = app.listen(actualPort, HOST, () => {
     console.log('');
     console.log('🚀 Notionally Server Started (Optimized Version)');
     console.log('=' .repeat(50));
-    console.log(`📡 Server: http://${HOST}:${PORT}`);
+    console.log(`📡 Server: http://${HOST}:${actualPort}`);
+    if (isTestMode) {
+        console.log(`⚠️  Running in TEST MODE on port ${actualPort} (original uses ${PORT})`);
+    }
     console.log(`📂 Dropbox: ${config.get('dropbox.localPath')}`);
     console.log(`🔗 Notion: ${notionClient.isConfigured() ? 'Connected' : 'Not configured'}`);
     console.log('=' .repeat(50));

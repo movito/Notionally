@@ -5,8 +5,12 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "start:optimized": "node src/server-optimized.js",
+    "start:optimized:test": "TEST_OPTIMIZED=true node src/server-optimized.js",
     "dev": "./scripts/dev.sh",
     "dev:simple": "nodemon src/server.js",
+    "dev:optimized": "nodemon src/server-optimized.js",
+    "dev:optimized:test": "TEST_OPTIMIZED=true nodemon src/server-optimized.js",
     "setup:dropbox": "node scripts/get-dropbox-token.js",
     "check": "node scripts/check-setup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
