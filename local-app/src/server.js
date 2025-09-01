@@ -476,6 +476,9 @@ app.post('/save-post', async (req, res) => {
                             
                             // Look for meta refresh or JavaScript redirects
                             const patterns = [
+                                // LinkedIn interstitial page specific pattern - HIGHEST PRIORITY
+                                /data-tracking-control-name=["']external_url_click["'][^>]*href=["']([^"']+)["']/i,
+                                // Standard redirect patterns
                                 /<meta[^>]*http-equiv=["']refresh["'][^>]*content=["']0;url=([^"']+)["']/i,
                                 /window\.location\.href\s*=\s*["']([^"']+)["']/,
                                 /window\.location\.replace\(["']([^"']+)["']\)/,
@@ -488,7 +491,8 @@ app.post('/save-post', async (req, res) => {
                                 /[?&]url=([^&]+)/,
                             ];
                             
-                            for (const pattern of patterns) {
+                            for (let i = 0; i < patterns.length; i++) {
+                                const pattern = patterns[i];
                                 const match = html.match(pattern);
                                 if (match && match[1]) {
                                     let foundUrl = match[1];
@@ -507,6 +511,7 @@ app.post('/save-post', async (req, res) => {
                                         !foundUrl.endsWith('.js') &&
                                         !foundUrl.includes('/sc/h/')) { // LinkedIn static content path
                                         intermediateUrl = foundUrl;
+                                        debugLog('INFO', `Found redirect URL using pattern #${i + 1}: ${intermediateUrl}`);
                                         console.log(`    Found redirect in HTML: ${intermediateUrl}`);
                                         break;
                                     }
