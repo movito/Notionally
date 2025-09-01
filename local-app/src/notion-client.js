@@ -690,7 +690,7 @@ class NotionClient {
                 object: 'block',
                 type: 'code',
                 code: {
-                    language: 'plaintext',
+                    language: 'plain text',  // Notion requires "plain text" with a space
                     rich_text: [{
                         type: 'text',
                         text: {
@@ -721,7 +721,7 @@ class NotionClient {
                 object: 'block',
                 type: 'code',
                 code: {
-                    language: 'plaintext',
+                    language: 'plain text',  // Notion requires "plain text" with a space
                     rich_text: [{
                         type: 'text',
                         text: {

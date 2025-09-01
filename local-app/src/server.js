@@ -439,6 +439,13 @@ app.post('/save-post', async (req, res) => {
                                 if (redirMatch) {
                                     intermediateUrl = redirMatch[0];
                                     console.log(`    Found LinkedIn redir URL in content: ${intermediateUrl}`);
+                                } else {
+                                    // Log first 500 chars of HTML for debugging
+                                    debugLog('DEBUG', 'No redirect found in HTML', {
+                                        htmlPreview: html.substring(0, 500),
+                                        url: url
+                                    });
+                                    console.log(`    ⚠️ No redirect found`);
                                 }
                             }
                         }
@@ -488,14 +495,14 @@ app.post('/save-post', async (req, res) => {
                             }
                             
                             if (finalUrl && !finalUrl.includes('linkedin.com') && !finalUrl.includes('lnkd.in')) {
-                                console.log(`    ✅ Resolved to: ${finalUrl}`);
+                                debugLog('INFO', `✅ Resolved to: ${finalUrl}`);
                                 processedUrls.push({
                                     original: url,
                                     resolved: finalUrl,
                                     wasShortened: true
                                 });
                             } else {
-                                console.log(`    ⚠️ Could not extract final URL`);
+                                debugLog('WARN', `⚠️ Could not extract final URL from warning page`);
                                 processedUrls.push({
                                     original: url,
                                     resolved: url,
