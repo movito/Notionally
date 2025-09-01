@@ -366,7 +366,64 @@ app.post('/save-post', async (req, res) => {
                     if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
                         debugLog('INFO', `Unfurling LinkedIn shortened URL: ${url}`);
                         
-                        // First, try simple approach - just follow all redirects
+                        // Try multiple URL expansion services
+                        let resolved = false;
+                        
+                        // Method 1: Try unshorten.it API
+                        try {
+                            debugLog('INFO', `Trying unshorten.it for: ${url}`);
+                            const unshortenResponse = await fetch(`https://unshorten.it/api/v1/unshorten?url=${encodeURIComponent(url)}`, {
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            if (unshortenResponse.ok) {
+                                const data = await unshortenResponse.json();
+                                if (data.url && data.url !== url && !data.url.includes('lnkd.in')) {
+                                    debugLog('INFO', `✅ Unshorten.it resolved to: ${data.url}`);
+                                    processedUrls.push({
+                                        original: url,
+                                        resolved: data.url,
+                                        wasShortened: true,
+                                        method: 'unshorten.it'
+                                    });
+                                    resolved = true;
+                                    continue; // Skip to next URL
+                                }
+                            }
+                        } catch (error) {
+                            debugLog('DEBUG', `Unshorten.it failed: ${error.message}`);
+                        }
+                        
+                        // Method 2: Try HEAD request to get Location header
+                        if (!resolved) {
+                            try {
+                                debugLog('INFO', `Trying HEAD request for: ${url}`);
+                                const headResponse = await fetch(url, {
+                                    method: 'HEAD',
+                                    redirect: 'manual',
+                                    headers: {
+                                        'User-Agent': 'Mozilla/5.0 (compatible; Notionally/1.0)'
+                                    }
+                                });
+                                const location = headResponse.headers.get('location');
+                                if (location && !location.includes('lnkd.in')) {
+                                    debugLog('INFO', `✅ HEAD request found redirect to: ${location}`);
+                                    processedUrls.push({
+                                        original: url,
+                                        resolved: location,
+                                        wasShortened: true,
+                                        method: 'HEAD'
+                                    });
+                                    resolved = true;
+                                    continue;
+                                }
+                            } catch (error) {
+                                debugLog('DEBUG', `HEAD request failed: ${error.message}`);
+                            }
+                        }
+                        
+                        // Fallback: try simple fetch with redirect following
                         try {
                             const simpleResponse = await fetch(url, {
                                 method: 'GET',
@@ -520,12 +577,13 @@ app.post('/save-post', async (req, res) => {
                                     wasShortened: true
                                 });
                             } else {
-                                console.log(`    ⚠️ No redirect found`);
+                                debugLog('WARN', `⚠️ Could not resolve shortened URL, keeping original`);
                                 processedUrls.push({
                                     original: url,
                                     resolved: url,
                                     wasShortened: true,
-                                    failedToResolve: true
+                                    failedToResolve: true,
+                                    note: 'LinkedIn uses JavaScript redirects that require browser execution'
                                 });
                             }
                         }
