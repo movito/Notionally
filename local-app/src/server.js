@@ -24,6 +24,15 @@ const { v4: uuidv4 } = require('uuid');
 const { getInstance: getConfig } = require('./config/ConfigManager');
 const config = getConfig();
 
+// Security middleware
+const { validators } = require('./middleware/validation');
+const { 
+    rateLimiters, 
+    securityHeaders, 
+    requestSizeLimits, 
+    requestLogger 
+} = require('./middleware/security');
+
 // Services
 const VideoProcessor = require('./video-processor');
 const NotionClient = require('./notion-client');
@@ -46,10 +55,20 @@ const postProcessor = new PostProcessingService(
 // Initialize Express app
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Security headers
+app.use(securityHeaders);
+
+// CORS - permissive for local use (allows browser extensions)
+app.use(cors({
+    origin: true,  // Allow all origins for local development
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'X-Request-Id']
+}));
+
+// Body parsing with size limits
+app.use(express.json({ limit: requestSizeLimits.json }));
+app.use(express.urlencoded({ extended: true, limit: requestSizeLimits.urlencoded }));
 
 // Add request ID for tracking
 app.use((req, res, next) => {
@@ -58,14 +77,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// Request logging
-app.use((req, res, next) => {
-    console.log(`[${req.id}] ${req.method} ${req.path}`);
-    next();
-});
+// Request logging with timing
+app.use(requestLogger);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Health check endpoint (with rate limiting)
+app.get('/health', rateLimiters.health, (req, res) => {
     const health = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -79,8 +95,11 @@ app.get('/health', (req, res) => {
     res.json(health);
 });
 
-// Main optimized save endpoint
-app.post('/save-post', asyncHandler(async (req, res) => {
+// Main save endpoint (with validation and rate limiting)
+app.post('/save-post', 
+    rateLimiters.savePost,
+    validators.savePost,
+    asyncHandler(async (req, res) => {
     const startTime = Date.now();
     console.log(`[${req.id}] 📥 Received save request`);
     
@@ -109,8 +128,11 @@ app.post('/save-post', asyncHandler(async (req, res) => {
     }
 }));
 
-// Test endpoint for debugging
-app.post('/test-save', asyncHandler(async (req, res) => {
+// Test endpoint (with validation and rate limiting)
+app.post('/test-save', 
+    rateLimiters.test,
+    validators.testSave,
+    asyncHandler(async (req, res) => {
     console.log(`[${req.id}] 🧪 Test save request received`);
     
     const testResult = {

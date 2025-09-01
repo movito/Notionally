@@ -5,6 +5,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+const { sanitizePath } = require('./middleware/security');
 
 class VideoProcessor {
     constructor(config) {
@@ -49,8 +50,9 @@ class VideoProcessor {
         // Generate unique filename
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const authorSlug = this.slugify(postData.author);
-        const filename = `${timestamp}_${authorSlug}.mp4`;
-        const tempPath = path.join(this.tempDir, filename);
+        // Sanitize filename to prevent path injection
+        const filename = `${timestamp}_${authorSlug}.mp4`.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const tempPath = sanitizePath(filename, this.tempDir);
 
         try {
             // Step 1: Download the video
