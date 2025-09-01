@@ -43,6 +43,14 @@ class DropboxHandler {
     }
     
     /**
+     * Check if Dropbox handler is properly configured
+     * @returns {boolean} True if configured with API access
+     */
+    isConfigured() {
+        return this.hasApiAccess === true;
+    }
+    
+    /**
      * Proactively refresh the access token
      */
     async refreshAccessToken() {

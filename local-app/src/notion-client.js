@@ -8,6 +8,14 @@ class NotionClient {
         });
         this.databaseId = config.notion.databaseId;
     }
+    
+    /**
+     * Check if Notion client is properly configured
+     * @returns {boolean} True if configured with API key and database ID
+     */
+    isConfigured() {
+        return !!(this.config.notion?.apiKey && this.databaseId);
+    }
 
     /**
      * Create a new Notion page with LinkedIn post content
