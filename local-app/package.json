@@ -4,7 +4,8 @@
   "description": "Local processing app for Notionally - LinkedIn to Notion video saver",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "./scripts/start.sh",
+    "start:direct": "node src/server.js",
     "start:original": "node src/server-original.js",
     "dev": "./scripts/dev.sh",
     "dev:simple": "nodemon src/server.js",

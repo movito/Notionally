@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Notionally Development Server Starter
+# Notionally Production Server Starter
 # Automatically kills any existing process on port before starting
 
 PORT=${PORT:-8765}
@@ -11,12 +11,12 @@ NC='\033[0m' # No Color
 
 echo -e "${YELLOW}🔍 Checking for existing processes on port $PORT...${NC}"
 
-# Use the same reliable method as in your example
+# Kill any existing process on the port using a more reliable method
 if lsof -ti:$PORT > /dev/null 2>&1; then
     echo -e "${YELLOW}⚠️  Found existing process on port $PORT${NC}"
     echo -e "${YELLOW}🛑 Stopping existing process...${NC}"
     
-    # Kill all processes on the port (more reliable than PID approach)
+    # Kill all processes on the port
     lsof -ti:$PORT | xargs kill -9 2>/dev/null
     
     # Wait for port to be released
@@ -27,8 +27,8 @@ else
     echo -e "${GREEN}✅ Port $PORT is available${NC}"
 fi
 
-echo -e "${GREEN}🚀 Starting development server...${NC}"
+echo -e "${GREEN}🚀 Starting Notionally server on port $PORT...${NC}"
 echo ""
 
-# Start nodemon
-exec npx nodemon src/server.js
+# Start the server
+exec node src/server.js
