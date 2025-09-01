@@ -8,9 +8,11 @@ Notionally solves the friction of saving LinkedIn content to Notion by adding "S
 
 - **One-click saving** - Save LinkedIn posts without copying URLs or opening new tabs
 - **Video capture** - Automatically downloads and saves videos from LinkedIn posts
+- **URL unfurling** - Automatically resolves LinkedIn shortened URLs (lnkd.in) to their destinations
 - **Dropbox integration** - Videos stored in your Dropbox with shareable links embedded in Notion
 - **In-feed buttons** - "Save to Notion" buttons appear directly on each LinkedIn post
 - **Local processing** - All video processing happens on your machine for privacy
+- **Debug tracking** - Comprehensive debug information saved with each post for troubleshooting
 
 ## 🏗️ Architecture
 
@@ -18,10 +20,14 @@ Notionally solves the friction of saving LinkedIn content to Notion by adding "S
 LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 ```
 
-1. **Greasemonkey Script** - Runs in Firefox, adds save buttons to LinkedIn posts
-2. **Local Processing App** - Node.js server that downloads videos and calls Notion API
+1. **Greasemonkey Script** - Runs in Firefox, adds save buttons to LinkedIn posts and collects debug information
+2. **Local Processing App** - Modular Node.js server with:
+   - Service layer for post processing
+   - Parallel video/image downloading
+   - URL resolution for shortened links
+   - Comprehensive error handling
 3. **Dropbox Storage** - Videos saved to local Dropbox folder with shareable links
-4. **Notion Integration** - Posts created with text content and embedded video players
+4. **Notion Integration** - Posts created with text content, embedded video players, and debug information
 
 ## 🚀 Quick Start
 
@@ -78,10 +84,18 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 Notionally/
 ├── local-app/                 # Node.js server for video processing
 │   ├── src/
-│   │   ├── server.js         # Express server
+│   │   ├── server.js          # Main Express server
 │   │   ├── video-processor.js # Video download and processing
 │   │   ├── notion-client.js   # Notion API integration
-│   │   └── dropbox-handler.js # Dropbox file management
+│   │   ├── dropbox-handler.js # Dropbox file management
+│   │   ├── config/            # Configuration management
+│   │   │   └── ConfigManager.js
+│   │   ├── services/          # Service layer
+│   │   │   ├── PostProcessingService.js
+│   │   │   └── URLResolutionService.js
+│   │   └── utils/             # Shared utilities
+│   │       ├── index.js
+│   │       └── errors.js
 │   ├── package.json
 │   └── config.example.json
 ├── greasemonkey-script/       # Firefox userscript
@@ -142,12 +156,15 @@ For more help, see [docs/troubleshooting.md](docs/troubleshooting.md)
 ## 🚧 Development Status
 
 - [x] Project structure and documentation
-- [ ] Local processing app (video download/processing)
-- [ ] Greasemonkey script (LinkedIn integration)
-- [ ] Notion API integration
-- [ ] Dropbox file handling
-- [ ] Testing and debugging
-- [ ] User documentation
+- [x] Local processing app (video download/processing)
+- [x] Greasemonkey script (LinkedIn integration)
+- [x] Notion API integration
+- [x] Dropbox file handling
+- [x] URL unfurling for LinkedIn shortened links
+- [x] Debug information tracking
+- [x] Modular architecture with service layer
+- [x] Testing and debugging
+- [x] User documentation
 
 ---
 
