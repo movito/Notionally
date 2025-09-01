@@ -575,6 +575,165 @@ class NotionClient {
             }
         });
 
+        // Add debug information block if present
+        if (pageData.debugInfo) {
+            blocks.push({
+                object: 'block',
+                type: 'divider',
+                divider: {}
+            });
+            
+            blocks.push({
+                object: 'block',
+                type: 'toggle',
+                toggle: {
+                    rich_text: [
+                        {
+                            type: 'text',
+                            text: {
+                                content: '🐛 Debug Information (click to expand)'
+                            }
+                        }
+                    ],
+                    children: this.buildDebugBlocks(pageData.debugInfo)
+                }
+            });
+        }
+        
+        return blocks;
+    }
+    
+    /**
+     * Build debug information blocks
+     */
+    buildDebugBlocks(debugInfo) {
+        const blocks = [];
+        
+        // Client info
+        blocks.push({
+            object: 'block',
+            type: 'heading_3',
+            heading_3: {
+                rich_text: [{
+                    type: 'text',
+                    text: { content: '📱 Client Information' }
+                }]
+            }
+        });
+        
+        blocks.push({
+            object: 'block',
+            type: 'code',
+            code: {
+                language: 'json',
+                rich_text: [{
+                    type: 'text',
+                    text: {
+                        content: JSON.stringify({
+                            scriptVersion: debugInfo.client?.scriptVersion,
+                            timestamp: debugInfo.client?.timestamp,
+                            userAgent: debugInfo.client?.userAgent,
+                            pageUrl: debugInfo.client?.pageUrl,
+                            urlStats: debugInfo.client?.urlStats
+                        }, null, 2).substring(0, 2000) // Notion limit
+                    }
+                }]
+            }
+        });
+        
+        // Server info
+        blocks.push({
+            object: 'block',
+            type: 'heading_3',
+            heading_3: {
+                rich_text: [{
+                    type: 'text',
+                    text: { content: '🖥️ Server Information' }
+                }]
+            }
+        });
+        
+        blocks.push({
+            object: 'block',
+            type: 'code',
+            code: {
+                language: 'json',
+                rich_text: [{
+                    type: 'text',
+                    text: {
+                        content: JSON.stringify({
+                            appVersion: debugInfo.server?.appVersion,
+                            timestamp: debugInfo.server?.timestamp,
+                            urlsProcessed: debugInfo.server?.urlsProcessed,
+                            urlResolutionResults: debugInfo.server?.urlResolutionResults
+                        }, null, 2).substring(0, 2000) // Notion limit
+                    }
+                }]
+            }
+        });
+        
+        // Client logs (last 10)
+        if (debugInfo.client?.logs?.length > 0) {
+            blocks.push({
+                object: 'block',
+                type: 'heading_3',
+                heading_3: {
+                    rich_text: [{
+                        type: 'text',
+                        text: { content: '📋 Client Logs (last 10)' }
+                    }]
+                }
+            });
+            
+            const lastLogs = debugInfo.client.logs.slice(-10);
+            blocks.push({
+                object: 'block',
+                type: 'code',
+                code: {
+                    language: 'plaintext',
+                    rich_text: [{
+                        type: 'text',
+                        text: {
+                            content: lastLogs.map(log => 
+                                `[${log.timestamp}] ${log.level}: ${log.message}`
+                            ).join('\n').substring(0, 2000)
+                        }
+                    }]
+                }
+            });
+        }
+        
+        // Server logs (last 10)
+        if (debugInfo.server?.logs?.length > 0) {
+            blocks.push({
+                object: 'block',
+                type: 'heading_3',
+                heading_3: {
+                    rich_text: [{
+                        type: 'text',
+                        text: { content: '📋 Server Logs (last 10)' }
+                    }]
+                }
+            });
+            
+            const lastLogs = debugInfo.server.logs.slice(-10);
+            blocks.push({
+                object: 'block',
+                type: 'code',
+                code: {
+                    language: 'plaintext',
+                    rich_text: [{
+                        type: 'text',
+                        text: {
+                            content: lastLogs.map(log => 
+                                `[${log.timestamp}] ${log.level}: ${log.message}`
+                            ).join('\n').substring(0, 2000)
+                        }
+                    }]
+                }
+            });
+        }
+        
         return blocks;
     }
 

@@ -199,12 +199,45 @@ app.post('/test-save', async (req, res) => {
 
 // Main endpoint to save LinkedIn posts
 app.post('/save-post', async (req, res) => {
+    // Collect debug logs for this request
+    const serverDebugLogs = [];
+    const APP_VERSION = '1.0.0'; // You can update this version number
+    
+    // Helper to log and collect debug info
+    const debugLog = (level, message, data = null) => {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            level,
+            message,
+            data
+        };
+        serverDebugLogs.push(logEntry);
+        
+        // Also log to console
+        if (level === 'ERROR') {
+            console.error(`❌ ${message}`, data || '');
+        } else {
+            console.log(`📝 ${message}`, data || '');
+        }
+    };
+    
     try {
-        console.log('📥 Received save request');
+        debugLog('INFO', 'Received save request');
         const postData = req.body;
+        
+        // Extract debug info from client if present
+        const clientDebugInfo = postData.debugInfo;
+        delete postData.debugInfo; // Remove from postData to avoid passing to Notion content
+        
+        debugLog('INFO', 'Client debug info received', {
+            scriptVersion: clientDebugInfo?.scriptVersion,
+            urlCount: clientDebugInfo?.urlCount,
+            hasShortened: clientDebugInfo?.hasShortened
+        });
         
         // Validate required fields
         if (!postData.text && !postData.media?.videos?.length) {
+            debugLog('ERROR', 'Invalid post data - no text or videos');
             return res.status(400).json({
                 error: 'Post must have text content or videos',
                 code: 'INVALID_POST_DATA'
@@ -326,12 +359,12 @@ app.post('/save-post', async (req, res) => {
         // Process URLs server-side - properly unfurl LinkedIn shortened URLs
         let processedUrls = [];
         if (postData.urls?.length > 0) {
-            console.log(`🔗 Processing ${postData.urls.length} URL(s)...`);
+            debugLog('INFO', `Processing ${postData.urls.length} URL(s)...`);
             
             for (const url of postData.urls) {
                 try {
                     if (url.includes('lnkd.in') || url.includes('linkedin.com/redir')) {
-                        console.log(`  Unfurling LinkedIn shortened URL: ${url}`);
+                        debugLog('INFO', `Unfurling LinkedIn shortened URL: ${url}`);
                         
                         // First, try simple approach - just follow all redirects
                         try {
@@ -514,6 +547,34 @@ app.post('/save-post', async (req, res) => {
             processedUrls = postData.processedUrls;
         }
         
+        // Combine all debug information
+        const debugInfo = {
+            client: {
+                scriptVersion: clientDebugInfo?.scriptVersion || 'unknown',
+                userAgent: clientDebugInfo?.userAgent,
+                pageUrl: clientDebugInfo?.pageUrl,
+                timestamp: clientDebugInfo?.timestamp,
+                urlStats: {
+                    count: clientDebugInfo?.urlCount || 0,
+                    hasShortened: clientDebugInfo?.hasShortened || false
+                },
+                logs: clientDebugInfo?.logs || []
+            },
+            server: {
+                appVersion: APP_VERSION,
+                timestamp: new Date().toISOString(),
+                urlsProcessed: processedUrls.length,
+                urlResolutionResults: processedUrls.map(u => ({
+                    original: u.original,
+                    resolved: u.resolved,
+                    wasShortened: u.wasShortened,
+                    wasResolved: u.resolved !== u.original,
+                    error: u.error
+                })),
+                logs: serverDebugLogs
+            }
+        };
+        
         const notionPage = await notionClient.createPage({
             title: postData.text.substring(0, 100) || `LinkedIn post from ${postData.author}`,
             content: postData.text,
@@ -523,7 +584,8 @@ app.post('/save-post', async (req, res) => {
             timestamp: postData.timestamp,
             videos: processedVideos,
             images: [], // Don't include images in initial creation
-            processedUrls: processedUrls // Pass the server-processed URLs
+            processedUrls: processedUrls, // Pass the server-processed URLs
+            debugInfo: debugInfo // Pass debug information
         });
 
         console.log(`✅ Notion page created: ${notionPage.url}`);

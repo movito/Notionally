@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Notionally - LinkedIn to Notion Saver
 // @namespace    http://tampermonkey.net/
-// @version      1.5.9
+// @version      1.6.0
 // @description  Save LinkedIn posts directly to Notion
 // @author       Fredrik Matheson
 // @match        https://www.linkedin.com/*
@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 /**
+ * Version 1.6.0 - Add comprehensive debug info collection for troubleshooting
  * Version 1.5.9 - Skip client-side URL resolution, let server handle it to avoid CORS
  * Version 1.5.8 - Implement URL polling to track redirects while on same origin
  * Version 1.5.7 - Added comprehensive debugging for redirect page detection
@@ -124,6 +125,41 @@
         useTestEndpoint: false  // Set to true to use /test-save instead of /save-post
     };
     
+    // Debug log collector for sending to Notion
+    const debugLogs = [];
+    const SCRIPT_VERSION = '1.6.0';
+    
+    // Enhanced logging function that also collects logs
+    const originalLog = console.log;
+    function collectingLog(...args) {
+        // Call original console.log
+        originalLog('[Notionally]', ...args);
+        
+        // Collect log for sending to server
+        const timestamp = new Date().toISOString();
+        const message = args.map(arg => {
+            if (typeof arg === 'object') {
+                try {
+                    return JSON.stringify(arg, null, 2);
+                } catch (e) {
+                    return String(arg);
+                }
+            }
+            return String(arg);
+        }).join(' ');
+        
+        debugLogs.push({
+            timestamp,
+            level: 'INFO',
+            message
+        });
+        
+        // Keep only last 200 logs to avoid memory issues
+        if (debugLogs.length > 200) {
+            debugLogs.shift();
+        }
+    }
+    
     // Store captured video URLs
     const capturedVideoUrls = new Map();
     
@@ -184,11 +220,29 @@
     
     // Utility functions
     const log = (...args) => {
-        if (CONFIG.debug) console.log('[Notionally]', ...args);
+        if (CONFIG.debug) collectingLog(...args);
     };
     
     const error = (...args) => {
         console.error('[Notionally]', ...args);
+        // Also collect errors
+        const timestamp = new Date().toISOString();
+        const message = args.map(arg => {
+            if (typeof arg === 'object') {
+                try {
+                    return JSON.stringify(arg, null, 2);
+                } catch (e) {
+                    return String(arg);
+                }
+            }
+            return String(arg);
+        }).join(' ');
+        
+        debugLogs.push({
+            timestamp,
+            level: 'ERROR',
+            message
+        });
     };
     
     // Check if local server is running
@@ -591,12 +645,27 @@
     async function saveToNotion(postData, endpoint = '/save-post') {
         try {
             log(`Sending to endpoint: ${endpoint}`);
+            
+            // Add debug info to the request
+            const dataWithDebug = {
+                ...postData,
+                debugInfo: {
+                    scriptVersion: SCRIPT_VERSION,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    pageUrl: window.location.href,
+                    logs: debugLogs.slice(-100), // Send last 100 logs
+                    urlCount: postData.urls?.length || 0,
+                    hasShortened: postData.urls?.some(url => url.includes('lnkd.in')) || false
+                }
+            };
+            
             const response = await fetch(`${CONFIG.localServerUrl}${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(postData)
+                body: JSON.stringify(dataWithDebug)
             });
             
             if (!response.ok) {
