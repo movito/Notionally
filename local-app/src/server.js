@@ -498,8 +498,14 @@ app.post('/save-post', async (req, res) => {
                                         foundUrl = decodeURIComponent(foundUrl);
                                     }
                                     
-                                    // Skip if it's a LinkedIn URL
-                                    if (!foundUrl.includes('linkedin.com') && !foundUrl.includes('lnkd.in')) {
+                                    // Skip if it's a LinkedIn URL or static asset
+                                    if (!foundUrl.includes('linkedin.com') && 
+                                        !foundUrl.includes('lnkd.in') &&
+                                        !foundUrl.includes('licdn.com') && // LinkedIn CDN
+                                        !foundUrl.includes('static.licdn.com') && // LinkedIn static assets
+                                        !foundUrl.endsWith('.css') &&
+                                        !foundUrl.endsWith('.js') &&
+                                        !foundUrl.includes('/sc/h/')) { // LinkedIn static content path
                                         intermediateUrl = foundUrl;
                                         console.log(`    Found redirect in HTML: ${intermediateUrl}`);
                                         break;
@@ -536,15 +542,30 @@ app.post('/save-post', async (req, res) => {
                                     });
                                     
                                     // Also search for any external URLs in the entire HTML
-                                    const allUrlsPattern = /https?:\/\/(?!(?:www\.)?linkedin\.com|lnkd\.in)[a-zA-Z0-9][a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+/g;
+                                    const allUrlsPattern = /https?:\/\/(?!(?:www\.)?linkedin\.com|lnkd\.in|static\.licdn\.com|licdn\.com)[a-zA-Z0-9][a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+/g;
                                     const foundUrls = html.match(allUrlsPattern);
                                     if (foundUrls && foundUrls.length > 0) {
-                                        debugLog('INFO', `Found ${foundUrls.length} external URL(s) in page:`, foundUrls);
-                                        // Use the first non-LinkedIn URL found
-                                        intermediateUrl = foundUrls[0];
-                                        console.log(`    Found external URL in page: ${intermediateUrl}`);
+                                        // Filter out static assets and find real destination URLs
+                                        const realUrls = foundUrls.filter(url => 
+                                            !url.endsWith('.css') &&
+                                            !url.endsWith('.js') &&
+                                            !url.includes('/sc/h/') &&
+                                            !url.includes('static.') &&
+                                            !url.includes('/aero-v1/') &&
+                                            !url.match(/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i)
+                                        );
+                                        
+                                        if (realUrls.length > 0) {
+                                            debugLog('INFO', `Found ${realUrls.length} potential destination URL(s):`, realUrls);
+                                            // Use the first real URL found
+                                            intermediateUrl = realUrls[0];
+                                            console.log(`    Found external URL in page: ${intermediateUrl}`);
+                                        } else {
+                                            debugLog('DEBUG', `Found only static assets (${foundUrls.length} total):`, foundUrls.slice(0, 5));
+                                            console.log(`    ⚠️ No redirect found (only static assets)`);
+                                        }
                                     } else {
-                                        console.log(`    ⚠️ No redirect found`);
+                                        console.log(`    ⚠️ No external URLs found in HTML`);
                                     }
                                 }
                             }
