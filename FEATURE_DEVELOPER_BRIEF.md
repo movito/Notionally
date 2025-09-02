@@ -4,7 +4,7 @@
 Implement duplicate page prevention for the Notionally app. Currently, when the same LinkedIn post is saved multiple times in quick succession, it creates duplicate Notion pages. Your task is to add a simple caching mechanism to prevent this.
 
 ## Current State
-- Branch: `feature/v1.0.2-careful-upgrade` (already checked out)
+- Branch: `feature/v1.0.3-task-006-duplicate-prevention` (already checked out)
 - App is working perfectly - DO NOT BREAK IT
 - All tests currently pass
 - Server can be started with `npm start`

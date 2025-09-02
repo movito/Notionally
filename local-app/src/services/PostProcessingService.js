@@ -14,6 +14,98 @@ class PostProcessingService {
         this.notionClient = notionClient;
         this.urlResolver = new URLResolutionService();
         this.debugLogs = [];
+        
+        // In-memory cache for duplicate prevention
+        this.recentSaves = new Map();
+        this.pendingSaves = new Map(); // Track in-progress saves
+        this.CACHE_TTL = 60000; // 60 seconds
+        this.CACHE_CLEANUP_INTERVAL = 30000; // Clean every 30 seconds
+        this.MAX_CACHE_SIZE = 100; // Prevent unbounded growth
+        
+        // Start cache cleanup timer
+        this.startCacheCleanup();
+    }
+    
+    /**
+     * Start periodic cache cleanup
+     */
+    startCacheCleanup() {
+        this.cleanupTimer = setInterval(() => {
+            this.cleanupCache();
+        }, this.CACHE_CLEANUP_INTERVAL);
+        
+        // Ensure timer doesn't prevent process exit
+        if (this.cleanupTimer.unref) {
+            this.cleanupTimer.unref();
+        }
+    }
+    
+    /**
+     * Clean expired entries from cache
+     */
+    cleanupCache() {
+        const now = Date.now();
+        let removedCount = 0;
+        
+        for (const [key, entry] of this.recentSaves.entries()) {
+            if (now - entry.timestamp > this.CACHE_TTL) {
+                this.recentSaves.delete(key);
+                removedCount++;
+            }
+        }
+        
+        if (removedCount > 0) {
+            this.log('INFO', `Cache cleanup: removed ${removedCount} expired entries`);
+        }
+        
+        // Additional safety: if cache is too large, remove oldest entries
+        if (this.recentSaves.size > this.MAX_CACHE_SIZE) {
+            const entriesToRemove = this.recentSaves.size - this.MAX_CACHE_SIZE;
+            const sortedEntries = Array.from(this.recentSaves.entries())
+                .sort((a, b) => a[1].timestamp - b[1].timestamp);
+            
+            for (let i = 0; i < entriesToRemove; i++) {
+                this.recentSaves.delete(sortedEntries[i][0]);
+            }
+            
+            this.log('WARN', `Cache size limit reached, removed ${entriesToRemove} oldest entries`);
+        }
+    }
+    
+    /**
+     * Check cache for recent save of the same URL
+     */
+    checkCache(url) {
+        if (!url) return null;
+        
+        const cached = this.recentSaves.get(url);
+        if (cached) {
+            const age = Date.now() - cached.timestamp;
+            if (age < this.CACHE_TTL) {
+                this.log('INFO', `Cache hit for URL: ${url} (age: ${Math.round(age/1000)}s)`);
+                return cached.result;
+            } else {
+                // Entry expired, remove it
+                this.recentSaves.delete(url);
+                this.log('INFO', `Cache entry expired for URL: ${url}`);
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Add successful save to cache
+     */
+    addToCache(url, result) {
+        if (!url) return;
+        
+        this.recentSaves.set(url, {
+            result: result,
+            timestamp: Date.now()
+        });
+        
+        this.log('INFO', `Added to cache: ${url}`);
     }
     
     /**
@@ -27,50 +119,94 @@ class PostProcessingService {
             // Validate input
             this.validatePostData(postData);
             
-            // Process components in parallel where possible
-            const [videos, images, urls] = await Promise.all([
-                this.processVideos(postData.media?.videos || []),
-                this.processImages(postData.media?.images || []),
-                this.processUrls(postData.urls || [])
-            ]);
-            
-            // Create Notion page with all processed content EXCEPT images
-            const notionPage = await this.createNotionPage({
-                ...postData,
-                processedVideos: videos,
-                processedImages: [], // Don't include images in page creation
-                processedUrls: urls,
-                debugInfo: this.buildDebugInfo(clientDebugInfo)
-            });
-            
-            // Add images to the page separately (like v1.0.0 did)
-            if (images.length > 0 && this.notionClient.addImagesToPage) {
-                this.log('INFO', `Adding ${images.length} image(s) to Notion page...`);
+            // Check cache for duplicate prevention
+            if (postData.url) {
+                const cachedResult = this.checkCache(postData.url);
+                if (cachedResult) {
+                    this.log('INFO', 'Returning cached result to prevent duplicate');
+                    return cachedResult;
+                }
+                
+                // Check if this URL is already being processed
+                const pendingPromise = this.pendingSaves.get(postData.url);
+                if (pendingPromise) {
+                    this.log('INFO', `Request already in progress for URL: ${postData.url}, waiting...`);
+                    return await pendingPromise;
+                }
+                
+                // Mark this URL as being processed
+                const processingPromise = this.processSinglePost(postData, clientDebugInfo);
+                this.pendingSaves.set(postData.url, processingPromise);
+                
                 try {
-                    await this.notionClient.addImagesToPage(notionPage.id, images, postData.url);
-                    this.log('INFO', `Successfully added ${images.length} image(s) to Notion page`);
-                } catch (imageError) {
-                    this.log('ERROR', `Failed to add images: ${imageError.message}`);
-                    // Don't fail the whole process if images fail
+                    const result = await processingPromise;
+                    return result;
+                } finally {
+                    // Remove from pending saves when done
+                    this.pendingSaves.delete(postData.url);
                 }
             }
             
-            this.log('INFO', `Successfully processed post: ${notionPage.url}`);
-            
-            return {
-                success: true,
-                notionUrl: notionPage.url,
-                stats: {
-                    videosProcessed: videos.length,
-                    imagesProcessed: images.length,
-                    urlsResolved: urls.filter(u => u.resolved !== u.original).length
-                }
-            };
+            // No URL, process normally without caching
+            return await this.processSinglePost(postData, clientDebugInfo);
             
         } catch (error) {
             this.log('ERROR', `Post processing failed: ${error.message}`, error);
             throw error;
         }
+    }
+    
+    /**
+     * Process a single post (internal method for actual processing)
+     */
+    async processSinglePost(postData, clientDebugInfo) {
+        // Process components in parallel where possible
+        const [videos, images, urls] = await Promise.all([
+            this.processVideos(postData.media?.videos || []),
+            this.processImages(postData.media?.images || []),
+            this.processUrls(postData.urls || [])
+        ]);
+        
+        // Create Notion page with all processed content EXCEPT images
+        const notionPage = await this.createNotionPage({
+            ...postData,
+            processedVideos: videos,
+            processedImages: [], // Don't include images in page creation
+            processedUrls: urls,
+            debugInfo: this.buildDebugInfo(clientDebugInfo)
+        });
+        
+        // Add images to the page separately (like v1.0.0 did)
+        if (images.length > 0 && this.notionClient.addImagesToPage) {
+            this.log('INFO', `Adding ${images.length} image(s) to Notion page...`);
+            try {
+                await this.notionClient.addImagesToPage(notionPage.id, images, postData.url);
+                this.log('INFO', `Successfully added ${images.length} image(s) to Notion page`);
+            } catch (imageError) {
+                this.log('ERROR', `Failed to add images: ${imageError.message}`);
+                // Don't fail the whole process if images fail
+            }
+        }
+        
+        this.log('INFO', `Successfully processed post: ${notionPage.url}`);
+        
+        // Create the result object
+        const result = {
+            success: true,
+            notionUrl: notionPage.url,
+            stats: {
+                videosProcessed: videos.length,
+                imagesProcessed: images.length,
+                urlsResolved: urls.filter(u => u.resolved !== u.original).length
+            }
+        };
+        
+        // Add to cache for duplicate prevention
+        if (postData.url) {
+            this.addToCache(postData.url, result);
+        }
+        
+        return result;
     }
     
     /**
@@ -322,6 +458,19 @@ class PostProcessingService {
         } else {
             console.log(`📝 ${message}`, data || '');
         }
+    }
+    
+    /**
+     * Clean up resources (call on shutdown)
+     */
+    destroy() {
+        if (this.cleanupTimer) {
+            clearInterval(this.cleanupTimer);
+            this.cleanupTimer = null;
+            this.log('INFO', 'Cache cleanup timer stopped');
+        }
+        this.recentSaves.clear();
+        this.pendingSaves.clear();
     }
 }
 

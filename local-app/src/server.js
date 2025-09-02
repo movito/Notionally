@@ -283,6 +283,10 @@ const server = app.listen(PORT, HOST, () => {
 process.on('SIGTERM', () => {
     console.log('📛 SIGTERM received, shutting down gracefully...');
     server.close(() => {
+        // Clean up PostProcessingService resources
+        if (postProcessor && typeof postProcessor.destroy === 'function') {
+            postProcessor.destroy();
+        }
         console.log('✅ Server closed');
         process.exit(0);
     });
@@ -291,6 +295,10 @@ process.on('SIGTERM', () => {
 process.on('SIGINT', () => {
     console.log('\n📛 SIGINT received, shutting down gracefully...');
     server.close(() => {
+        // Clean up PostProcessingService resources
+        if (postProcessor && typeof postProcessor.destroy === 'function') {
+            postProcessor.destroy();
+        }
         console.log('✅ Server closed');
         process.exit(0);
     });
