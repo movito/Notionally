@@ -473,7 +473,10 @@ class DropboxHandler {
         
         console.log(`🔗 Generated mock shareable link: ${shareableUrl}`);
         
-        const streamingUrl = shareableUrl.replace('?dl=0', '?raw=1');
+        // Convert to streaming URL format (remove query params for embedding)
+        const streamingUrl = shareableUrl
+            .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+            .replace('?dl=0', '');
         
         return {
             viewUrl: shareableUrl,

@@ -170,8 +170,59 @@ class NotionClient {
         });
         
         for (const image of images) {
-            // Always use callout format since Notion can't embed Dropbox URLs
-            if (image.dropboxPath || image.filename) {
+            // Try to embed if we have a proper shareable URL, otherwise use callout
+            if (image.shareableUrl && (typeof image.shareableUrl === 'object' ? image.shareableUrl.streamingUrl : image.shareableUrl)) {
+                // Extract the streaming URL
+                let streamingUrl;
+                if (typeof image.shareableUrl === 'object' && image.shareableUrl.streamingUrl) {
+                    streamingUrl = image.shareableUrl.streamingUrl;
+                } else if (typeof image.shareableUrl === 'string') {
+                    // Convert regular Dropbox URL to streaming format
+                    streamingUrl = image.shareableUrl
+                        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                        .replace('?dl=0', '');
+                }
+                
+                // Try to embed the image
+                blocks.push({
+                    object: 'block',
+                    type: 'image',
+                    image: {
+                        type: 'external',
+                        external: {
+                            url: streamingUrl
+                        },
+                        caption: image.alt ? [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: image.alt
+                                }
+                            }
+                        ] : []
+                    }
+                });
+                
+                // Add success message
+                blocks.push({
+                    object: 'block',
+                    type: 'callout',
+                    callout: {
+                        rich_text: [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: `✅ Image saved to Dropbox: ${image.dropboxPath || image.filename}`
+                                }
+                            }
+                        ],
+                        icon: {
+                            emoji: '🖼️'
+                        },
+                        color: 'green_background'
+                    }
+                });
+            } else if (image.dropboxPath || image.filename) {
                 // Fallback: Since localhost URLs don't work in Notion, we'll add a descriptive block
                 blocks.push({
                     object: 'block',
