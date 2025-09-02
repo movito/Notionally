@@ -221,34 +221,104 @@ class DropboxHandler {
         
         // Create organized folder structure
         const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const relativePath = `${date}/images/${filename}`;
+        const dropboxPath = `/LinkedIn_Videos/${relativePath}`;
+        
+        // Save locally for backup
         const targetDir = path.join(this.dropboxPath, date, 'images');
         await fs.ensureDir(targetDir);
-        
         const targetPath = path.join(targetDir, filename);
-        const relativePath = path.relative(this.dropboxPath, targetPath);
         
-        try {
-            // Save image to local Dropbox folder
-            await fs.writeFile(targetPath, imageBuffer);
-            console.log(`✅ Image saved to Dropbox: ${relativePath}`);
-            
-            // Generate shareable link
-            let shareableUrl = null;
+        let shareableUrl = null;
+        
+        // Try to upload via Dropbox API for immediate share link
+        if (this.hasApiAccess) {
             try {
-                shareableUrl = await this.generateShareableLink(targetPath);
-                console.log(`🔗 Generated share link for image: ${filename}`);
-            } catch (linkError) {
-                console.warn(`⚠️ Could not generate share link for image: ${linkError.message}`);
+                console.log(`🔄 Uploading image to Dropbox API: ${dropboxPath}`);
+                
+                // Upload to Dropbox via API
+                const uploadResult = await this.dbx.filesUpload({
+                    path: dropboxPath,
+                    contents: imageBuffer,
+                    mode: { '.tag': 'overwrite' },
+                    autorename: false,
+                    mute: false
+                });
+                
+                console.log(`✅ Image uploaded via API: ${uploadResult.result.path_display}`);
+                
+                // Create share link immediately
+                try {
+                    const shareResult = await this.dbx.sharingCreateSharedLinkWithSettings({
+                        path: dropboxPath,
+                        settings: {
+                            requested_visibility: { '.tag': 'public' },
+                            audience: { '.tag': 'public' },
+                            access: { '.tag': 'viewer' }
+                        }
+                    });
+                    
+                    const viewUrl = shareResult.result.url;
+                    const streamingUrl = viewUrl
+                        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                        .replace('?dl=0', '');
+                    
+                    console.log(`✅ Created share link: ${viewUrl}`);
+                    
+                    shareableUrl = {
+                        viewUrl,
+                        streamingUrl,
+                        filename
+                    };
+                    
+                } catch (linkError) {
+                    // If link already exists, retrieve it
+                    if (linkError.error?.error?.['.tag'] === 'shared_link_already_exists') {
+                        const links = await this.dbx.sharingListSharedLinks({
+                            path: dropboxPath
+                        });
+                        
+                        if (links.result.links.length > 0) {
+                            const viewUrl = links.result.links[0].url;
+                            const streamingUrl = viewUrl
+                                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                                .replace('?dl=0', '');
+                            
+                            console.log(`✅ Retrieved existing share link: ${viewUrl}`);
+                            
+                            shareableUrl = {
+                                viewUrl,
+                                streamingUrl,
+                                filename
+                            };
+                        }
+                    } else {
+                        console.warn(`⚠️ Could not create share link: ${linkError.message}`);
+                    }
+                }
+                
+            } catch (uploadError) {
+                console.warn(`⚠️ API upload failed, falling back to local save: ${uploadError.message}`);
             }
-            
-            return {
-                relativePath,
-                shareableUrl
-            };
-        } catch (error) {
-            console.error(`❌ Failed to save image to Dropbox: ${error.message}`);
-            throw error;
         }
+        
+        // Always save locally as backup
+        try {
+            await fs.writeFile(targetPath, imageBuffer);
+            console.log(`✅ Image saved locally: ${relativePath}`);
+        } catch (error) {
+            console.error(`❌ Failed to save image locally: ${error.message}`);
+        }
+        
+        // If no share URL from API, generate mock URL
+        if (!shareableUrl) {
+            shareableUrl = await this.generateShareableLink(targetPath);
+        }
+        
+        return {
+            relativePath,
+            shareableUrl
+        };
     }
 
     /**
