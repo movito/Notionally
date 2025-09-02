@@ -202,6 +202,44 @@ class DropboxHandler {
     }
 
     /**
+     * Save base64 image to Dropbox
+     * @param {String} base64Data - Base64 encoded image data (with or without data URI prefix)
+     * @param {String} filename - Filename for the image
+     * @returns {String} Relative path to saved file
+     */
+    async saveImageFromBase64(base64Data, filename) {
+        console.log(`📦 Saving base64 image to Dropbox: ${filename}`);
+        
+        // Extract base64 data if it has data URI prefix
+        let base64String = base64Data;
+        if (base64Data.includes(',')) {
+            base64String = base64Data.split(',')[1];
+        }
+        
+        // Convert base64 to buffer
+        const imageBuffer = Buffer.from(base64String, 'base64');
+        
+        // Create organized folder structure
+        const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const targetDir = path.join(this.dropboxPath, date, 'images');
+        await fs.ensureDir(targetDir);
+        
+        const targetPath = path.join(targetDir, filename);
+        const relativePath = path.relative(this.dropboxPath, targetPath);
+        
+        try {
+            // Save image to local Dropbox folder
+            await fs.writeFile(targetPath, imageBuffer);
+            console.log(`✅ Image saved to Dropbox: ${relativePath}`);
+            
+            return relativePath;
+        } catch (error) {
+            console.error(`❌ Failed to save image to Dropbox: ${error.message}`);
+            throw error;
+        }
+    }
+
+    /**
      * Save processed video to Dropbox folder
      * @param {Object} processedVideo - Video info from VideoProcessor
      * @param {Object} postData - Post metadata for organization

@@ -176,8 +176,11 @@ class NotionClient {
         });
         
         for (const image of images) {
+            console.log('Processing image:', JSON.stringify(image, null, 2));
+            
             // Handle regular image URLs (from LinkedIn)
             if (image.url && !image.shareableUrl) {
+                console.log(`Adding image with URL: ${image.url}`);
                 blocks.push({
                     object: 'block',
                     type: 'image',

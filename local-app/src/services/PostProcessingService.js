@@ -156,8 +156,10 @@ class PostProcessingService {
             images,
             async (image, index) => {
                 try {
+                    // Handle both 'url' and 'src' properties
+                    const imageUrl = image.url || image.src;
                     const processedImage = {
-                        url: image.url,
+                        url: imageUrl,
                         alt: image.alt || `Image ${index + 1}`,
                         index: index
                     };
@@ -172,6 +174,41 @@ class PostProcessingService {
                         processedImage.dropboxPath = dropboxPath;
                         processedImage.filename = filename;
                     }
+                    // Otherwise, if we have a URL, download and save the image
+                    else if (imageUrl && this.dropboxHandler.isConfigured()) {
+                        try {
+                            this.log('INFO', `Downloading image from URL: ${imageUrl}`);
+                            
+                            // Download the image
+                            const response = await fetch(imageUrl);
+                            if (!response.ok) {
+                                throw new Error(`Failed to download image: ${response.status}`);
+                            }
+                            
+                            // Get the image data as a buffer
+                            const arrayBuffer = await response.arrayBuffer();
+                            const buffer = Buffer.from(arrayBuffer);
+                            
+                            // Convert to base64
+                            const base64 = buffer.toString('base64');
+                            const mimeType = response.headers.get('content-type') || 'image/jpeg';
+                            const base64WithPrefix = `data:${mimeType};base64,${base64}`;
+                            
+                            // Save to Dropbox
+                            const filename = `image_${Date.now()}_${index}.jpg`;
+                            const dropboxPath = await this.dropboxHandler.saveImageFromBase64(
+                                base64WithPrefix,
+                                filename
+                            );
+                            
+                            processedImage.dropboxPath = dropboxPath;
+                            processedImage.filename = filename;
+                            this.log('INFO', `Image saved to Dropbox: ${dropboxPath}`);
+                        } catch (downloadError) {
+                            this.log('ERROR', `Failed to download/save image: ${downloadError.message}`);
+                            // Keep the original URL even if download fails
+                        }
+                    }
                     
                     return processedImage;
                     
@@ -180,7 +217,7 @@ class PostProcessingService {
                     return {
                         failed: true,
                         error: error.message,
-                        url: image.url,
+                        url: image.url || image.src,
                         index: index
                     };
                 }
