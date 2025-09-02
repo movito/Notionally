@@ -115,6 +115,12 @@ class NotionClient {
             
             console.log(`✅ Notion page created: ${pageUrl}`);
             
+            // Add images if present
+            if (pageData.images && pageData.images.length > 0) {
+                console.log(`📸 Adding ${pageData.images.length} image(s) to page...`);
+                await this.addImagesToPage(response.id, pageData.images, pageData.sourceUrl);
+            }
+            
             return {
                 id: response.id,
                 url: pageUrl,
@@ -170,7 +176,29 @@ class NotionClient {
         });
         
         for (const image of images) {
-            if (image.shareableUrl && image.shareableUrl.viewUrl && image.shareableUrl.viewUrl.startsWith('https://www.dropbox.com')) {
+            // Handle regular image URLs (from LinkedIn)
+            if (image.url && !image.shareableUrl) {
+                blocks.push({
+                    object: 'block',
+                    type: 'image',
+                    image: {
+                        type: 'external',
+                        external: {
+                            url: image.url
+                        },
+                        caption: image.alt ? [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: image.alt
+                                }
+                            }
+                        ] : []
+                    }
+                });
+            }
+            // Handle Dropbox URLs
+            else if (image.shareableUrl && image.shareableUrl.viewUrl && image.shareableUrl.viewUrl.startsWith('https://www.dropbox.com')) {
                 // Use real Dropbox URL for embedding
                 blocks.push({
                     object: 'block',
