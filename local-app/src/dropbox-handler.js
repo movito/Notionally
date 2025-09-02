@@ -202,10 +202,10 @@ class DropboxHandler {
     }
 
     /**
-     * Save base64 image to Dropbox
+     * Save base64 image to Dropbox and generate shareable link
      * @param {String} base64Data - Base64 encoded image data (with or without data URI prefix)
      * @param {String} filename - Filename for the image
-     * @returns {String} Relative path to saved file
+     * @returns {Object} Object with relativePath and shareableUrl
      */
     async saveImageFromBase64(base64Data, filename) {
         console.log(`📦 Saving base64 image to Dropbox: ${filename}`);
@@ -232,7 +232,19 @@ class DropboxHandler {
             await fs.writeFile(targetPath, imageBuffer);
             console.log(`✅ Image saved to Dropbox: ${relativePath}`);
             
-            return relativePath;
+            // Generate shareable link
+            let shareableUrl = null;
+            try {
+                shareableUrl = await this.generateShareableLink(targetPath);
+                console.log(`🔗 Generated share link for image: ${filename}`);
+            } catch (linkError) {
+                console.warn(`⚠️ Could not generate share link for image: ${linkError.message}`);
+            }
+            
+            return {
+                relativePath,
+                shareableUrl
+            };
         } catch (error) {
             console.error(`❌ Failed to save image to Dropbox: ${error.message}`);
             throw error;

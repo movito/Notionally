@@ -176,46 +176,60 @@ class NotionClient {
             }
             
             // If we have a Dropbox shareable URL, use that
-            if (image.shareableUrl && image.shareableUrl.viewUrl && image.shareableUrl.viewUrl.startsWith('https://www.dropbox.com')) {
-                // Use real Dropbox URL for embedding
-                blocks.push({
-                    object: 'block',
-                    type: 'image',
-                    image: {
-                        type: 'external',
-                        external: {
-                            url: image.shareableUrl.streamingUrl
-                        },
-                        caption: image.alt ? [
-                            {
-                                type: 'text',
-                                text: {
-                                    content: image.alt
-                                }
-                            }
-                        ] : []
-                    }
-                });
+            if (image.shareableUrl) {
+                // Handle both old format (object) and new format (string)
+                let streamingUrl;
+                if (typeof image.shareableUrl === 'string') {
+                    // New format: direct URL string, convert to streaming URL
+                    streamingUrl = image.shareableUrl
+                        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                        .replace('?dl=0', '');
+                } else if (image.shareableUrl.streamingUrl) {
+                    // Old format: object with streamingUrl property
+                    streamingUrl = image.shareableUrl.streamingUrl;
+                }
                 
-                // Add metadata about the image
-                blocks.push({
-                    object: 'block',
-                    type: 'callout',
-                    callout: {
-                        rich_text: [
-                            {
-                                type: 'text',
-                                text: {
-                                    content: `✅ Image saved to Dropbox: ${image.dropboxPath}`
+                if (streamingUrl) {
+                    // Use real Dropbox URL for embedding
+                    blocks.push({
+                        object: 'block',
+                        type: 'image',
+                        image: {
+                            type: 'external',
+                            external: {
+                                url: streamingUrl
+                            },
+                            caption: image.alt ? [
+                                {
+                                    type: 'text',
+                                    text: {
+                                        content: image.alt
+                                    }
                                 }
-                            }
-                        ],
-                        icon: {
-                            emoji: '💾'
-                        },
-                        color: 'gray_background'
-                    }
-                });
+                            ] : []
+                        }
+                    });
+                    
+                    // Add metadata about the image
+                    blocks.push({
+                        object: 'block',
+                        type: 'callout',
+                        callout: {
+                            rich_text: [
+                                {
+                                    type: 'text',
+                                    text: {
+                                        content: `✅ Image embedded from Dropbox: ${image.dropboxPath || image.filename}`
+                                    }
+                                }
+                            ],
+                            icon: {
+                                emoji: '🔗'
+                            },
+                            color: 'green_background'
+                        }
+                    });
+                }
             } else if (image.dropboxPath || image.filename) {
                 // Image was saved to Dropbox but we don't have a shareable URL
                 // Add a descriptive block instead of trying to embed

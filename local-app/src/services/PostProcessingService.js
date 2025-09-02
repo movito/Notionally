@@ -179,12 +179,15 @@ class PostProcessingService {
                     // If base64 data is provided, save to Dropbox
                     if (image.base64 && this.dropboxHandler.isConfigured()) {
                         const filename = `image_${Date.now()}_${index}.jpg`;
-                        const dropboxPath = await this.dropboxHandler.saveImageFromBase64(
+                        const dropboxResult = await this.dropboxHandler.saveImageFromBase64(
                             image.base64,
                             filename
                         );
-                        processedImage.dropboxPath = dropboxPath;
+                        processedImage.dropboxPath = dropboxResult.relativePath;
                         processedImage.filename = filename;
+                        if (dropboxResult.shareableUrl) {
+                            processedImage.shareableUrl = dropboxResult.shareableUrl;
+                        }
                     }
                     // Otherwise, if we have a URL, download and save the image
                     else if (imageUrl && this.dropboxHandler.isConfigured()) {
@@ -208,14 +211,17 @@ class PostProcessingService {
                             
                             // Save to Dropbox
                             const filename = `image_${Date.now()}_${index}.jpg`;
-                            const dropboxPath = await this.dropboxHandler.saveImageFromBase64(
+                            const dropboxResult = await this.dropboxHandler.saveImageFromBase64(
                                 base64WithPrefix,
                                 filename
                             );
                             
-                            processedImage.dropboxPath = dropboxPath;
+                            processedImage.dropboxPath = dropboxResult.relativePath;
                             processedImage.filename = filename;
-                            this.log('INFO', `Image saved to Dropbox: ${dropboxPath}`);
+                            if (dropboxResult.shareableUrl) {
+                                processedImage.shareableUrl = dropboxResult.shareableUrl;
+                            }
+                            this.log('INFO', `Image saved to Dropbox: ${dropboxResult.relativePath}`);
                         } catch (downloadError) {
                             this.log('ERROR', `Failed to download/save image: ${downloadError.message}`);
                             // Keep the original URL even if download fails
