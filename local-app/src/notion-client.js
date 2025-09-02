@@ -170,6 +170,12 @@ class NotionClient {
         });
         
         for (const image of images) {
+            // Skip images that failed or have no way to display
+            if (image.failed) {
+                continue;
+            }
+            
+            // If we have a Dropbox shareable URL, use that
             if (image.shareableUrl && image.shareableUrl.viewUrl && image.shareableUrl.viewUrl.startsWith('https://www.dropbox.com')) {
                 // Use real Dropbox URL for embedding
                 blocks.push({
@@ -210,8 +216,9 @@ class NotionClient {
                         color: 'gray_background'
                     }
                 });
-            } else if (image.dropboxPath) {
-                // Fallback: Since localhost URLs don't work in Notion, we'll add a descriptive block
+            } else if (image.dropboxPath || image.filename) {
+                // Image was saved to Dropbox but we don't have a shareable URL
+                // Add a descriptive block instead of trying to embed
                 blocks.push({
                     object: 'block',
                     type: 'callout',

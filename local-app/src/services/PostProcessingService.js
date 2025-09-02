@@ -34,14 +34,26 @@ class PostProcessingService {
                 this.processUrls(postData.urls || [])
             ]);
             
-            // Create Notion page with all processed content
+            // Create Notion page with all processed content EXCEPT images
             const notionPage = await this.createNotionPage({
                 ...postData,
                 processedVideos: videos,
-                processedImages: images,
+                processedImages: [], // Don't include images in page creation
                 processedUrls: urls,
                 debugInfo: this.buildDebugInfo(clientDebugInfo)
             });
+            
+            // Add images to the page separately (like v1.0.0 did)
+            if (images.length > 0 && this.notionClient.addImagesToPage) {
+                this.log('INFO', `Adding ${images.length} image(s) to Notion page...`);
+                try {
+                    await this.notionClient.addImagesToPage(notionPage.id, images, postData.url);
+                    this.log('INFO', `Successfully added ${images.length} image(s) to Notion page`);
+                } catch (imageError) {
+                    this.log('ERROR', `Failed to add images: ${imageError.message}`);
+                    // Don't fail the whole process if images fail
+                }
+            }
             
             this.log('INFO', `Successfully processed post: ${notionPage.url}`);
             
@@ -267,11 +279,8 @@ class PostProcessingService {
             debugInfo: data.debugInfo
         };
         
-        return await RetryUtils.withRetry(
-            () => this.notionClient.createPage(notionData),
-            3,
-            2000
-        );
+        // Don't retry page creation - it creates duplicates
+        return await this.notionClient.createPage(notionData);
     }
     
     /**
