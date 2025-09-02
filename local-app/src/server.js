@@ -15,6 +15,30 @@ if (majorVersion < 22) {
 
 console.log(`✅ Running with Node.js ${nodeVersion}`);
 
+// Load environment variables first
+require('dotenv').config();
+
+// Environment variable validation (only check what's actually in .env)
+const requiredEnvVars = ['NOTION_API_KEY'];
+const missingVars = [];
+
+for (const varName of requiredEnvVars) {
+    if (!process.env[varName]) {
+        missingVars.push(varName);
+    }
+}
+
+if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:');
+    missingVars.forEach(varName => {
+        console.error(`  - ${varName}`);
+    });
+    console.error('\n📝 Please check your .env file');
+    process.exit(1);
+}
+
+console.log('✅ Environment variables validated');
+
 // Dependencies
 const express = require('express');
 const cors = require('cors');
@@ -58,9 +82,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Request logging
+// Request logging with timing
 app.use((req, res, next) => {
-    console.log(`[${req.id}] ${req.method} ${req.path}`);
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        console.log(`[${req.id}] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    });
     next();
 });
 
@@ -109,6 +137,13 @@ app.post('/save-post', asyncHandler(async (req, res) => {
     }
 }));
 
+// Test error endpoint
+app.get('/test-error', (req, res, next) => {
+    const error = new Error('Test error to verify error handling');
+    error.status = 400;
+    next(error);
+});
+
 // Test endpoint for debugging
 app.post('/test-save', asyncHandler(async (req, res) => {
     console.log(`[${req.id}] 🧪 Test save request received`);
@@ -149,7 +184,17 @@ app.use((req, res) => {
 });
 
 // Error handling middleware (must be last)
-app.use(errorHandler);
+app.use((err, req, res, next) => {
+    console.error(`[${req.id}] Error:`, err.message);
+    
+    // Don't leak stack traces to client
+    const statusCode = err.status || err.statusCode || 500;
+    res.status(statusCode).json({
+        error: 'Something went wrong',
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
+        requestId: req.id
+    });
+});
 
 // Start server
 const PORT = process.env.PORT || config.get('server.port') || 8765;
