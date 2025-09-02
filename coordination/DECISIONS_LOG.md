@@ -1,5 +1,16 @@
 # Decisions Log
 
+## 2025-09-02 (Evening)
+
+### Decision: Implement Phase 2 Input Validation
+**Context**: Need to add security without breaking LinkedIn
+**Decision**: Added careful validation to /save-post endpoint
+**Implementation**:
+- Content-Type must be application/json
+- Required fields: author, url, text/videos
+- Size limits: text 100KB, author 200 chars, url 500 chars
+**Outcome**: ✅ Validation working, all tests pass, LinkedIn intact
+
 ## 2025-09-02
 
 ### Decision: Implement Comprehensive Safeguards

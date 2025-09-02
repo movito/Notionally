@@ -1,10 +1,12 @@
 # TASK-006: Fix Duplicate Page Prevention
 
 ## Status
-- **Assigned To**: TBD
+- **Assigned To**: feature-developer
 - **Priority**: Low
 - **Created**: 2025-09-02
 - **Updated**: 2025-09-02
+- **Started**: 2025-09-02
+- **Branch**: feature/v1.0.2-careful-upgrade
 - **Blocked**: No
 
 ## Description
@@ -51,7 +53,7 @@ Queue requests for same URL, process sequentially
 Add delay and retry to find recently created pages
 
 ## Implementation Steps
-1. Add caching mechanism
+1. Add caching mechanism to PostProcessingService
 2. Test with rapid requests
 3. Test with different URLs
 4. Ensure cache doesn't grow unbounded
@@ -77,8 +79,21 @@ wait
 - [ ] Cache doesn't cause memory issues
 - [ ] No impact on normal save performance
 - [ ] Test passes without warning
+- [ ] Run ./local-app/scripts/test-critical.sh - all must pass
 
-## Notes
+## Important Notes
 - Low priority - duplicates are annoying but not breaking
 - Don't over-engineer the solution
 - Simple cache is probably sufficient
+- Test thoroughly with the automated test suite
+- Remember to test with real LinkedIn posts after implementation
+
+## Files to Modify
+- `/Users/broadcaster_three/Github/Notionally/local-app/src/services/PostProcessingService.js` - Add caching logic
+- Possibly `/Users/broadcaster_three/Github/Notionally/local-app/src/notion-client.js` - If cache should be at Notion level
+
+## Safety Requirements
+- Must not break existing functionality
+- Must pass all tests in test-critical.sh
+- Must handle cache failures gracefully
+- Must not cause memory leaks

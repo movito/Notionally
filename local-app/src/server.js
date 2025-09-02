@@ -113,8 +113,75 @@ app.post('/save-post', asyncHandler(async (req, res) => {
     console.log(`[${req.id}] 📥 Received save request`);
     
     try {
+        // Phase 2 Validation: Content-Type
+        if (!req.is('application/json')) {
+            console.log(`[${req.id}] ⚠️ Invalid Content-Type: ${req.get('Content-Type')}`);
+            return res.status(400).json({ 
+                error: 'Content-Type must be application/json',
+                requestId: req.id 
+            });
+        }
+        
         // Extract debug info if present
         const { debugInfo, ...postData } = req.body;
+        
+        // Phase 2 Validation: Required fields
+        if (!postData.author) {
+            console.log(`[${req.id}] ⚠️ Missing required field: author`);
+            return res.status(400).json({ 
+                error: 'Missing required field: author',
+                requestId: req.id 
+            });
+        }
+        
+        if (!postData.url) {
+            console.log(`[${req.id}] ⚠️ Missing required field: url`);
+            return res.status(400).json({ 
+                error: 'Missing required field: url',
+                requestId: req.id 
+            });
+        }
+        
+        // Must have either text OR media.videos
+        const hasText = postData.text && postData.text.trim().length > 0;
+        const hasVideos = postData.media?.videos && postData.media.videos.length > 0;
+        
+        if (!hasText && !hasVideos) {
+            console.log(`[${req.id}] ⚠️ Missing content: must have text or videos`);
+            return res.status(400).json({ 
+                error: 'Post must contain either text content or videos',
+                requestId: req.id 
+            });
+        }
+        
+        // Phase 2 Validation: Field size limits
+        const TEXT_MAX_SIZE = 100 * 1024; // 100KB
+        const AUTHOR_MAX_LENGTH = 200;
+        const URL_MAX_LENGTH = 500;
+        
+        if (postData.text && postData.text.length > TEXT_MAX_SIZE) {
+            console.log(`[${req.id}] ⚠️ Text too large: ${postData.text.length} bytes`);
+            return res.status(400).json({ 
+                error: `Text content exceeds maximum size of ${TEXT_MAX_SIZE} bytes`,
+                requestId: req.id 
+            });
+        }
+        
+        if (postData.author && postData.author.length > AUTHOR_MAX_LENGTH) {
+            console.log(`[${req.id}] ⚠️ Author name too long: ${postData.author.length} chars`);
+            return res.status(400).json({ 
+                error: `Author name exceeds maximum length of ${AUTHOR_MAX_LENGTH} characters`,
+                requestId: req.id 
+            });
+        }
+        
+        if (postData.url && postData.url.length > URL_MAX_LENGTH) {
+            console.log(`[${req.id}] ⚠️ URL too long: ${postData.url.length} chars`);
+            return res.status(400).json({ 
+                error: `URL exceeds maximum length of ${URL_MAX_LENGTH} characters`,
+                requestId: req.id 
+            });
+        }
         
         // Process the post using the service layer
         const result = await postProcessor.processPost(postData, debugInfo);
