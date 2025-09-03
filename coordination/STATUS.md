@@ -1,8 +1,8 @@
 # Notionally Project Status
 
-## Current Branch: feature/v1.0.4-security-fixes-1
-**Date**: 2025-09-02
-**Version**: Moving from v1.0.3 → v1.0.4
+## Current Branch: feature/v1.0.5
+**Date**: 2025-09-03
+**Version**: v1.0.5 (Rate Limiting Implementation)
 
 ## ✅ Completed in v1.0.1
 - Core functionality fully restored
@@ -44,23 +44,34 @@
   - All tests passing (7/7 critical, 11/12 security)
   - **Feature-developer approved completion**
 
+## ✅ Completed in v1.0.5
+- **TASK-008 Rate Limiting**:
+  - Rate limiting on /save-post endpoint (30 req/min)
+  - Automatic localhost bypass for development
+  - Standard rate limit headers (RateLimit-*)
+  - Configurable via config.json
+  - express-rate-limit middleware integration
+  - All regression tests passing
+  - **Feature-developer implemented and tested**
+
 ## 🎯 Current Status
-v1.0.4 security hardening complete and **test-runner verified**. All tests passing (23/24, 1 known issue). Ready for production deployment.
+v1.0.5 rate limiting implementation complete. All tests passing (7/7 critical, 11/12 security, 5/5 duplicate prevention). Ready for test-runner verification.
 
 ## 🔒 Security Phases Status
 
 | Phase | Description | Status | Risk Level |
 |-------|------------|--------|------------|
-| Phase 1 | Logging, Error Handling, Env Validation | ✅ Complete | Low |
-| Phase 2 | Input Validation | ✅ Complete | Medium |
-| Phase 3 | Rate Limiting | ⏳ Future | High |
-| Phase 4 | CORS Refinement | ⏳ Future | Very High |
+| Phase 1 | Logging, Error Handling, Env Validation | ✅ Complete (v1.0.1) | Low |
+| Phase 2 | Input Validation | ✅ Complete (v1.0.2) | Medium |
+| Phase 3 | Security Hardening | ✅ Complete (v1.0.4) | Medium |
+| Phase 4 | Rate Limiting | ✅ Complete (v1.0.5) | High |
+| Phase 5 | CORS Refinement | ⏳ Future | Very High |
 
 ## 🚀 Next Steps
-1. ✅ Test-runner verified TASK-007 implementation (2025-09-02)
-2. Consider merging to master - **APPROVED BY TEST-RUNNER**
-3. Plan next feature or improvement
-4. Continue monitoring for any issues
+1. ✅ Test-runner to verify TASK-008 implementation
+2. Merge v1.0.5 to master after verification
+3. Monitor rate limiting effectiveness in production
+4. Consider next features or improvements
 
 ## ⚠️ Remember
 - Test after EVERY change
