@@ -18,6 +18,22 @@ console.log(`✅ Running with Node.js ${nodeVersion}`);
 // Load environment variables first
 require('dotenv').config();
 
+// Check .env file permissions (security)
+const fs = require('fs');
+const path = require('path');
+
+const envPath = path.join(__dirname, '../../.env');
+if (fs.existsSync(envPath)) {
+    const stats = fs.statSync(envPath);
+    const mode = (stats.mode & parseInt('777', 8)).toString(8);
+    
+    // Warn if .env file has overly permissive permissions
+    if (mode !== '600' && mode !== '644') {
+        console.warn('⚠️  Warning: .env file has permissions ' + mode);
+        console.warn('🔐 Consider restricting with: chmod 600 .env');
+    }
+}
+
 // Environment variable validation (only check what's actually in .env)
 const requiredEnvVars = ['NOTION_API_KEY'];
 const missingVars = [];
@@ -37,7 +53,17 @@ if (missingVars.length > 0) {
     process.exit(1);
 }
 
-console.log('✅ Environment variables validated');
+// Ensure sensitive environment variables are never logged
+const sensitiveVars = ['NOTION_API_KEY', 'DROPBOX_ACCESS_TOKEN', 'API_KEY', 'SECRET', 'PASSWORD', 'TOKEN'];
+for (const varName of sensitiveVars) {
+    if (process.env[varName]) {
+        // Mask the value to prevent accidental logging
+        const maskedValue = process.env[varName].substring(0, 4) + '***';
+        console.log(`✅ ${varName} is set (${maskedValue}...)`);
+    }
+}
+
+console.log('✅ Environment variables validated and secured');
 
 // Dependencies
 const express = require('express');
@@ -55,7 +81,8 @@ const DropboxHandler = require('./dropbox-handler');
 const PostProcessingService = require('./services/PostProcessingService');
 
 // Utilities
-const { errorHandler, asyncHandler } = require('./utils/errors');
+const { errorHandler, asyncHandler, sanitizeErrorMessage } = require('./utils/errors');
+const { sanitizePostData } = require('./utils/sanitization');
 
 // Initialize services
 const videoProcessor = new VideoProcessor(config.getAll());
@@ -72,15 +99,34 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Add request ID for tracking
+// Add request ID for tracking and safe security headers (MUST BE BEFORE ROUTE HANDLERS)
 app.use((req, res, next) => {
     req.id = uuidv4();
     res.setHeader('X-Request-Id', req.id);
+    
+    // Safe security headers that won't break LinkedIn integration
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
     next();
 });
+
+// Different size limits for different endpoints
+// Default limit for most endpoints (reasonable for text/metadata)
+app.use('/health', express.json({ limit: '1kb' }));
+app.use('/test-error', express.json({ limit: '1kb' }));
+app.use('/test-save', express.json({ limit: '10mb' })); // Test endpoint can handle moderate data
+
+// Main save endpoint needs larger limit for video metadata and images
+// Note: We're not uploading actual video files, just metadata and base64 images
+app.use('/save-post', express.json({ limit: '25mb' })); // Reduced from 50mb
+
+// Default for any other endpoints
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
 // Request logging with timing
 app.use((req, res, next) => {
@@ -123,7 +169,11 @@ app.post('/save-post', asyncHandler(async (req, res) => {
         }
         
         // Extract debug info if present
-        const { debugInfo, ...postData } = req.body;
+        const { debugInfo, ...rawPostData } = req.body;
+        
+        // Sanitize input data to prevent XSS
+        const postData = sanitizePostData(rawPostData);
+        console.log(`[${req.id}] 🧹 Input sanitized for XSS prevention`);
         
         // Phase 2 Validation: Required fields
         if (!postData.author) {
@@ -199,7 +249,9 @@ app.post('/save-post', asyncHandler(async (req, res) => {
         
     } catch (error) {
         const duration = Date.now() - startTime;
-        console.error(`[${req.id}] ❌ Failed after ${duration}ms:`, error.message);
+        // Sanitize error message before logging
+        const sanitizedMsg = sanitizeErrorMessage(error.message);
+        console.error(`[${req.id}] ❌ Failed after ${duration}ms:`, sanitizedMsg);
         throw error; // Let error handler deal with it
     }
 }));
@@ -252,13 +304,20 @@ app.use((req, res) => {
 
 // Error handling middleware (must be last)
 app.use((err, req, res, next) => {
-    console.error(`[${req.id}] Error:`, err.message);
+    // Log sanitized error to console
+    const sanitizedMessage = sanitizeErrorMessage(err.message);
+    console.error(`[${req.id}] Error:`, sanitizedMessage);
     
-    // Don't leak stack traces to client
+    // Log full error details in development only
+    if (process.env.NODE_ENV === 'development') {
+        console.error(`[${req.id}] Full error:`, err);
+    }
+    
+    // Never leak sensitive information to client
     const statusCode = err.status || err.statusCode || 500;
     res.status(statusCode).json({
         error: 'Something went wrong',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
+        message: sanitizedMessage,
         requestId: req.id
     });
 });

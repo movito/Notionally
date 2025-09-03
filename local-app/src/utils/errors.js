@@ -63,26 +63,55 @@ class URLResolutionError extends ApplicationError {
 }
 
 /**
+ * Sanitize error message to remove sensitive information
+ */
+function sanitizeErrorMessage(message) {
+    if (!message) return 'An error occurred';
+    
+    // Remove file paths (both Unix and Windows style)
+    let sanitized = message.replace(/\/[\w\/\.\-]+/g, '[path]');
+    sanitized = sanitized.replace(/[A-Za-z]:\\[\w\\\.\ \-]+/g, '[path]');
+    
+    // Remove API keys or secrets (anything that looks like a key)
+    sanitized = sanitized.replace(/secret_[\w]+/gi, '[secret]');
+    sanitized = sanitized.replace(/api[_\-]?key[\s]*[:=][\s]*[\w\-]+/gi, '[api-key]');
+    sanitized = sanitized.replace(/token[\s]*[:=][\s]*[\w\-]+/gi, '[token]');
+    
+    // Remove environment variable values
+    sanitized = sanitized.replace(/process\.env\.[\w]+/gi, '[env-var]');
+    
+    // Remove stack trace indicators
+    sanitized = sanitized.replace(/at\s+.*\(.*\)/g, '');
+    sanitized = sanitized.replace(/at\s+.*:\d+:\d+/g, '');
+    
+    return sanitized.trim() || 'An error occurred';
+}
+
+/**
  * Express error handling middleware
  */
 function errorHandler(err, req, res, next) {
-    // Log error details
+    // Log full error details to server console only
     console.error('Error occurred:', {
         error: err.message,
         code: err.code,
-        stack: err.stack,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : '[stack hidden in production]',
         context: err.context || {},
         requestId: req.id,
         path: req.path,
         method: req.method
     });
     
+    // Prepare sanitized error response
+    const sanitizedMessage = sanitizeErrorMessage(err.message);
+    
     // Handle different error types
     if (err instanceof ApplicationError) {
+        // Don't send context to client - it might contain sensitive data
         return res.status(err.statusCode).json({
-            error: err.message,
+            error: sanitizedMessage,
             code: err.code,
-            context: err.context
+            requestId: req.id
         });
     }
     
@@ -90,8 +119,9 @@ function errorHandler(err, req, res, next) {
     if (err.code === 'notionhq_client_error') {
         return res.status(400).json({
             error: 'Notion API error',
-            message: err.message,
-            code: 'NOTION_API_ERROR'
+            message: 'Failed to save to Notion',
+            code: 'NOTION_API_ERROR',
+            requestId: req.id
         });
     }
     
@@ -99,15 +129,16 @@ function errorHandler(err, req, res, next) {
     if (err.error && err.error['.tag']) {
         return res.status(400).json({
             error: 'Dropbox API error',
-            message: err.error.error_summary || err.message,
-            code: 'DROPBOX_API_ERROR'
+            message: 'Failed to save to Dropbox',
+            code: 'DROPBOX_API_ERROR',
+            requestId: req.id
         });
     }
     
-    // Default error response
+    // Default error response - never expose raw error messages
     res.status(500).json({
         error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred',
+        message: 'An error occurred while processing your request',
         requestId: req.id
     });
 }
@@ -129,5 +160,6 @@ module.exports = {
     VideoProcessingError,
     URLResolutionError,
     errorHandler,
-    asyncHandler
+    asyncHandler,
+    sanitizeErrorMessage
 };
