@@ -182,22 +182,99 @@ Test Dropbox: `curl http://localhost:8765/test-dropbox`
 
 ## Development Practices
 
-### Semantic Versioning
-All version numbers in this project must follow semantic versioning (SemVer) practices:
-- **MAJOR.MINOR.PATCH** format (e.g., 1.2.3)
-- **MAJOR**: Increment for breaking changes
-- **MINOR**: Increment for new features (backwards compatible)
-- **PATCH**: Increment for bug fixes (backwards compatible)
+### Semantic Versioning & Branch Naming
 
-Files that must maintain version consistency:
+#### Version Numbers
+All version numbers in this project MUST follow semantic versioning (SemVer) practices:
+- **Format**: `MAJOR.MINOR.PATCH` (e.g., 1.2.3)
+- **MAJOR**: Increment for breaking changes that are NOT backwards compatible
+- **MINOR**: Increment for new features that ARE backwards compatible
+- **PATCH**: Increment for bug fixes and minor improvements (backwards compatible)
+
+#### Branch Naming Conventions
+All feature branches MUST follow these naming patterns:
+- **Features**: `feature/v{MAJOR.MINOR.PATCH}-{brief-description}`
+  - Example: `feature/v1.0.5-rate-limiting`
+  - Example: `feature/v1.1.0-batch-processing`
+- **Bug Fixes**: `fix/v{MAJOR.MINOR.PATCH}-{issue-description}`
+  - Example: `fix/v1.0.6-cors-header-issue`
+- **Security**: `security/v{MAJOR.MINOR.PATCH}-{security-focus}`
+  - Example: `security/v1.0.7-input-validation`
+- **Hotfixes**: `hotfix/v{MAJOR.MINOR.PATCH}-{critical-issue}`
+  - Example: `hotfix/v1.0.8-notion-api-breaking`
+
+#### Version Increment Rules
+When creating a new branch, determine the version based on the type of change:
+
+1. **PATCH Version (1.0.x)** - Increment when:
+   - Fixing bugs without adding features
+   - Improving performance without API changes
+   - Updating documentation
+   - Refactoring code without changing functionality
+   - Adding tests
+   - Security patches that don't break compatibility
+
+2. **MINOR Version (1.x.0)** - Increment when:
+   - Adding new features
+   - Adding new endpoints
+   - Adding optional parameters
+   - Enhancing existing features (backwards compatible)
+   - Adding new configuration options
+
+3. **MAJOR Version (x.0.0)** - Increment when:
+   - Removing features or endpoints
+   - Changing API contracts
+   - Modifying data structures in breaking ways
+   - Requiring configuration changes
+   - Changing system requirements
+
+#### Files That Must Maintain Version Consistency
+When updating version numbers, these files MUST be kept in sync:
 - `greasemonkey-script/linkedin-notion-saver.user.js` (header @version)
 - `local-app/package.json` (version field)
-- Any release tags in git
+- `VERSION_HISTORY.md` (new version entry)
+- Git release tags (when creating releases)
 
-When making changes:
-- Bug fixes: increment PATCH (1.0.0 → 1.0.1)
-- New features: increment MINOR (1.0.1 → 1.1.0)
-- Breaking changes: increment MAJOR (1.1.0 → 2.0.0)
+#### Task Naming
+When creating tasks in the coordination folder, use version numbers:
+- `TASK-{NUMBER}-v{VERSION}-{description}.md`
+- Example: `TASK-008-v1.0.5-implement-rate-limiting.md`
+
+#### Commit Messages
+Include version context in commit messages:
+- `feat(v1.1.0): Add batch processing capability`
+- `fix(v1.0.5): Resolve duplicate page creation issue`
+- `security(v1.0.6): Add XSS prevention measures`
+- `docs(v1.0.5): Update API documentation`
+
+#### Version Tracking
+- Always document version changes in `VERSION_HISTORY.md`
+- Include what changed, why, and any migration notes
+- Mark versions as stable, beta, or deprecated as appropriate
+
+#### Examples of Proper Versioning
+
+**Scenario 1**: Adding a new feature to export posts as PDF
+- Current version: 1.0.4
+- New branch: `feature/v1.1.0-pdf-export`
+- After merge: Version becomes 1.1.0
+
+**Scenario 2**: Fixing a bug where images don't upload
+- Current version: 1.1.0
+- New branch: `fix/v1.1.1-image-upload-failure`
+- After merge: Version becomes 1.1.1
+
+**Scenario 3**: Complete rewrite of the server architecture
+- Current version: 1.1.1
+- New branch: `feature/v2.0.0-server-rewrite`
+- After merge: Version becomes 2.0.0
+
+#### Important Notes
+- NEVER reuse version numbers
+- NEVER decrease version numbers
+- ALWAYS increment from the current master version
+- If multiple branches are in progress, coordinate version numbers to avoid conflicts
+- When in doubt, ask before creating a branch with a version number
 
 ## Notes for Future Development
 
