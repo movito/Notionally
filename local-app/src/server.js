@@ -69,6 +69,7 @@ console.log('✅ Environment variables validated and secured');
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
+const rateLimit = require('express-rate-limit');
 
 // Configuration
 const { getInstance: getConfig } = require('./config/ConfigManager');
@@ -96,6 +97,10 @@ const postProcessor = new PostProcessingService(
 
 // Initialize Express app
 const app = express();
+
+// Trust proxy headers for rate limiting to work with X-Forwarded-For
+// Using number 1 means we trust the first proxy (for testing with X-Forwarded-For)
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors());
@@ -138,12 +143,65 @@ app.use((req, res, next) => {
     next();
 });
 
+// Rate limiting configuration
+const rateLimitConfig = config.get('rateLimiting', {
+    enabled: true,
+    windowMs: 60000,
+    maxRequests: 30,
+    skipLocalhost: true,
+    message: 'Too many requests, please slow down. You can make up to 30 saves per minute.'
+});
+
+// Create rate limiter if enabled
+if (rateLimitConfig.enabled) {
+    const limiter = rateLimit({
+        windowMs: rateLimitConfig.windowMs,
+        max: rateLimitConfig.maxRequests,
+        message: rateLimitConfig.message,
+        standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
+        legacyHeaders: false, // Disable `X-RateLimit-*` headers
+        skip: (req) => {
+            // Skip rate limiting for localhost
+            if (!rateLimitConfig.skipLocalhost) return false;
+            
+            const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+            const isLocalhost = ip === '127.0.0.1' || 
+                              ip === '::1' || 
+                              ip === 'localhost' ||
+                              ip === '::ffff:127.0.0.1';
+            
+            if (isLocalhost) {
+                console.log(`[${req.id}] Rate limiting skipped for localhost (${ip})`);
+            }
+            
+            return isLocalhost;
+        },
+        handler: (req, res) => {
+            console.log(`[${req.id}] Rate limit exceeded for IP: ${req.ip}`);
+            res.status(429).json({
+                error: rateLimitConfig.message,
+                requestId: req.id,
+                retryAfter: Math.ceil(rateLimitConfig.windowMs / 1000)
+            });
+        }
+    });
+    
+    // Apply rate limiting only to /save-post endpoint
+    app.use('/save-post', limiter);
+    console.log('✅ Rate limiting enabled for /save-post endpoint');
+    console.log(`   - Window: ${rateLimitConfig.windowMs}ms`);
+    console.log(`   - Max requests: ${rateLimitConfig.maxRequests}`);
+    console.log(`   - Skip localhost: ${rateLimitConfig.skipLocalhost}`);
+} else {
+    console.log('⚠️  Rate limiting is disabled');
+}
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     const health = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
+        version: '1.0.5',
         services: {
             notion: notionClient.isConfigured() ? 'configured' : 'not configured',
             dropbox: dropboxHandler.isConfigured() ? 'configured' : 'not configured',

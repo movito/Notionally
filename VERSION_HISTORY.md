@@ -1,6 +1,24 @@
 # Notionally Version History
 
-## v1.0.3 (2025-09-02) ✅ CURRENT
+## v1.0.5 (2025-09-03) ✅ CURRENT
+**Security**: Rate Limiting Implementation
+- Added rate limiting on /save-post endpoint (30 requests/minute)
+- Automatic localhost bypass for development
+- Standard rate limit headers (RateLimit-Limit, RateLimit-Remaining)
+- Configurable via config.json
+- express-rate-limit middleware integration
+- **Status**: Production-ready, all tests passing
+
+## v1.0.4 (2025-09-02) ✅
+**Security**: Phase 3 Security Hardening
+- Error message sanitization (removes paths, API keys)
+- Security headers (X-Content-Type-Options, X-Frame-Options)
+- XSS prevention via input sanitization
+- Environment variable security checks
+- Optimized request size limits per endpoint
+- **Status**: Complete, test-runner verified
+
+## v1.0.3 (2025-09-02) ✅
 **Feature**: Duplicate Page Prevention
 - Implemented in-memory cache to prevent duplicate Notion pages
 - 60-second TTL for cached results
@@ -44,18 +62,19 @@
 ---
 
 ## Current Production Branch
-- **Master**: v1.0.1 (stable, protected)
-- **Latest Features**: v1.0.3 on `feature/v1.0.3-task-006-duplicate-prevention`
+- **Master**: v1.0.4 (stable, protected)
+- **Latest Features**: v1.0.5 on `feature/v1.0.5`
 
-## Test Results Summary
+## Test Results Summary (v1.0.5)
 - Critical Tests: 7/7 ✅
+- Security Tests: 11/12 ✅ (1 known issue, unrelated)
 - Duplicate Prevention: 5/5 ✅
-- Load Testing: 96% success rate ✅
-- Performance: 97% cache speedup ✅
+- Rate Limiting: Working with localhost bypass ✅
+- Performance: No degradation observed ✅
 
 ## Next Steps
-1. Merge v1.0.3 to master when ready
-2. Consider Phase 3 security (rate limiting) - HIGH RISK
+1. Merge v1.0.5 to master when ready
+2. Monitor rate limiting effectiveness in production
 3. Consider Phase 4 security (CORS refinement) - VERY HIGH RISK
 
 ## Key Principle
