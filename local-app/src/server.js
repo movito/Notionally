@@ -359,8 +359,9 @@ app.post('/investigation/comments', asyncHandler(async (req, res) => {
         linkPatterns: {}
     };
     
-    // Aggregate selector findings
+    // Enhanced telemetry analysis
     posts.forEach(post => {
+        // Original selector aggregation
         if (post.structure?.selectors) {
             Object.entries(post.structure.selectors).forEach(([selector, data]) => {
                 if (!analysis.selectors[selector]) {
@@ -369,6 +370,52 @@ app.post('/investigation/comments', asyncHandler(async (req, res) => {
                 analysis.selectors[selector].count++;
                 analysis.selectors[selector].posts.push(post.index);
             });
+        }
+        
+        // New: Analyze enhanced telemetry
+        if (post.commentSearch) {
+            // Track what was found
+            if (!analysis.detailedFindings) {
+                analysis.detailedFindings = {
+                    byClassName: [],
+                    byAttribute: [],
+                    potentialContainers: [],
+                    lazyLoadingButtons: []
+                };
+            }
+            
+            // Aggregate className findings
+            if (post.commentSearch.byClassName) {
+                post.commentSearch.byClassName.forEach(finding => {
+                    analysis.detailedFindings.byClassName.push({
+                        postIndex: post.index,
+                        className: finding.className,
+                        tagName: finding.tagName
+                    });
+                });
+            }
+            
+            // Track potential containers
+            if (post.commentSearch.potentialContainers) {
+                post.commentSearch.potentialContainers.forEach(container => {
+                    analysis.detailedFindings.potentialContainers.push({
+                        postIndex: post.index,
+                        selector: container.selector,
+                        textSnippet: container.textSnippet?.substring(0, 100)
+                    });
+                });
+            }
+            
+            // Track lazy loading indicators
+            if (post.lazyLoading?.buttons) {
+                post.lazyLoading.buttons.forEach(button => {
+                    analysis.detailedFindings.lazyLoadingButtons.push({
+                        postIndex: post.index,
+                        text: button.text,
+                        ariaLabel: button.ariaLabel
+                    });
+                });
+            }
         }
     });
     
