@@ -32,6 +32,9 @@ Thumbs.db
 logs/
 *.log
 
+# Investigation data (v1.2.0 feature development)
+investigation-data/
+
 # Runtime data
 pids
 *.pid

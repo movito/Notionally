@@ -396,9 +396,36 @@
     }
 
     // =========================
+    // SERVER COMMUNICATION
+    // =========================
+    async function sendToServer(data) {
+        try {
+            const response = await fetch('http://localhost:8765/investigation/comments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('[Notionally Debug] ✅ Data sent to server:', result);
+                return result;
+            } else {
+                console.error('[Notionally Debug] ❌ Server error:', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('[Notionally Debug] ❌ Failed to send to server:', error);
+            return null;
+        }
+    }
+
+    // =========================
     // DATA COLLECTION
     // =========================
-    function collectCommentData() {
+    async function collectCommentData(autoSend = true) {
         console.log('[Notionally Debug] Starting comment data collection...');
         debugLog('COMMENT_DISCOVERY', 3, 'Starting data collection');
         
@@ -466,15 +493,31 @@
             collectedData.posts.push(postData);
         });
         
-        // Save to clipboard for analysis
+        // Add metadata
+        const dataWithMetadata = {
+            posts: collectedData.posts,
+            metadata: {
+                timestamp: collectedData.timestamp,
+                url: collectedData.url,
+                userAgent: navigator.userAgent,
+                scriptVersion: '1.6.1-debug'
+            }
+        };
+        
+        // Send to server if autoSend is enabled
+        if (autoSend) {
+            const serverResult = await sendToServer(dataWithMetadata);
+            if (serverResult) {
+                alert(`Notionally Debug: Data sent to server!\n\nAnalyzed ${serverResult.summary.postsAnalyzed} posts\nFound ${serverResult.summary.postsWithComments} with comments\nDiscovered ${serverResult.summary.selectorsFound} selectors`);
+            }
+        }
+        
+        // Also save to clipboard as backup
         const dataStr = JSON.stringify(collectedData, null, 2);
         navigator.clipboard.writeText(dataStr).then(() => {
-            console.log('[Notionally Debug] ✅ Comment data copied to clipboard!');
-            console.log('[Notionally Debug] Paste into a file for analysis');
-            alert('Notionally Debug: Comment data collected and copied to clipboard!\nPaste into a JSON file for analysis.');
+            console.log('[Notionally Debug] ✅ Comment data also copied to clipboard as backup!');
         }).catch(err => {
             console.error('[Notionally Debug] Failed to copy to clipboard:', err);
-            console.log('[Notionally Debug] Data:', collectedData);
         });
         
         debugLog('COMMENT_DISCOVERY', 3, 'Data collection complete', {
@@ -554,14 +597,70 @@
     }
 
     // =========================
+    // AUTOMATIC DATA COLLECTION
+    // =========================
+    let autoCollectInterval = null;
+    let postsAnalyzed = 0;
+    const AUTO_COLLECT_LIMIT = 100; // Stop after analyzing 100 posts
+    
+    function startAutoCollection() {
+        console.log('[Notionally Debug] 🚀 Starting automatic collection...');
+        postsAnalyzed = 0;
+        
+        // Collect immediately
+        collectAndScroll();
+        
+        // Then collect every 10 seconds
+        autoCollectInterval = setInterval(() => {
+            if (postsAnalyzed >= AUTO_COLLECT_LIMIT) {
+                stopAutoCollection();
+                alert(`Notionally Debug: Auto-collection complete!\n\nAnalyzed ${postsAnalyzed} posts total.\nCheck server for aggregated results.`);
+            } else {
+                collectAndScroll();
+            }
+        }, 10000);
+    }
+    
+    async function collectAndScroll() {
+        const data = await collectCommentData(true);
+        if (data) {
+            postsAnalyzed += data.posts.length;
+            console.log(`[Notionally Debug] Analyzed ${data.posts.length} posts (Total: ${postsAnalyzed})`);
+            
+            // Scroll down to load more posts
+            window.scrollBy(0, window.innerHeight * 2);
+        }
+    }
+    
+    function stopAutoCollection() {
+        if (autoCollectInterval) {
+            clearInterval(autoCollectInterval);
+            autoCollectInterval = null;
+            console.log('[Notionally Debug] 🛑 Auto-collection stopped');
+        }
+    }
+
+    // =========================
     // KEYBOARD SHORTCUTS
     // =========================
     document.addEventListener('keydown', function(event) {
-        // Ctrl+Shift+D - Collect comment data
+        // Ctrl+Shift+D - Collect comment data once
         if (event.ctrlKey && event.shiftKey && event.key === 'D') {
             event.preventDefault();
             console.log('[Notionally Debug] Keyboard shortcut triggered: Collect data');
             collectCommentData();
+        }
+        
+        // Ctrl+Shift+A - Start/stop automatic collection
+        if (event.ctrlKey && event.shiftKey && event.key === 'A') {
+            event.preventDefault();
+            if (autoCollectInterval) {
+                stopAutoCollection();
+                alert('Notionally Debug: Auto-collection stopped');
+            } else {
+                startAutoCollection();
+                alert('Notionally Debug: Auto-collection started!\n\nWill collect data every 10 seconds and auto-scroll.\nPress Ctrl+Shift+A again to stop.');
+            }
         }
         
         // Ctrl+Shift+E - Export debug log
@@ -634,9 +733,17 @@
     // =========================
     console.log('%c🔍 Notionally Debug Mode Active', 'background: #4CAF50; color: white; font-size: 16px; padding: 5px;');
     console.log('📋 Keyboard Shortcuts:');
-    console.log('  • Ctrl+Shift+D - Collect comment data from current page');
+    console.log('  • Ctrl+Shift+D - Collect comment data from current page (manual)');
+    console.log('  • Ctrl+Shift+A - Start/stop automatic collection with scrolling');
     console.log('  • Ctrl+Shift+E - Export debug log as JSON');
     console.log('  • Ctrl+Shift+T - Run test scenario');
+    console.log('');
+    console.log('🤖 Automatic Mode:');
+    console.log('  Press Ctrl+Shift+A to start automatic collection');
+    console.log('  • Collects data every 10 seconds');
+    console.log('  • Auto-scrolls to load more posts');
+    console.log('  • Sends directly to server at http://localhost:8765');
+    console.log('  • Stops after 100 posts analyzed');
     console.log('');
     console.log('🛠️ Console Commands:');
     console.log('  • notionally_debug.collectData() - Collect data from all posts');

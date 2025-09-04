@@ -1,13 +1,25 @@
 # Debug Script Usage Guide
 
+## Prerequisites
+1. Make sure Notionally server is running: `npm start` (port 8765)
+2. Install the debug script in Firefox/Greasemonkey
+
 ## Installation
 1. Open the file `linkedin-notion-saver-debug.user.js` in Firefox
 2. Greasemonkey will prompt to install it
 3. Click "Install"
 4. Navigate to LinkedIn feed
 
-## Keyboard Shortcuts
-- **Ctrl+Shift+D** - Collect comment data from current page (analyzes first 10 posts)
+## Automatic Collection (Recommended)
+Press **Ctrl+Shift+A** to start automatic collection:
+- Collects data from visible posts every 10 seconds
+- Automatically scrolls to load more posts
+- Sends data directly to server for aggregation
+- Stops after analyzing 100 posts
+- Press Ctrl+Shift+A again to stop early
+
+## Manual Collection
+- **Ctrl+Shift+D** - Collect data once from current view (sends to server)
 - **Ctrl+Shift+E** - Export debug log as JSON file
 - **Ctrl+Shift+T** - Run specific test scenario
 
@@ -116,9 +128,30 @@ The collected data includes:
 - DOM hierarchy mapping
 - Loading behavior observations
 
+## Analyzing Collected Data
+
+After collecting data, analyze the results:
+
+```bash
+# From the local-app directory
+cd local-app
+npm run analyze-investigation
+
+# Or directly
+node scripts/analyze-investigation.js
+```
+
+This will show:
+- Summary of posts analyzed
+- Most common selectors for comments
+- Author identification patterns  
+- Link format distribution
+- Recommendations for implementation
+
 ## Next Steps
 After collecting data from 20+ posts:
-1. Analyze JSON output for consistent patterns
-2. Identify reliable selectors
-3. Document edge cases
-4. Update implementation plan with findings
+1. Run the analyzer to see aggregated patterns
+2. Review `investigation-data/analysis-report.json` for details
+3. Identify the most reliable selectors (80%+ coverage)
+4. Update implementation with discovered selectors
+5. Handle edge cases with fallback selectors

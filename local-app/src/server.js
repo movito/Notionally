@@ -321,6 +321,83 @@ app.get('/test-error', (req, res, next) => {
     next(error);
 });
 
+// Investigation endpoint for v1.2.0 comment extraction feature
+app.post('/investigation/comments', asyncHandler(async (req, res) => {
+    console.log(`[${req.id}] 🔍 Investigation data received`);
+    
+    const { posts, metadata } = req.body;
+    
+    if (!posts || !Array.isArray(posts)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid investigation data format'
+        });
+    }
+    
+    // Store investigation data
+    const investigationDir = path.join(__dirname, '../../investigation-data');
+    if (!fs.existsSync(investigationDir)) {
+        fs.mkdirSync(investigationDir, { recursive: true });
+    }
+    
+    // Create filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `comments-${timestamp}.json`;
+    const filepath = path.join(investigationDir, filename);
+    
+    // Analyze the data for patterns
+    const analysis = {
+        metadata: {
+            ...metadata,
+            receivedAt: new Date().toISOString(),
+            postCount: posts.length,
+            postsWithComments: posts.filter(p => p.hasComments).length,
+            postsWithLinkPattern: posts.filter(p => p.hasLinkInCommentsPattern).length
+        },
+        selectors: {},
+        authorPatterns: {},
+        linkPatterns: {}
+    };
+    
+    // Aggregate selector findings
+    posts.forEach(post => {
+        if (post.structure?.selectors) {
+            Object.entries(post.structure.selectors).forEach(([selector, data]) => {
+                if (!analysis.selectors[selector]) {
+                    analysis.selectors[selector] = { count: 0, posts: [] };
+                }
+                analysis.selectors[selector].count++;
+                analysis.selectors[selector].posts.push(post.index);
+            });
+        }
+    });
+    
+    // Save raw data and analysis
+    const fullData = {
+        raw: req.body,
+        analysis
+    };
+    
+    fs.writeFileSync(filepath, JSON.stringify(fullData, null, 2));
+    console.log(`[${req.id}] 💾 Investigation data saved to: ${filename}`);
+    
+    res.json({
+        success: true,
+        message: 'Investigation data received',
+        filename,
+        summary: {
+            postsAnalyzed: posts.length,
+            postsWithComments: analysis.metadata.postsWithComments,
+            selectorsFound: Object.keys(analysis.selectors).length,
+            topSelectors: Object.entries(analysis.selectors)
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 5)
+                .map(([selector, data]) => ({ selector, count: data.count }))
+        },
+        requestId: req.id
+    });
+}));
+
 // Test endpoint for debugging
 app.post('/test-save', asyncHandler(async (req, res) => {
     console.log(`[${req.id}] 🧪 Test save request received`);
