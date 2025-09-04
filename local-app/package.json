@@ -7,8 +7,10 @@
     "start": "./scripts/start.sh",
     "start:direct": "node src/server.js",
     "start:original": "node src/server-original.js",
-    "dev": "./scripts/dev.sh",
+    "dev": "node src/start-with-setup.js",
     "dev:simple": "nodemon src/server.js",
+    "dev:skip-setup": "node src/start-with-setup.js --skip-setup",
+    "setup": "node src/setup/interactive-setup.js",
     "setup:dropbox": "node scripts/get-dropbox-token.js",
     "check": "node scripts/check-setup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "@notionhq/client": "^2.2.15",
+    "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "dropbox": "^10.34.0",
@@ -31,6 +34,7 @@
     "express-rate-limit": "^8.0.1",
     "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^11.2.0",
+    "inquirer": "^12.9.4",
     "path": "^0.12.7",
     "uuid": "^11.1.0"
   },
