@@ -9,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
 const { spawn } = require('child_process');
+const { smartSetupCheck, isTrueFirstRun } = require('./setup/detect-credentials');
 
 // Check if config exists
 const configPath = path.join(__dirname, '..', 'config.json');
@@ -21,9 +22,11 @@ async function main() {
     return;
   }
   
-  // Check if config exists
-  if (!fs.existsSync(configPath)) {
-    console.log(chalk.yellow('\n📋 No configuration found!\n'));
+  // Use smart detection that checks env vars too
+  const hasValidConfig = await smartSetupCheck();
+  
+  if (!hasValidConfig) {
+    // No credentials found anywhere
     console.log(chalk.cyan('Welcome to Notionally! Let\'s get you set up.\n'));
     
     // Run interactive setup
@@ -42,26 +45,10 @@ async function main() {
       process.exit(1);
     }
   } else {
-    // Config exists, validate it quickly
-    try {
-      const config = require(configPath);
-      
-      if (!config.notion?.apiKey || !config.notion?.databaseId) {
-        console.log(chalk.yellow('\n⚠️  Configuration is incomplete!\n'));
-        console.log(chalk.cyan('Running setup to fix configuration...\n'));
-        
-        const { runSetup } = require('./setup/interactive-setup');
-        await runSetup();
-      }
-      
-      // Start server normally
-      startServer();
-      
-    } catch (err) {
-      console.log(chalk.red('❌ Error reading config:', err.message));
-      console.log(chalk.yellow('Run `npm run setup` to reconfigure.\n'));
-      process.exit(1);
-    }
+    // Credentials found (either in config.json or env vars)
+    // Config was either valid or generated from env
+    console.log(chalk.green('✅ Configuration ready'));
+    startServer();
   }
 }
 
