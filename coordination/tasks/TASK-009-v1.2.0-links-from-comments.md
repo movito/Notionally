@@ -1,10 +1,11 @@
 # TASK-009: Links from Comments Feature (v1.2.0)
 
-**Status**: 🟡 In Progress  
+**Status**: 🔴 Blocked - Needs Developer  
 **Branch**: `feature/v1.2.0-links-from-comments`  
 **Assignee**: feature-developer  
 **Priority**: High  
 **Created**: 2025-01-10  
+**Updated**: 2025-01-10  
 
 ## Overview
 
@@ -47,7 +48,56 @@ Currently, Notionally only captures the main post, missing these valuable links.
 - Graceful degradation if comment extraction fails
 - Must not break existing post saving functionality
 
+## Current Status Update (2025-01-10)
+
+### ⚠️ IMPORTANT: Dropdown Menu Integration Issue
+
+The v1.7.0 script with investigation features **does not activate** when the context menu button is pressed. The v1.6.0 original script works correctly. This needs to be debugged and fixed.
+
+**Working Version**: `linkedin-notion-saver.user.js` v1.6.0  
+**Broken Version**: `linkedin-notion-saver-with-investigation.user.js` v1.7.0
+
+**Issue**: The MutationObserver for dropdown menus is not detecting the menu properly in v1.7.0.
+
+### Investigation Tools Already Created
+
+Several investigation approaches have been prepared:
+1. **Standalone add-on**: `comment-investigation-addon.user.js` - Adds floating purple buttons
+2. **Combined script**: `linkedin-notion-saver-with-investigation.user.js` - Needs fixing
+3. **Server endpoint**: `/investigation/comments` - Ready and working
+4. **Analysis script**: `npm run analyze-investigation` - Ready
+
 ## Implementation Steps
+
+### Step 0: Fix Dropdown Detection (PRIORITY) 🚨
+
+**The first task is to fix why v1.7.0 doesn't detect dropdown menus.**
+
+1. **Debug the MutationObserver**
+   - Compare v1.6.0 (working) with v1.7.0 (broken)
+   - The issue is likely in the `watchForDropdowns()` function
+   - LinkedIn may have changed their dropdown structure
+
+2. **Test the detection**
+   ```javascript
+   // Add debug logging to see what's being detected
+   const observer = new MutationObserver((mutations) => {
+       mutations.forEach((mutation) => {
+           mutation.addedNodes.forEach((node) => {
+               console.log('[Debug] Node added:', node);
+               if (node.classList) {
+                   console.log('[Debug] Classes:', node.classList);
+               }
+           });
+       });
+   });
+   ```
+
+3. **Potential fixes to try**:
+   - Check if LinkedIn changed class names for dropdowns
+   - The selector `artdeco-dropdown__content` might have changed
+   - Try broader selectors like `[role="menu"]` or `[aria-label*="More actions"]`
+   - Check if the dropdown is loaded asynchronously
 
 ### Step 1: Investigation Phase 🔍
 **Status**: Ready to Start  
@@ -245,10 +295,38 @@ Use these LinkedIn post patterns for testing:
 
 - v1.2.0 - Initial implementation of links from comments
 
+## Recommended Implementation Approach
+
+### Option 1: Use the Standalone Add-on (QUICKEST PATH)
+The `comment-investigation-addon.user.js` already works and adds floating purple buttons. This could be the fastest path:
+1. Test the standalone add-on thoroughly
+2. Collect investigation data
+3. Once selectors are confirmed, integrate into main script
+
+### Option 2: Fix the Combined Script
+Debug why `linkedin-notion-saver-with-investigation.user.js` v1.7.0 doesn't detect dropdowns:
+1. Copy the working `watchForDropdowns()` function from v1.6.0
+2. Add the investigation features carefully
+3. Test incrementally
+
+### Option 3: Minimal Addition to v1.6.0
+Start with the working v1.6.0 and add ONLY the investigation menu item:
+```javascript
+// In addSaveToDropdown(), after adding Save to Notion:
+if (CONFIG.investigationMode) {
+    // Add simple investigation option
+    const investigateItem = saveMenuItem.cloneNode(true);
+    investigateItem.className = 'notionally-investigate-item';
+    // Modify text and click handler
+    menuList.insertBefore(investigateItem, saveMenuItem.nextSibling);
+}
+```
+
 ## Questions/Blockers
 
 *To be filled by developer during implementation*
 
+- [x] **BLOCKER**: v1.7.0 dropdown detection not working
 - [ ] Selector discovery findings:
 - [ ] Performance measurements:
 - [ ] Edge cases encountered:
