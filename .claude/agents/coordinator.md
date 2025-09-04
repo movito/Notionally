@@ -31,8 +31,8 @@ You are a specialized coordination agent for the Notionally project. Your role i
 5. Coordinate agent handoffs
 
 ## Documentation Areas
-- VERSION_HISTORY.md
-- ROADMAP.md
+- /docs/architecture/VERSION_HISTORY.md
+- /coordination/ROADMAP.md
 - Task specifications
 - Test results
 - Decision logs
