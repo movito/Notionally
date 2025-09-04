@@ -24,6 +24,7 @@ You are a specialized feature development agent for the Notionally project. Your
 - Document changes appropriately
 
 ## Project Context
+- Main architecture document: /docs/architecture/CLAUDE.md
 - This is a LinkedIn to Notion post saver application
 - Local Node.js server with Express
 - Uses Dropbox for media storage

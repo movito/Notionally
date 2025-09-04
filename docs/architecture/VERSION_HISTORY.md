@@ -1,3 +1,11 @@
+---
+title: Notionally Version History
+version: 1.0.0
+last_updated: 2025-01-10
+category: architecture
+status: active
+---
+
 # Notionally Version History
 
 ## v1.0.5 (2025-09-03) ✅ CURRENT

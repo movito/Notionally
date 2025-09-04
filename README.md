@@ -62,7 +62,7 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
    **Dropbox Setup (Important!):**
    - For long-term access, use a refresh token instead of access token
    - Run `npm run setup:dropbox` for an interactive setup
-   - Or see [docs/DROPBOX_SETUP.md](local-app/docs/DROPBOX_SETUP.md) for manual setup
+   - Or see [DROPBOX_SETUP.md](docs/setup/DROPBOX_SETUP.md) for manual setup
 
 4. Start the local processing app:
    ```bash
@@ -151,7 +151,7 @@ MIT License - see LICENSE file for details
 - **Notion integration failing?** Verify your API key and database permissions
 - **Dropbox links not working?** Ensure Dropbox desktop app is running and syncing
 
-For more help, see [docs/troubleshooting.md](docs/troubleshooting.md)
+For more help, see [Documentation Index](docs/INDEX.md)
 
 ## 🚧 Development Status
 
