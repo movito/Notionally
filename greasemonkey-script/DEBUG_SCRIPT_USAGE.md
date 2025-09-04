@@ -5,7 +5,7 @@
 2. Install the debug script in Firefox/Greasemonkey
 
 ## Installation
-1. Open the file `linkedin-notion-saver-debug.user.js` in Firefox
+1. Open the file `linkedin-notion-saver-v1.6.1-debug.user.js` in Firefox
 2. Greasemonkey will prompt to install it
 3. Click "Install"
 4. Navigate to LinkedIn feed

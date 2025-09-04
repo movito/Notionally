@@ -54,16 +54,17 @@ Currently, Notionally only captures the main post, missing these valuable links.
 
 The v1.7.0 script with investigation features **does not activate** when the context menu button is pressed. The v1.6.0 original script works correctly. This needs to be debugged and fixed.
 
-**Working Version**: `linkedin-notion-saver.user.js` v1.6.0  
-**Broken Version**: `linkedin-notion-saver-with-investigation.user.js` v1.7.0
+**Working Version**: `linkedin-notion-saver-v1.6.0.user.js`  
+**Broken Version**: `linkedin-notion-saver-v1.7.0-with-investigation.user.js`
 
 **Issue**: The MutationObserver for dropdown menus is not detecting the menu properly in v1.7.0.
 
 ### Investigation Tools Already Created
 
 Several investigation approaches have been prepared:
-1. **Standalone add-on**: `comment-investigation-addon.user.js` - Adds floating purple buttons
-2. **Combined script**: `linkedin-notion-saver-with-investigation.user.js` - Needs fixing
+1. **Standalone add-on**: `comment-investigation-addon-v1.0.0.user.js` - Adds floating purple buttons
+2. **Combined script**: `linkedin-notion-saver-v1.7.0-with-investigation.user.js` - Needs fixing
+3. **Debug telemetry**: `linkedin-comment-debugger-v1.0.0-debug.user.js` - Red debug buttons
 3. **Server endpoint**: `/investigation/comments` - Ready and working
 4. **Analysis script**: `npm run analyze-investigation` - Ready
 
@@ -138,7 +139,7 @@ Several investigation approaches have been prepared:
    ```
 
 ### Step 2: Greasemonkey Script Updates 📝
-**File**: `greasemonkey-script/linkedin-notion-saver.user.js`  
+**File**: `greasemonkey-script/linkedin-notion-saver-v1.6.0.user.js`  
 **Duration**: 3-4 hours
 
 1. **Add Comment Extraction Functions**
@@ -266,7 +267,7 @@ Use these LinkedIn post patterns for testing:
 - **Feature Strategy**: `/docs/development/FEATURE_V1.2.0_LINKS_FROM_COMMENTS.md`
 - **Investigation Plan**: `/docs/development/COMMENT_EXTRACTION_INVESTIGATION.md`
 - **Greasemonkey Dev Guide**: `/docs/development/GREASEMONKEY_DEVELOPMENT_GUIDE.md`
-- **Current Script**: `greasemonkey-script/linkedin-notion-saver.user.js`
+- **Current Script**: `greasemonkey-script/linkedin-notion-saver-v1.6.0.user.js`
 - **Test Examples**: Collect during investigation phase
 
 ## Notes for Developer
@@ -304,7 +305,7 @@ The `comment-investigation-addon.user.js` already works and adds floating purple
 3. Once selectors are confirmed, integrate into main script
 
 ### Option 2: Fix the Combined Script
-Debug why `linkedin-notion-saver-with-investigation.user.js` v1.7.0 doesn't detect dropdowns:
+Debug why `linkedin-notion-saver-v1.7.0-with-investigation.user.js` doesn't detect dropdowns:
 1. Copy the working `watchForDropdowns()` function from v1.6.0
 2. Add the investigation features carefully
 3. Test incrementally
