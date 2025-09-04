@@ -7,12 +7,13 @@
     "start": "./scripts/start.sh",
     "start:direct": "node src/server.js",
     "start:original": "node src/server-original.js",
-    "dev": "node src/start-with-setup.js",
-    "dev:simple": "nodemon src/server.js",
-    "dev:skip-setup": "node src/start-with-setup.js --skip-setup",
+    "dev": "node scripts/clear-port.js && node src/start-with-setup.js",
+    "dev:simple": "node scripts/clear-port.js && nodemon src/server.js",
+    "dev:skip-setup": "node scripts/clear-port.js && node src/start-with-setup.js --skip-setup",
     "setup": "node src/setup/interactive-setup.js",
     "setup:dropbox": "node scripts/get-dropbox-token.js",
     "check": "node scripts/check-setup.js",
+    "clear-port": "node scripts/clear-port.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
