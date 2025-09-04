@@ -1,186 +1,236 @@
 #!/usr/bin/env node
 
 /**
- * Investigation Data Analyzer
- * Analyzes collected comment investigation data to find patterns
+ * Analysis script for comment investigation data
+ * Run with: npm run analyze-investigation
  */
 
 const fs = require('fs');
 const path = require('path');
+const chalk = require('chalk');
 
 const investigationDir = path.join(__dirname, '../../investigation-data');
 
-// Colors for terminal output
-const colors = {
-    reset: '\x1b[0m',
-    bright: '\x1b[1m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    blue: '\x1b[34m',
-    cyan: '\x1b[36m'
-};
-
 function analyzeInvestigationData() {
-    console.log(`${colors.bright}${colors.blue}🔍 Notionally Investigation Data Analyzer${colors.reset}\n`);
+    console.log(chalk.cyan('📊 Analyzing Comment Investigation Data'));
+    console.log(chalk.gray('=' .repeat(50)));
     
     // Check if investigation directory exists
     if (!fs.existsSync(investigationDir)) {
-        console.log(`${colors.yellow}No investigation data found yet.${colors.reset}`);
-        console.log('Run the debug script on LinkedIn first to collect data.\n');
+        console.log(chalk.yellow('⚠️  No investigation data found.'));
+        console.log(chalk.gray('Run the investigation script in LinkedIn first.'));
         return;
     }
     
-    // Read all investigation files
+    // Get all JSON files
     const files = fs.readdirSync(investigationDir)
-        .filter(f => f.startsWith('comments-') && f.endsWith('.json'))
+        .filter(f => f.endsWith('.json'))
         .sort();
     
     if (files.length === 0) {
-        console.log(`${colors.yellow}No investigation files found.${colors.reset}\n`);
+        console.log(chalk.yellow('⚠️  No investigation files found.'));
         return;
     }
     
-    console.log(`Found ${colors.green}${files.length}${colors.reset} investigation file(s)\n`);
+    console.log(chalk.green(`✅ Found ${files.length} investigation file(s)\n`));
     
     // Aggregate data from all files
     const aggregated = {
         totalPosts: 0,
         postsWithComments: 0,
         postsWithLinkPattern: 0,
+        authorCommentsFound: 0,
+        linksInAuthorComments: 0,
         selectors: {},
-        authorSelectors: {},
-        linkPatterns: {
-            direct: 0,
-            redirect: 0,
-            shortened: 0,
-            textOnly: 0
-        }
+        authorPatterns: new Set(),
+        linkPatterns: [],
+        examplePosts: []
     };
     
-    // Process each file
     files.forEach(filename => {
+        console.log(chalk.blue(`\n📄 Analyzing: ${filename}`));
         const filepath = path.join(investigationDir, filename);
         const data = JSON.parse(fs.readFileSync(filepath, 'utf8'));
         
-        // Count posts
-        if (data.raw?.posts) {
-            aggregated.totalPosts += data.raw.posts.length;
-            aggregated.postsWithComments += data.raw.posts.filter(p => p.hasComments).length;
-            aggregated.postsWithLinkPattern += data.raw.posts.filter(p => p.hasLinkInCommentsPattern).length;
+        if (data.raw && data.raw.posts) {
+            const posts = data.raw.posts;
+            aggregated.totalPosts += posts.length;
             
-            // Aggregate selectors
-            data.raw.posts.forEach(post => {
-                if (post.structure?.selectors) {
-                    Object.keys(post.structure.selectors).forEach(selector => {
-                        aggregated.selectors[selector] = (aggregated.selectors[selector] || 0) + 1;
-                    });
+            posts.forEach(post => {
+                // Count posts with comments
+                if (post.hasComments || (post.commentAnalysis && post.commentAnalysis.hasComments)) {
+                    aggregated.postsWithComments++;
                 }
                 
-                // Track author selectors
-                if (post.authors?.comments) {
-                    post.authors.comments.forEach(comment => {
-                        if (comment.selector) {
-                            aggregated.authorSelectors[comment.selector] = 
-                                (aggregated.authorSelectors[comment.selector] || 0) + 1;
+                // Count posts with "link in comments" pattern
+                if (post.hasLinkInCommentsPattern || 
+                    (post.commentAnalysis && post.commentAnalysis.hasLinkInCommentsPattern)) {
+                    aggregated.postsWithLinkPattern++;
+                }
+                
+                // Analyze comment data
+                const commentAnalysis = post.commentAnalysis || post;
+                if (commentAnalysis.commentData && Array.isArray(commentAnalysis.commentData)) {
+                    const authorComments = commentAnalysis.commentData.filter(c => c.isPostAuthor);
+                    
+                    if (authorComments.length > 0) {
+                        aggregated.authorCommentsFound++;
+                        
+                        // Count links in author comments
+                        authorComments.forEach(comment => {
+                            if (comment.links && comment.links.length > 0) {
+                                aggregated.linksInAuthorComments += comment.links.length;
+                                
+                                // Save example for reference
+                                if (aggregated.examplePosts.length < 5) {
+                                    aggregated.examplePosts.push({
+                                        postIndex: post.index,
+                                        authorName: commentAnalysis.authorInfo?.name,
+                                        commentText: comment.text.substring(0, 100),
+                                        links: comment.links
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // Aggregate selectors
+                if (commentAnalysis.selectors) {
+                    Object.keys(commentAnalysis.selectors).forEach(selector => {
+                        if (!aggregated.selectors[selector]) {
+                            aggregated.selectors[selector] = 0;
                         }
+                        aggregated.selectors[selector]++;
                     });
                 }
                 
-                // Track link patterns
-                if (post.linkPatterns) {
-                    if (post.linkPatterns.directLinks?.length > 0) aggregated.linkPatterns.direct++;
-                    if (post.linkPatterns.redirectLinks?.length > 0) aggregated.linkPatterns.redirect++;
-                    if (post.linkPatterns.textUrls?.length > 0) aggregated.linkPatterns.textOnly++;
-                    post.linkPatterns.directLinks?.forEach(link => {
-                        if (link.isShortened) aggregated.linkPatterns.shortened++;
-                    });
+                // Collect author patterns
+                if (commentAnalysis.authorInfo) {
+                    aggregated.authorPatterns.add(commentAnalysis.authorInfo.selector);
                 }
             });
         }
+        
+        // Show file summary
+        if (data.analysis) {
+            console.log(chalk.gray(`  Posts analyzed: ${data.analysis.metadata.postCount}`));
+            console.log(chalk.gray(`  With comments: ${data.analysis.metadata.postsWithComments}`));
+            console.log(chalk.gray(`  With link pattern: ${data.analysis.metadata.postsWithLinkPattern}`));
+        }
     });
     
-    // Sort selectors by frequency
+    // Display aggregated results
+    console.log(chalk.cyan('\n📈 Aggregated Results'));
+    console.log(chalk.gray('=' .repeat(50)));
+    
+    console.log(chalk.white('\n📊 Statistics:'));
+    console.log(`  Total posts analyzed: ${chalk.yellow(aggregated.totalPosts)}`);
+    console.log(`  Posts with comments: ${chalk.yellow(aggregated.postsWithComments)} (${Math.round(aggregated.postsWithComments / aggregated.totalPosts * 100)}%)`);
+    console.log(`  Posts with "link in comments" pattern: ${chalk.yellow(aggregated.postsWithLinkPattern)}`);
+    console.log(`  Posts with author comments: ${chalk.yellow(aggregated.authorCommentsFound)}`);
+    console.log(`  Total links in author comments: ${chalk.yellow(aggregated.linksInAuthorComments)}`);
+    
+    console.log(chalk.white('\n🎯 Most Common Selectors:'));
     const sortedSelectors = Object.entries(aggregated.selectors)
-        .sort((a, b) => b[1] - a[1]);
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
     
-    const sortedAuthorSelectors = Object.entries(aggregated.authorSelectors)
-        .sort((a, b) => b[1] - a[1]);
-    
-    // Display results
-    console.log(`${colors.bright}📊 Summary${colors.reset}`);
-    console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-    console.log(`Total posts analyzed: ${colors.green}${aggregated.totalPosts}${colors.reset}`);
-    console.log(`Posts with comments: ${colors.green}${aggregated.postsWithComments}${colors.reset} (${Math.round(aggregated.postsWithComments/aggregated.totalPosts*100)}%)`);
-    console.log(`Posts with "link in comments" pattern: ${colors.green}${aggregated.postsWithLinkPattern}${colors.reset} (${Math.round(aggregated.postsWithLinkPattern/aggregated.totalPosts*100)}%)`);
-    console.log();
-    
-    console.log(`${colors.bright}🎯 Top Comment Container Selectors${colors.reset}`);
-    console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-    sortedSelectors.slice(0, 10).forEach(([selector, count]) => {
+    sortedSelectors.forEach(([selector, count]) => {
         const percentage = Math.round(count / aggregated.totalPosts * 100);
-        console.log(`${colors.green}${count.toString().padStart(3)}${colors.reset} (${percentage.toString().padStart(3)}%) ${selector}`);
+        console.log(`  ${chalk.green(selector)}`);
+        console.log(`    Found in ${count} posts (${percentage}%)`);
     });
-    console.log();
     
-    if (sortedAuthorSelectors.length > 0) {
-        console.log(`${colors.bright}👤 Top Author Identification Selectors${colors.reset}`);
-        console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-        sortedAuthorSelectors.slice(0, 5).forEach(([selector, count]) => {
-            console.log(`${colors.green}${count.toString().padStart(3)}${colors.reset} ${selector}`);
+    console.log(chalk.white('\n🔍 Author Selectors Found:'));
+    aggregated.authorPatterns.forEach(selector => {
+        console.log(`  ${chalk.green(selector)}`);
+    });
+    
+    if (aggregated.examplePosts.length > 0) {
+        console.log(chalk.white('\n📝 Example Posts with Author Links:'));
+        aggregated.examplePosts.forEach((example, i) => {
+            console.log(chalk.yellow(`\n  Example ${i + 1}:`));
+            console.log(`    Author: ${example.authorName}`);
+            console.log(`    Comment: "${example.commentText}..."`);
+            console.log(`    Links found:`);
+            example.links.forEach(link => {
+                console.log(`      - ${chalk.blue(link.url)}`);
+                if (link.fromText) {
+                    console.log(`        (extracted from text)`);
+                }
+            });
         });
-        console.log();
     }
     
-    console.log(`${colors.bright}🔗 Link Pattern Distribution${colors.reset}`);
-    console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-    console.log(`Direct external links: ${colors.green}${aggregated.linkPatterns.direct}${colors.reset}`);
-    console.log(`LinkedIn redirects: ${colors.green}${aggregated.linkPatterns.redirect}${colors.reset}`);
-    console.log(`Shortened (lnkd.in): ${colors.green}${aggregated.linkPatterns.shortened}${colors.reset}`);
-    console.log(`Text-only URLs: ${colors.green}${aggregated.linkPatterns.textOnly}${colors.reset}`);
-    console.log();
+    // Recommendations
+    console.log(chalk.cyan('\n💡 Recommendations'));
+    console.log(chalk.gray('=' .repeat(50)));
     
-    // Recommendations based on data
-    console.log(`${colors.bright}💡 Recommendations${colors.reset}`);
-    console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
+    if (sortedSelectors.length > 0) {
+        const topSelector = sortedSelectors[0][0];
+        console.log(chalk.green(`\n✅ Primary comment selector: "${topSelector}"`));
+        console.log(`   Reliability: ${Math.round(sortedSelectors[0][1] / aggregated.totalPosts * 100)}%`);
+    }
     
-    // Find most reliable selectors
-    const reliableSelectors = sortedSelectors.filter(([_, count]) => count >= aggregated.totalPosts * 0.8);
-    if (reliableSelectors.length > 0) {
-        console.log(`${colors.green}✓${colors.reset} Most reliable comment selector (80%+ coverage):`);
-        console.log(`  ${reliableSelectors[0][0]}`);
-    } else {
-        const bestSelector = sortedSelectors[0];
-        if (bestSelector) {
-            console.log(`${colors.yellow}⚠${colors.reset} Best comment selector (${Math.round(bestSelector[1]/aggregated.totalPosts*100)}% coverage):`);
-            console.log(`  ${bestSelector[0]}`);
-            console.log(`  Consider using multiple selectors as fallbacks`);
+    if (aggregated.authorPatterns.size > 0) {
+        const authorSelector = Array.from(aggregated.authorPatterns)[0];
+        console.log(chalk.green(`\n✅ Primary author selector: "${authorSelector}"`));
+    }
+    
+    if (aggregated.postsWithComments > 0) {
+        const successRate = Math.round(aggregated.authorCommentsFound / aggregated.postsWithComments * 100);
+        console.log(chalk.yellow(`\n📊 Author comment detection rate: ${successRate}%`));
+        
+        if (successRate < 50) {
+            console.log(chalk.red('⚠️  Low detection rate - selectors may need improvement'));
         }
     }
     
-    console.log();
+    // Save summary
+    const summaryPath = path.join(investigationDir, 'ANALYSIS_SUMMARY.md');
+    const summary = `# Comment Investigation Analysis Summary
+
+Generated: ${new Date().toISOString()}
+
+## Statistics
+- Total posts analyzed: ${aggregated.totalPosts}
+- Posts with comments: ${aggregated.postsWithComments} (${Math.round(aggregated.postsWithComments / aggregated.totalPosts * 100)}%)
+- Posts with "link in comments" pattern: ${aggregated.postsWithLinkPattern}
+- Posts with author comments: ${aggregated.authorCommentsFound}
+- Total links in author comments: ${aggregated.linksInAuthorComments}
+
+## Recommended Selectors
+
+### Comment Container
+\`\`\`javascript
+const commentSelector = '${sortedSelectors[0] ? sortedSelectors[0][0] : 'Not found'}';
+\`\`\`
+
+### Author Identification  
+\`\`\`javascript
+const authorSelector = '${Array.from(aggregated.authorPatterns)[0] || 'Not found'}';
+\`\`\`
+
+## Top Selectors Found
+${sortedSelectors.map(([sel, count]) => `- \`${sel}\` - ${count} posts`).join('\n')}
+
+## Next Steps
+1. Implement using the recommended selectors
+2. Add fallback selectors for reliability
+3. Test with edge cases
+4. Monitor for LinkedIn DOM changes
+`;
     
-    // Save analysis report
-    const reportPath = path.join(investigationDir, 'analysis-report.json');
-    const report = {
-        generatedAt: new Date().toISOString(),
-        filesAnalyzed: files.length,
-        summary: aggregated,
-        topSelectors: sortedSelectors.slice(0, 10),
-        topAuthorSelectors: sortedAuthorSelectors.slice(0, 5),
-        recommendations: {
-            primaryCommentSelector: sortedSelectors[0]?.[0] || null,
-            fallbackCommentSelectors: sortedSelectors.slice(1, 4).map(s => s[0]),
-            primaryAuthorSelector: sortedAuthorSelectors[0]?.[0] || null,
-            coverage: {
-                comments: Math.round(aggregated.postsWithComments / aggregated.totalPosts * 100),
-                linkPattern: Math.round(aggregated.postsWithLinkPattern / aggregated.totalPosts * 100)
-            }
-        }
-    };
+    fs.writeFileSync(summaryPath, summary);
+    console.log(chalk.green(`\n✅ Analysis summary saved to: ${summaryPath}`));
     
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    console.log(`📄 Full analysis report saved to: ${colors.green}investigation-data/analysis-report.json${colors.reset}\n`);
+    console.log(chalk.cyan('\n🎯 Next Steps:'));
+    console.log('1. Review the ANALYSIS_SUMMARY.md file');
+    console.log('2. Update the Greasemonkey script with discovered selectors');
+    console.log('3. Test on posts with known author comments');
+    console.log('4. Iterate based on results\n');
 }
 
-// Run analyzer
+// Run analysis
 analyzeInvestigationData();
