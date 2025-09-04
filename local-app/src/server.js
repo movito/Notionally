@@ -144,13 +144,13 @@ app.use((req, res, next) => {
 });
 
 // Rate limiting configuration
-const rateLimitConfig = config.get('rateLimiting', {
+const rateLimitConfig = config.get('rateLimiting') || {
     enabled: true,
     windowMs: 60000,
     maxRequests: 30,
     skipLocalhost: true,
     message: 'Too many requests, please slow down. You can make up to 30 saves per minute.'
-});
+};
 
 // Create rate limiter if enabled
 if (rateLimitConfig.enabled) {

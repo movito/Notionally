@@ -380,7 +380,7 @@ async function runSetup() {
 }
 
 // Export for use in server.js
-module.exports = { runSetup, checkExistingSetup };
+module.exports = { runSetup, checkExistingSetup, validateNotionCredentials };
 
 // Run if called directly
 if (require.main === module) {

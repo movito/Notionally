@@ -291,3 +291,68 @@ Include version context in commit messages:
 - Implement progress tracking for large video downloads
 - Consider adding configuration UI instead of JSON file
 - Potential for browser extension instead of Greasemonkey script
+
+## Documentation Organization Rules
+
+### IMPORTANT: Documentation Structure and Placement
+
+All markdown documentation files MUST be organized according to this structure:
+
+#### Files that MUST remain at root level:
+- `README.md` - Main project documentation
+- `CLAUDE.md` or `claude.md` - Stub file pointing to this document
+
+#### All other markdown files MUST be placed in the appropriate `/docs` subdirectory:
+
+1. **`/docs/architecture/`** - System design and technical architecture
+   - API documentation
+   - Component diagrams
+   - Technical specifications
+   - This CLAUDE.md file (the actual content)
+
+2. **`/docs/development/`** - Development guides and processes
+   - Coding standards
+   - Contributing guidelines
+   - Version history
+   - Development workflows
+
+3. **`/docs/setup/`** - Installation and configuration
+   - Getting started guides
+   - Configuration documentation
+   - Environment setup
+
+4. **`/docs/security/`** - Security documentation
+   - Security policies
+   - Audit reports
+   - Best practices
+
+5. **`/docs/roadmap/`** - Future planning
+   - Feature roadmaps
+   - Enhancement proposals
+   - Planning documents
+
+6. **`/docs/archive/`** - Historical/deprecated documentation
+   - Old planning documents
+   - Deprecated features
+   - Legacy documentation
+
+#### Documentation Creation Rules:
+
+1. **NEVER create new markdown files at the project root** unless they are README.md or CLAUDE.md stub
+2. **ALWAYS place new documentation in the appropriate `/docs` subdirectory**
+3. **Use descriptive filenames** in SCREAMING_SNAKE_CASE for visibility (e.g., `API_DOCUMENTATION.md`)
+4. **Include metadata headers** in documentation files:
+   ```yaml
+   ---
+   title: Document Title
+   version: 1.0.0
+   last_updated: YYYY-MM-DD
+   category: architecture|development|setup|security|roadmap|archive
+   status: active|deprecated|draft
+   ---
+   ```
+
+5. **When in doubt**, place new documentation in `/docs/development/` or `/docs/archive/`
+
+### Enforcement Note
+These rules are permanent and must be followed for all future documentation created in this project. This helps maintain a clean project root and organized documentation structure.
