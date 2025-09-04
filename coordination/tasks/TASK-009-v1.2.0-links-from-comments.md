@@ -55,9 +55,11 @@ Currently, Notionally only captures the main post, missing these valuable links.
 **Output**: Investigation findings document
 
 1. **Setup Debug Environment**
+   - **Follow the Greasemonkey Development Guide**: `/docs/development/GREASEMONKEY_DEVELOPMENT_GUIDE.md`
    - Copy investigation code from `/docs/development/COMMENT_EXTRACTION_INVESTIGATION.md`
    - Create debug version of Greasemonkey script (v1.6.1-debug)
    - Add all debug functions and logging
+   - Install in Firefox using Greasemonkey extension
 
 2. **Data Collection**
    - Navigate to LinkedIn feed
@@ -213,6 +215,7 @@ Use these LinkedIn post patterns for testing:
 
 - **Feature Strategy**: `/docs/development/FEATURE_V1.2.0_LINKS_FROM_COMMENTS.md`
 - **Investigation Plan**: `/docs/development/COMMENT_EXTRACTION_INVESTIGATION.md`
+- **Greasemonkey Dev Guide**: `/docs/development/GREASEMONKEY_DEVELOPMENT_GUIDE.md`
 - **Current Script**: `greasemonkey-script/linkedin-notion-saver.user.js`
 - **Test Examples**: Collect during investigation phase
 
