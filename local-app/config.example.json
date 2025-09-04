@@ -1,7 +1,8 @@
 {
   "notion": {
-    "apiKey": "secret_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "databaseId": "your-notion-database-id-here"
+    "apiKey": "${NOTION_API_KEY}",
+    "databaseId": "${NOTION_DATABASE_ID}",
+    "comment": "These values should be set in your .env file"
   },
   "dropbox": {
     "localPath": "~/Dropbox (Personal)/LinkedIn_Videos",

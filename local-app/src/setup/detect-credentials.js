@@ -15,31 +15,27 @@ const envPath = path.join(__dirname, '..', '..', '.env');
  * Check if credentials exist in environment variables
  */
 function hasEnvCredentials() {
-  // Check for Notion API key (database ID might be in config.example.json or elsewhere)
-  const hasNotionKey = process.env.NOTION_API_KEY;
-  const hasNotionDb = process.env.NOTION_DATABASE_ID;
+  // Check for Notion API key and database ID
+  const hasNotionKey = process.env.NOTION_API_KEY && 
+                      !process.env.NOTION_API_KEY.includes('your_') &&
+                      !process.env.NOTION_API_KEY.includes('${');
+  const hasNotionDb = process.env.NOTION_DATABASE_ID && 
+                     process.env.NOTION_DATABASE_ID !== 'your-notion-database-id-here' &&
+                     process.env.NOTION_DATABASE_ID !== 'your_database_id_here' &&
+                     !process.env.NOTION_DATABASE_ID.includes('${');
   
   if (hasNotionKey && hasNotionDb) {
     console.log(chalk.green('✅ Found complete credentials in environment variables'));
     return true;
-  } else if (hasNotionKey) {
-    console.log(chalk.yellow('⚠️  Found NOTION_API_KEY but missing NOTION_DATABASE_ID'));
-    // Check if we can get database ID from config.example.json
-    const examplePath = path.join(__dirname, '..', '..', 'config.example.json');
-    if (fs.existsSync(examplePath)) {
-      try {
-        const example = fs.readJsonSync(examplePath);
-        if (example.notion?.databaseId && example.notion.databaseId !== 'YOUR_DATABASE_ID') {
-          console.log(chalk.green('✅ Found database ID in config.example.json'));
-          // Set it in process.env for this session
-          process.env.NOTION_DATABASE_ID = example.notion.databaseId;
-          return true;
-        }
-      } catch (err) {
-        // Ignore
-      }
+  } else if (hasNotionKey && !hasNotionDb) {
+    console.log(chalk.yellow('⚠️  Found NOTION_API_KEY but missing valid NOTION_DATABASE_ID'));
+    if (process.env.NOTION_DATABASE_ID === 'your-notion-database-id-here') {
+      console.log(chalk.cyan('   ➜ Replace placeholder in .env with your actual database ID'));
     }
-    return false; // Has key but no database ID
+    return false;
+  } else if (!hasNotionKey && process.env.NOTION_API_KEY) {
+    console.log(chalk.yellow('⚠️  NOTION_API_KEY appears to be a placeholder'));
+    return false;
   }
   
   return false;
