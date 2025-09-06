@@ -131,6 +131,34 @@ function sanitizeUrl(url) {
 }
 
 /**
+ * Sanitize LinkedIn post content - removes dangerous tags but preserves text
+ * Does NOT escape HTML entities since LinkedIn content is already safe
+ */
+function sanitizeLinkedInPostContent(text) {
+    if (!text) return '';
+    
+    // Convert to string if not already
+    text = String(text);
+    
+    // Remove script tags and their content
+    text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    
+    // Remove iframe tags
+    text = text.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+    
+    // Remove object and embed tags
+    text = text.replace(/<(object|embed)\b[^<]*(?:(?!<\/(object|embed)>)<[^<]*)*<\/(object|embed)>/gi, '');
+    
+    // Remove on* event handlers
+    text = text.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+    text = text.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
+    
+    // DO NOT escape HTML entities - LinkedIn content is trusted
+    // Just return the cleaned text
+    return text;
+}
+
+/**
  * Sanitize the entire post data object
  */
 function sanitizePostData(postData) {
@@ -138,9 +166,9 @@ function sanitizePostData(postData) {
     
     const sanitized = { ...postData };
     
-    // Sanitize text content
+    // Sanitize text content - use LinkedIn-specific sanitization
     if (sanitized.text) {
-        sanitized.text = sanitizeText(sanitized.text);
+        sanitized.text = sanitizeLinkedInPostContent(sanitized.text);
     }
     
     // Sanitize author name
@@ -197,5 +225,6 @@ module.exports = {
     sanitizeText,
     sanitizeAuthorName,
     sanitizeUrl,
-    sanitizePostData
+    sanitizePostData,
+    sanitizeLinkedInPostContent
 };
