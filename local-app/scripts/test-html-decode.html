@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Entity Decode Test</title>
+</head>
+<body>
+    <h1>Test HTML Entity Decoding</h1>
+    
+    <!-- Simulate LinkedIn's span structure -->
+    <div id="test1">
+        <span dir="ltr">He said &quot;Hello World&quot; &amp; it&#x27;s amazing! Check https:&#x2F;&#x2F;example.com</span>
+    </div>
+    
+    <div id="test2">
+        <span dir="ltr">Testing &lt;code&gt; tags &amp; special chars: &#x2F; &#x27; &quot;</span>
+    </div>
+    
+    <button onclick="testMethod1()">Test Method 1 (Current - with placeholders)</button>
+    <button onclick="testMethod2()">Test Method 2 (Direct textContent)</button>
+    <button onclick="testMethod3()">Test Method 3 (Create new element)</button>
+    
+    <h2>Results:</h2>
+    <pre id="results"></pre>
+    
+    <script>
+        function log(message) {
+            document.getElementById('results').innerHTML += message + '\n';
+        }
+        
+        function testMethod1() {
+            // Current method in v1.7.3
+            const textElement = document.querySelector('#test1 span[dir="ltr"]');
+            const clonedElement = textElement.cloneNode(true);
+            
+            const brPlaceholder = '___NEWLINE___';
+            const pPlaceholder = '___PARAGRAPH___';
+            
+            let html = clonedElement.innerHTML;
+            log('Method 1 - innerHTML: ' + html);
+            
+            html = html.replace(/<br\s*\/?>/gi, brPlaceholder);
+            html = html.replace(/<\/p>\s*<p[^>]*>/gi, pPlaceholder);
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            let postText = tempDiv.textContent || tempDiv.innerText || '';
+            postText = postText.replace(new RegExp(brPlaceholder, 'g'), '\n');
+            postText = postText.replace(new RegExp(pPlaceholder, 'g'), '\n\n');
+            
+            log('Method 1 - Result: ' + postText);
+            log('---');
+        }
+        
+        function testMethod2() {
+            // Direct textContent (should decode entities)
+            const textElement = document.querySelector('#test1 span[dir="ltr"]');
+            const postText = textElement.textContent;
+            log('Method 2 - textContent: ' + postText);
+            log('---');
+        }
+        
+        function testMethod3() {
+            // Create new element and use its textContent
+            const textElement = document.querySelector('#test1 span[dir="ltr"]');
+            const html = textElement.innerHTML;
+            log('Method 3 - innerHTML: ' + html);
+            
+            // Create a new element
+            const decoder = document.createElement('textarea');
+            decoder.innerHTML = html;
+            const postText = decoder.value;
+            
+            log('Method 3 - Result: ' + postText);
+            log('---');
+        }
+        
+        // Test all methods on load
+        window.onload = function() {
+            log('=== Initial Testing ===\n');
+            log('Test 1 HTML: ' + document.querySelector('#test1').innerHTML);
+            log('Test 2 HTML: ' + document.querySelector('#test2').innerHTML);
+            log('\n=== Testing Methods ===\n');
+        }
+    </script>
+</body>
+</html>

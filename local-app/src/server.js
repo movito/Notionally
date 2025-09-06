@@ -445,6 +445,109 @@ app.post('/investigation/comments', asyncHandler(async (req, res) => {
     });
 }));
 
+// Endpoint to append links to existing Notion pages
+app.post('/append-links', asyncHandler(async (req, res) => {
+    const { postUrl, postAuthor, links } = req.body;
+    
+    if (!postUrl || !links || links.length === 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'Missing required fields: postUrl and links',
+            requestId: req.id
+        });
+    }
+    
+    console.log(`[${req.id}] 🔗 Appending ${links.length} links to Notion page for post: ${postUrl}`);
+    
+    try {
+        // Find the existing Notion page by URL
+        const existingPage = await notionClient.findPageByUrl(postUrl);
+        
+        if (!existingPage) {
+            return res.status(404).json({
+                success: false,
+                error: 'No existing Notion page found for this LinkedIn post. Please save the post first.',
+                requestId: req.id
+            });
+        }
+        
+        // Append the links to the existing page
+        const result = await notionClient.appendLinksToPage(existingPage.id, {
+            postAuthor,
+            links
+        });
+        
+        console.log(`[${req.id}] ✅ Successfully appended ${links.length} links to Notion page`);
+        
+        res.json({
+            success: true,
+            message: `Added ${links.length} links to Notion page`,
+            pageId: existingPage.id,
+            requestId: req.id
+        });
+        
+    } catch (error) {
+        console.error(`[${req.id}] ❌ Error appending links:`, error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            requestId: req.id
+        });
+    }
+}));
+
+// Endpoint to append comments to existing Notion pages
+app.post('/append-comment', asyncHandler(async (req, res) => {
+    const { postUrl, postAuthor, comment } = req.body;
+    
+    if (!postUrl || !comment) {
+        return res.status(400).json({
+            success: false,
+            error: 'Missing required fields: postUrl and comment',
+            requestId: req.id
+        });
+    }
+    
+    console.log(`[${req.id}] 💬 Appending comment to Notion page for post: ${postUrl}`);
+    console.log(`[${req.id}] Comment by: ${comment.author}, URLs: ${comment.urls?.length || 0}`);
+    
+    try {
+        // Find the existing Notion page by URL
+        const existingPage = await notionClient.findPageByUrl(postUrl);
+        
+        if (!existingPage) {
+            return res.status(404).json({
+                success: false,
+                error: 'No existing Notion page found for this LinkedIn post. Please save the post first.',
+                requestId: req.id
+            });
+        }
+        
+        // Append the comment to the existing page
+        const result = await notionClient.appendCommentToPage(existingPage.id, {
+            postAuthor,
+            comment
+        });
+        
+        console.log(`[${req.id}] ✅ Successfully appended comment to Notion page`);
+        
+        res.json({
+            success: true,
+            message: 'Comment appended to Notion page',
+            pageId: existingPage.id,
+            requestId: req.id
+        });
+        
+    } catch (error) {
+        console.error(`[${req.id}] ❌ Error appending comment:`, error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            requestId: req.id
+        });
+    }
+}));
+
 // Test endpoint for debugging
 app.post('/test-save', asyncHandler(async (req, res) => {
     console.log(`[${req.id}] 🧪 Test save request received`);

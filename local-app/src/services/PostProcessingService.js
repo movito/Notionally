@@ -418,7 +418,8 @@ class PostProcessingService {
             videos: data.processedVideos,
             images: data.processedImages,
             processedUrls: data.processedUrls,
-            debugInfo: data.debugInfo
+            debugInfo: data.debugInfo,
+            scriptVersion: data.scriptVersion || 'Unknown'
         };
         
         // Don't retry page creation - it creates duplicates

@@ -1,6 +1,6 @@
 {
   "name": "notionally-local-app",
-  "version": "1.0.5",
+  "version": "1.7.5",
   "description": "Local processing app for Notionally - LinkedIn to Notion video saver",
   "main": "src/server.js",
   "scripts": {
@@ -16,7 +16,10 @@
     "clear-port": "node scripts/clear-port.js",
     "analyze-investigation": "node scripts/analyze-investigation.js",
     "analyze-telemetry": "node scripts/analyze-telemetry.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check-versions": "node scripts/check-versions.js",
+    "update-version": "node scripts/check-versions.js --update",
+    "test-entities": "node scripts/test-html-entities.js",
+    "test": "npm run test-entities"
   },
   "keywords": [
     "linkedin",

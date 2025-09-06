@@ -106,6 +106,11 @@ class NotionClient {
                                 }
                             }
                         ]
+                    },
+                    'Script version': {
+                        select: {
+                            name: pageData.scriptVersion || 'Unknown'
+                        }
                     }
                 },
                 children: contentBlocks
@@ -755,6 +760,263 @@ class NotionClient {
         }
         
         return blocks;
+    }
+
+    /**
+     * Find a Notion page by its LinkedIn URL
+     * @param {string} url - The LinkedIn post URL
+     * @returns {Object|null} The found page or null
+     */
+    async findPageByUrl(url) {
+        console.log(`🔍 Searching for Notion page with URL: ${url}`);
+        
+        try {
+            const response = await this.notion.databases.query({
+                database_id: this.databaseId,
+                filter: {
+                    property: 'URL',
+                    url: {
+                        equals: url
+                    }
+                }
+            });
+            
+            if (response.results.length > 0) {
+                console.log(`✅ Found existing Notion page: ${response.results[0].id}`);
+                return response.results[0];
+            }
+            
+            console.log('ℹ️ No existing Notion page found for this URL');
+            return null;
+            
+        } catch (error) {
+            console.error('❌ Error searching for page:', error.message);
+            throw error;
+        }
+    }
+    
+    /**
+     * Append links to an existing Notion page
+     * @param {string} pageId - The Notion page ID
+     * @param {Object} linkData - Data containing author and links
+     * @returns {Object} Update result
+     */
+    async appendLinksToPage(pageId, linkData) {
+        const { postAuthor, links } = linkData;
+        console.log(`📎 Appending ${links.length} links to page ${pageId}`);
+        
+        const blocks = [];
+        
+        // Add a divider
+        blocks.push({
+            object: 'block',
+            type: 'divider',
+            divider: {}
+        });
+        
+        // Add section header
+        blocks.push({
+            object: 'block',
+            type: 'heading_2',
+            heading_2: {
+                rich_text: [{
+                    type: 'text',
+                    text: { 
+                        content: '🔗 Links from Comments' 
+                    }
+                }]
+            }
+        });
+        
+        // Add timestamp
+        blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+                rich_text: [{
+                    type: 'text',
+                    text: { 
+                        content: `Added on ${new Date().toLocaleString()}`,
+                    },
+                    annotations: {
+                        italic: true,
+                        color: 'gray'
+                    }
+                }]
+            }
+        });
+        
+        // Add each link as a callout block
+        links.forEach((link, index) => {
+            blocks.push({
+                object: 'block',
+                type: 'callout',
+                callout: {
+                    rich_text: [
+                        {
+                            type: 'text',
+                            text: {
+                                content: `${link.author}: `
+                            },
+                            annotations: {
+                                bold: true
+                            }
+                        },
+                        {
+                            type: 'text',
+                            text: {
+                                content: link.url,
+                                link: { url: link.url }
+                            },
+                            annotations: {
+                                color: 'blue'
+                            }
+                        }
+                    ],
+                    icon: {
+                        emoji: '💬'
+                    },
+                    color: 'blue_background'
+                }
+            });
+        });
+        
+        try {
+            // Append blocks to the existing page
+            const result = await this.notion.blocks.children.append({
+                block_id: pageId,
+                children: blocks
+            });
+            
+            console.log(`✅ Successfully appended ${links.length} links to Notion page`);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Failed to append links to Notion page:', error.message);
+            throw new Error(`Failed to append links: ${error.message}`);
+        }
+    }
+
+    /**
+     * Append a comment to an existing Notion page
+     * @param {string} pageId - The Notion page ID
+     * @param {Object} commentData - Data containing comment info
+     * @returns {Object} Update result
+     */
+    async appendCommentToPage(pageId, commentData) {
+        const { postAuthor, comment } = commentData;
+        console.log(`💬 Appending comment to page ${pageId}`);
+        
+        const blocks = [];
+        
+        // Add a divider
+        blocks.push({
+            object: 'block',
+            type: 'divider',
+            divider: {}
+        });
+        
+        // Add section header
+        blocks.push({
+            object: 'block',
+            type: 'heading_2',
+            heading_2: {
+                rich_text: [{
+                    type: 'text',
+                    text: { 
+                        content: '💬 Comment from LinkedIn' 
+                    }
+                }]
+            }
+        });
+        
+        // Add timestamp and author
+        blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+                rich_text: [
+                    {
+                        type: 'text',
+                        text: { 
+                            content: `By ${comment.author} • Added on ${new Date().toLocaleString()}`,
+                        },
+                        annotations: {
+                            italic: true,
+                            color: 'gray'
+                        }
+                    }
+                ]
+            }
+        });
+        
+        // Add comment content as a callout
+        blocks.push({
+            object: 'block',
+            type: 'callout',
+            callout: {
+                rich_text: [{
+                    type: 'text',
+                    text: {
+                        content: comment.content
+                    }
+                }],
+                icon: {
+                    emoji: '💭'
+                },
+                color: 'gray_background'
+            }
+        });
+        
+        // Add links if present
+        if (comment.urls && comment.urls.length > 0) {
+            blocks.push({
+                object: 'block',
+                type: 'heading_3',
+                heading_3: {
+                    rich_text: [{
+                        type: 'text',
+                        text: { 
+                            content: '🔗 Links in comment' 
+                        }
+                    }]
+                }
+            });
+            
+            comment.urls.forEach((url, index) => {
+                blocks.push({
+                    object: 'block',
+                    type: 'bulleted_list_item',
+                    bulleted_list_item: {
+                        rich_text: [{
+                            type: 'text',
+                            text: {
+                                content: url,
+                                link: { url }
+                            },
+                            annotations: {
+                                color: 'blue'
+                            }
+                        }]
+                    }
+                });
+            });
+        }
+        
+        try {
+            // Append blocks to the existing page
+            const result = await this.notion.blocks.children.append({
+                block_id: pageId,
+                children: blocks
+            });
+            
+            console.log(`✅ Successfully appended comment to Notion page`);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Failed to append comment to Notion page:', error.message);
+            throw new Error(`Failed to append comment: ${error.message}`);
+        }
     }
 
     /**
