@@ -1,0 +1,549 @@
+00:05:15.412 TypeError: Error in input stream 3bhdakbk0ktjocycal8594ni8:10263:54
+00:05:15.889 Content-Security-Policy warnings 2
+00:05:16.406 unreachable code after return statement 5hrhoek5jh6ky9mlrp1hmx5sv:22626:1
+00:05:16.494 Ignoring unsupported entryTypes: longtask. 3bhdakbk0ktjocycal8594ni8:11520:229
+00:05:16.724 Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: https://static.licdn.com/aero-v1/sc/h/5hrhoek5jh6ky9mlrp1hmx5sv
+Source Map URL: vendor.map
+00:05:16.924 XML Parsing Error: no root element found
+Location: https://www.linkedin.com/realtime/realtimeFrontendClientConnectivityTracking?action=sendHeartbeat
+Line Number 1, Column 1: realtimeFrontendClientConnectivityTracking:1:1
+00:05:16.930 Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: https://static.licdn.com/aero-v1/sc/h/3bhdakbk0ktjocycal8594ni8
+Source Map URL: chunk.698.8381ffe977d5624f9f17.map
+00:05:17.455 [Pulse Debug INIT] 🎬 Pulse Article Debugger v1.9.1 starting... <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.456 [Pulse Debug DETECT] Pulse article detected 
+Object { url: "https://www.linkedin.com/pulse/brief-history-future-design-rob-tannen-phd-8hdjf/?trackingId=aJZMWgXGTuO7By5%2BpivYhQ%3D%3D", pathname: "/pulse/brief-history-future-design-rob-tannen-phd-8hdjf/" }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.457 [Pulse Debug INIT] 📰 On Pulse article page, initializing debugger <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.457 [Pulse Debug DETECT] Pulse article detected 
+Object { url: "https://www.linkedin.com/pulse/brief-history-future-design-rob-tannen-phd-8hdjf/?trackingId=aJZMWgXGTuO7By5%2BpivYhQ%3D%3D", pathname: "/pulse/brief-history-future-design-rob-tannen-phd-8hdjf/" }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.457 [Pulse Debug INIT] 🚀 Setting up Pulse article debugger <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.458 [Pulse Debug DROPDOWN] 🔍 Starting comprehensive dropdown investigation <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.458 [Pulse Debug DROPDOWN] ❌ No .reader-actions container found <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.459 [Pulse Debug DROPDOWN] Investigation complete 
+Object { foundReaderActions: false, overflowButtonCount: 0, dropdownElementCount: 0, potentialTriggerCount: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.459 [Pulse Debug INIT] ✅ Global observer started <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.459 [Pulse Debug INIT] ✅ Debug button added <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.460 🐛 Pulse Article Debugger Active Notionally - LinkedIn Pulse Article Debugger:619:17
+00:05:17.460 Available commands: Notionally - LinkedIn Pulse Article Debugger:620:17
+00:05:17.460   pulseDebug.investigate() - Run full investigation Notionally - LinkedIn Pulse Article Debugger:621:17
+00:05:17.460   pulseDebug.logs() - View recent debug logs Notionally - LinkedIn Pulse Article Debugger:622:17
+00:05:17.460   pulseDebug.snapshot(selector) - Capture element snapshot Notionally - LinkedIn Pulse Article Debugger:623:17
+00:05:17.460   pulseDebug.findDropdowns() - Find all dropdown elements Notionally - LinkedIn Pulse Article Debugger:624:17
+00:05:17.771 TypeError: mutation.target.className.includes is not a function 2 sandbox eval code:388:52
+00:05:17.825 quill Overwriting modules/clipboard with 
+class  {}
+5hrhoek5jh6ky9mlrp1hmx5sv:2737:141
+00:05:17.827 Adding a listener for DOMNodeInserted is deprecated and will be removed soon. Instead of a MutationEvent, use MutationObserver. https://developer.mozilla.org/docs/Web/API/MutationObserver 5hrhoek5jh6ky9mlrp1hmx5sv:3290:11
+00:05:17.848 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.933 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown artdeco-dropdown--placement-top artdeco-dropdown--justification-right ember-view", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.933 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown artdeco-dropdown--placement-top artdeco-dropdown--justification-right ember-view", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.933 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "msg-overlay-bubble-header__dropdown-trigger artdeco-button artdeco-button--1 artdeco-button--circle artdeco-button--muted artdeco-button--tertiary artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-top ember-view", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.933 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "msg-overlay-bubble-header__dropdown-trigger artdeco-button artdeco-button--1 artdeco-button--circle artdeco-button--muted artdeco-button--tertiary artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-top ember-view", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:17.933 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.939 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.940 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.941 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.943 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.944 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.945 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.946 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.947 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.950 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.951 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.952 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.954 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.955 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.956 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:17.963 TypeError: mutation.target.className.includes is not a function 2 sandbox eval code:388:52
+00:05:18.048 Partitioned cookie or storage access was provided to “https://li.protechts.net/index.html?ts=1757196317886&r_id=AAY%2BKSYzbEpUC7uFXts7Fg%3D%3D&app_id=PXdOjV695v&uc=scraping&d_id=6716a7b55cb0fe4baaa604c9f1072a923710c0f1f086933be621cee23c8e2fcc” because it is loaded in the third-party context and dynamic state partitioning is enabled. main.min.js:2:19138
+00:05:18.127 XML Parsing Error: no root element found
+Location: https://www.linkedin.com/realtime/realtimeFrontendClientConnectivityTracking?action=sendHeartbeat
+Line Number 1, Column 1: realtimeFrontendClientConnectivityTracking:1:1
+00:05:18.150 Layout was forced before the page was fully loaded. If stylesheets are not yet loaded this may cause a flash of unstyled content. merchantpool1.linkedin.com
+00:05:18.206 WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER. 3bhdakbk0ktjocycal8594ni8:9814:95
+00:05:18.207 WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER. 3bhdakbk0ktjocycal8594ni8:9810:15
+00:05:18.370 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader reader-right-rail", type: "childList", addedNodes: 0, removedNodes: 1 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader reader-right-rail", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader reader-right-rail", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader reader-right-rail", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] New menu button detected, reattaching handlers <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky\n        ", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky\n        ", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] New menu button detected, reattaching handlers <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__content", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__content", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__content", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__content", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] New menu button detected, reattaching handlers <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__social-activity", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__social-activity", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reader-social-bar-sticky__social-activity", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] New menu button detected, reattaching handlers <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "feed-shared-social-action-bar\n        \n        \n        \n        \n         reader-social-bar-sticky__social-actions", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "feed-shared-social-action-bar\n        \n        \n        \n        \n         reader-social-bar-sticky__social-actions", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "feed-shared-social-action-bar\n        \n        \n        \n        \n         reader-social-bar-sticky__social-actions", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "feed-shared-social-action-bar\n        \n        \n        \n        \n         reader-social-bar-sticky__social-actions", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "feed-shared-social-action-bar\n        \n        \n        \n        \n         reader-social-bar-sticky__social-actions", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] New menu button detected, reattaching handlers <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reactions-react-button reader-social-bar-sticky__button reader-social-bar-sticky__reaction-button", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reactions-react-button reader-social-bar-sticky__button reader-social-bar-sticky__reaction-button", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reactions-react-button reader-social-bar-sticky__button reader-social-bar-sticky__reaction-button", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.371 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reactions-react-button reader-social-bar-sticky__button reader-social-bar-sticky__reaction-button", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.372 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reactions-react-button reader-social-bar-sticky__button reader-social-bar-sticky__reaction-button", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.372 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "reactions-react-button reader-social-bar-sticky__button reader-social-bar-sticky__reaction-button", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.372 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:18.383 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown artdeco-dropdown--placement-bottom artdeco-dropdown--justification-right ember-view msg-premium-mailboxes__pages-chevron", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.383 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown artdeco-dropdown--placement-bottom artdeco-dropdown--justification-right ember-view msg-premium-mailboxes__pages-chevron", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.383 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown artdeco-dropdown--placement-bottom artdeco-dropdown--justification-right ember-view msg-premium-mailboxes__pages-chevron", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.384 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown artdeco-dropdown--placement-bottom artdeco-dropdown--justification-right ember-view msg-premium-mailboxes__pages-chevron", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.384 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__trigger artdeco-button artdeco-button--1 artdeco-button--circle artdeco-button--tertiary artdeco-button--muted artdeco-dropdown__trigger--placement-bottom ember-view", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.384 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__trigger artdeco-button artdeco-button--1 artdeco-button--circle artdeco-button--tertiary artdeco-button--muted artdeco-dropdown__trigger--placement-bottom ember-view", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.384 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:18.473 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Save <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.473 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Button 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.473 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open article options dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.473 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open menu for switching identity when interacting with this post <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.473 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Rob Hutton’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Luca di Filippo’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Tathagata Samanta’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Brian Sullivan’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Surya Teja Bachu’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for William Schmidt’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Lonnie Petersheim, MID’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open messenger dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 1 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 3 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 4 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 5 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 6 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 7 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 8 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 9 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 10 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 11 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 12 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 13 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 14 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 15 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.474 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 16 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 17 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 18 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 19 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Save <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Button 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open article options dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open menu for switching identity when interacting with this post <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Rob Hutton’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Luca di Filippo’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Tathagata Samanta’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Brian Sullivan’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Surya Teja Bachu’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for William Schmidt’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Lonnie Petersheim, MID’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open messenger dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 1 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 3 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 4 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 5 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 6 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 7 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 8 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 9 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 10 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 11 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 12 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 13 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 14 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 15 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 16 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 17 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.475 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 18 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 19 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Save <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Button 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open article options dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open menu for switching identity when interacting with this post <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Rob Hutton’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Luca di Filippo’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Tathagata Samanta’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Brian Sullivan’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Surya Teja Bachu’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for William Schmidt’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Lonnie Petersheim, MID’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open messenger dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 1 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 3 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 4 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 5 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 6 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 7 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 8 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 9 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 10 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 11 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 12 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 13 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 14 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 15 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 16 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 17 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 18 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 19 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Save <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Button 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open article options dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open menu for switching identity when interacting with this post <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.476 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Rob Hutton’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Luca di Filippo’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Tathagata Samanta’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Brian Sullivan’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Surya Teja Bachu’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for William Schmidt’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Lonnie Petersheim, MID’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open messenger dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 1 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 3 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 4 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 5 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 6 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 7 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 8 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 9 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 10 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 11 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 12 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 13 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 14 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 15 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 16 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 17 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 18 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 19 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Save <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Button 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open article options dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open menu for switching identity when interacting with this post <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.477 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Rob Hutton’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Luca di Filippo’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Tathagata Samanta’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Brian Sullivan’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Surya Teja Bachu’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for William Schmidt’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Lonnie Petersheim, MID’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open messenger dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 1 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 3 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 4 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 5 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 6 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 7 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 8 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 9 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 10 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 11 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 12 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 13 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 14 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 15 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 16 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 17 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 18 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 19 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Save <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: reader-actions button: Button 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open article options dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open menu for switching identity when interacting with this post <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Charles L Mauro CHFP’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Rob Hutton’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Luca di Filippo’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Tathagata Samanta’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.478 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Brian Sullivan’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Surya Teja Bachu’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for William Schmidt’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open options for Lonnie Petersheim, MID’s comment <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open reactions menu <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Overflow: Open messenger dropdown menu <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 1 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 2 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 3 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 4 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 5 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 6 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 7 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 8 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 9 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 10 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 11 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 12 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 13 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 14 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 15 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 16 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 17 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 18 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.479 [Pulse Debug CLICK] ✅ Click handler attached to: Dropdown trigger 19 <empty string> Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:18.855 Content-Security-Policy warnings 4
+00:05:18.887 Ignoring unsupported entryTypes: longtask. recaptcha__en.js:104:65
+00:05:18.900 Partitioned cookie or storage access was provided to “https://www.google.com/recaptcha/enterprise/anchor?ar=1&k=6LcIy_MqAAAAAMKiupFSbmzW3xjGSlIfRzNWYMjC&co=aHR0cHM6Ly93d3cubGlua2VkaW4uY29tOjQ0Mw..&hl=en&v=Lu6n5xwy2ghvnPNo3IxkhcCb&size=invisible&anchor-ms=20000&execute-ms=15000&cb=tv81xifum54d” because it is loaded in the third-party context and dynamic state partitioning is enabled. recaptcha__en.js:306:157
+00:05:21.836 [Pulse Debug CLICK] 🖱️ Click detected on: Overflow: Open article options dropdown menu 
+Object { target: "svg", currentTarget: "svg", className: SVGAnimatedString, ariaExpanded: null }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.839 [Pulse Debug CLICK] Pre-click state 
+Object { timestamp: 1757196321839, dropdownsPresent: 19, visibleMenus: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.839 [Pulse Debug CLICK] 🖱️ Click detected on: Dropdown trigger 3 
+Object { target: "svg", currentTarget: "BUTTON", className: "artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-bottom ember-view artdeco-button artdeco-button--secondary artdeco-button--muted artdeco-button--1 artdeco-button--circle", ariaExpanded: "false" }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.839 [Pulse Debug CLICK] Pre-click state 
+Object { timestamp: 1757196321839, dropdownsPresent: 19, visibleMenus: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.847 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-bottom ember-view artdeco-button artdeco-button--secondary artdeco-button--muted artdeco-button--1 artdeco-button--circle", type: "attributes", addedNodes: 0, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.847 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown__content--is-open artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "attributes", addedNodes: 0, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.847 [Pulse Debug CLICK] ✨ DOM changed after click! <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.872 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown__content--is-open artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "childList", addedNodes: 0, removedNodes: 1 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.872 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown__content--is-open artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.872 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content-inner", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.872 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content-inner", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content-inner", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content-inner", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content-inner", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content-inner", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view reader-overflow-options__overflow-item", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view reader-overflow-options__overflow-item", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view reader-overflow-options__overflow-item", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:21.873 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:21.881 TypeError: mutation.target.className.includes is not a function sandbox eval code:388:52
+00:05:21.885 TypeError: mutation.target.className.includes is not a function 2 sandbox eval code:388:52
+00:05:22.344 [Pulse Debug CLICK] Post-click state (after 500ms) 
+Object { timestamp: 1757196322342, dropdownsPresent: 19, visibleMenus: 1, readerOverflowContent: div#ember48.artdeco-dropdown__content.artdeco-dropdown__content--is-open.artdeco-dropdown--is-dropdown-element.artdeco-dropdown__content--justification-right.artdeco-dropdown__content--placement-bottom.ember-view.reader-overflow-options__content }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:22.347 [Pulse Debug SUCCESS] 🎉 reader-overflow-options__content found! 
+Object { snapshot: {…} }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:22.347 [Pulse Debug CLICK] Post-click state (after 500ms) 
+Object { timestamp: 1757196322347, dropdownsPresent: 19, visibleMenus: 1, readerOverflowContent: div#ember48.artdeco-dropdown__content.artdeco-dropdown__content--is-open.artdeco-dropdown--is-dropdown-element.artdeco-dropdown__content--justification-right.artdeco-dropdown__content--placement-bottom.ember-view.reader-overflow-options__content }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:22.348 [Pulse Debug SUCCESS] 🎉 reader-overflow-options__content found! 
+Object { snapshot: {…} }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:23.856 [Pulse Debug CLICK] Click observer stopped <empty string> 2 Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:24.950 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-bottom ember-view artdeco-button artdeco-button--secondary artdeco-button--muted artdeco-button--1 artdeco-button--circle", type: "attributes", addedNodes: 0, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:24.951 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "attributes", addedNodes: 0, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:25.125 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "childList", addedNodes: 0, removedNodes: 1 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:25.125 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "childList", addedNodes: 0, removedNodes: 1 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:25.125 [Pulse Debug MUTATION] Relevant mutation detected 
+Object { targetClass: "artdeco-dropdown__content artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-right artdeco-dropdown__content--placement-bottom ember-view reader-overflow-options__content", type: "childList", addedNodes: 1, removedNodes: 0 }
+Notionally - LinkedIn Pulse Article Debugger:51:21
+00:05:27.534 This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”. u.html
+00:05:27.542 Loading failed for the <script> with source “https://cs.ns1p.net/p.js?a=1516sqc”. u.html:1:1
+00:05:27.663 This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”. u.html
+00:05:28.673 Cookie warnings 2

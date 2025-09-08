@@ -160,18 +160,35 @@ class PostProcessingService {
      * Process a single post (internal method for actual processing)
      */
     async processSinglePost(postData, clientDebugInfo) {
+        // Special handling for Pulse articles with cover image
+        let processedCoverImage = null;
+        let contentImages = postData.media?.images || [];
+        
+        if (postData.type === 'pulse_article' && postData.coverImage) {
+            this.log('INFO', 'Processing Pulse article cover image');
+            // Process cover image separately
+            const coverImageResult = await this.processImages([postData.coverImage]);
+            processedCoverImage = coverImageResult[0] || null;
+            
+            // Remove cover image from content images if it's duplicated
+            contentImages = contentImages.filter(img => 
+                (img.url || img.src) !== postData.coverImage.url
+            );
+        }
+        
         // Process components in parallel where possible
         const [videos, images, urls] = await Promise.all([
             this.processVideos(postData.media?.videos || []),
-            this.processImages(postData.media?.images || []),
+            this.processImages(contentImages),
             this.processUrls(postData.urls || [])
         ]);
         
-        // Create Notion page with all processed content EXCEPT images
+        // Create Notion page with all processed content EXCEPT regular images
         const notionPage = await this.createNotionPage({
             ...postData,
             processedVideos: videos,
             processedImages: [], // Don't include images in page creation
+            processedCoverImage: processedCoverImage, // Include cover image for Pulse articles
             processedUrls: urls,
             debugInfo: this.buildDebugInfo(clientDebugInfo)
         });
@@ -409,6 +426,7 @@ class PostProcessingService {
         this.log('INFO', 'Creating Notion page');
         
         const notionData = {
+            type: data.type, // Pass through the content type (feed_post or pulse_article)
             title: data.text?.substring(0, 100) || `LinkedIn post from ${data.author}`,
             content: data.text,
             author: data.author,
@@ -417,6 +435,7 @@ class PostProcessingService {
             timestamp: data.timestamp,
             videos: data.processedVideos,
             images: data.processedImages,
+            coverImage: data.processedCoverImage, // Add processed cover image for Pulse articles
             processedUrls: data.processedUrls,
             debugInfo: data.debugInfo,
             scriptVersion: data.scriptVersion || 'Unknown'
