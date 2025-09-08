@@ -55,7 +55,7 @@ class NotionClient {
                     },
                     'Type ': {
                         select: {
-                            name: 'LinkedIn Post'
+                            name: pageData.type === 'pulse_article' ? 'LinkedIn Article' : 'LinkedIn Post'
                         }
                     },
                     'Tags': {
@@ -63,6 +63,7 @@ class NotionClient {
                             {
                                 name: 'LinkedIn'
                             },
+                            ...(pageData.type === 'pulse_article' ? [{ name: 'Article' }] : []),
                             ...(pageData.videos && pageData.videos.length > 0 ? [{ name: 'Video' }] : []),
                             {
                                 name: pageData.author.replace(/[^a-zA-Z0-9\s]/g, '').substring(0, 30)
@@ -301,17 +302,301 @@ class NotionClient {
     }
 
     /**
+     * Parse markdown content to Notion blocks (for Pulse articles only)
+     */
+    parseMarkdownToNotionBlocks(content) {
+        const blocks = [];
+        const lines = content.split('\n');
+        let i = 0;
+        
+        while (i < lines.length) {
+            const line = lines[i];
+            
+            // Skip empty lines
+            if (!line.trim()) {
+                i++;
+                continue;
+            }
+            
+            // Headings
+            if (line.startsWith('### ')) {
+                blocks.push({
+                    object: 'block',
+                    type: 'heading_3',
+                    heading_3: {
+                        rich_text: [{
+                            type: 'text',
+                            text: { content: line.substring(4).trim() }
+                        }]
+                    }
+                });
+            }
+            else if (line.startsWith('## ')) {
+                blocks.push({
+                    object: 'block',
+                    type: 'heading_2',
+                    heading_2: {
+                        rich_text: [{
+                            type: 'text',
+                            text: { content: line.substring(3).trim() }
+                        }]
+                    }
+                });
+            }
+            else if (line.startsWith('# ')) {
+                blocks.push({
+                    object: 'block',
+                    type: 'heading_1',
+                    heading_1: {
+                        rich_text: [{
+                            type: 'text',
+                            text: { content: line.substring(2).trim() }
+                        }]
+                    }
+                });
+            }
+            // Blockquotes
+            else if (line.startsWith('> ')) {
+                const quoteLines = [];
+                while (i < lines.length && lines[i].startsWith('> ')) {
+                    quoteLines.push(lines[i].substring(2).trim());
+                    i++;
+                }
+                i--; // Back up one since we'll increment at the end
+                blocks.push({
+                    object: 'block',
+                    type: 'quote',
+                    quote: {
+                        rich_text: [{
+                            type: 'text',
+                            text: { content: quoteLines.join(' ') }
+                        }]
+                    }
+                });
+            }
+            // Bullet lists
+            else if (line.startsWith('• ')) {
+                while (i < lines.length && lines[i].startsWith('• ')) {
+                    blocks.push({
+                        object: 'block',
+                        type: 'bulleted_list_item',
+                        bulleted_list_item: {
+                            rich_text: [{
+                                type: 'text',
+                                text: { content: lines[i].substring(2).trim() }
+                            }]
+                        }
+                    });
+                    i++;
+                }
+                i--; // Back up one since we'll increment at the end
+            }
+            // Numbered lists
+            else if (/^\d+\.\s/.test(line)) {
+                while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+                    blocks.push({
+                        object: 'block',
+                        type: 'numbered_list_item',
+                        numbered_list_item: {
+                            rich_text: [{
+                                type: 'text',
+                                text: { content: lines[i].replace(/^\d+\.\s/, '').trim() }
+                            }]
+                        }
+                    });
+                    i++;
+                }
+                i--; // Back up one since we'll increment at the end
+            }
+            // Divider
+            else if (line.trim() === '---') {
+                blocks.push({
+                    object: 'block',
+                    type: 'divider',
+                    divider: {}
+                });
+            }
+            // Code blocks
+            else if (line.startsWith('```')) {
+                const codeLines = [];
+                i++; // Skip opening ```
+                while (i < lines.length && !lines[i].startsWith('```')) {
+                    codeLines.push(lines[i]);
+                    i++;
+                }
+                // Skip closing ``` if found
+                if (i < lines.length && lines[i].startsWith('```')) {
+                    i++;
+                }
+                blocks.push({
+                    object: 'block',
+                    type: 'code',
+                    code: {
+                        rich_text: [{
+                            type: 'text',
+                            text: { content: codeLines.join('\n') || ' ' } // Notion requires non-empty content
+                        }],
+                        language: 'plain text'
+                    }
+                });
+                i--; // Back up one since we'll increment at the end
+            }
+            // Regular paragraphs
+            else {
+                // Collect continuous lines until we hit a blank line or special formatting
+                const paragraphLines = [];
+                while (i < lines.length && lines[i].trim() && 
+                       !lines[i].startsWith('#') && !lines[i].startsWith('>') && 
+                       !lines[i].startsWith('•') && !/^\d+\.\s/.test(lines[i]) && 
+                       !lines[i].startsWith('```') && lines[i].trim() !== '---') {
+                    paragraphLines.push(lines[i].trim());
+                    i++;
+                }
+                i--; // Back up one since we'll increment at the end
+                
+                if (paragraphLines.length > 0) {
+                    const paragraphText = paragraphLines.join(' ');
+                    // Parse inline formatting
+                    const richText = this.parseInlineFormatting(paragraphText);
+                    
+                    // Split long paragraphs if needed
+                    const maxLength = 2000;
+                    if (paragraphText.length <= maxLength) {
+                        blocks.push({
+                            object: 'block',
+                            type: 'paragraph',
+                            paragraph: {
+                                rich_text: richText
+                            }
+                        });
+                    } else {
+                        // For long paragraphs, use simple text splitting
+                        let remainingText = paragraphText;
+                        while (remainingText.length > 0) {
+                            const chunk = remainingText.substring(0, maxLength);
+                            blocks.push({
+                                object: 'block',
+                                type: 'paragraph',
+                                paragraph: {
+                                    rich_text: [{
+                                        type: 'text',
+                                        text: { content: chunk }
+                                    }]
+                                }
+                            });
+                            remainingText = remainingText.substring(maxLength);
+                        }
+                    }
+                }
+            }
+            
+            i++;
+        }
+        
+        return blocks;
+    }
+    
+    /**
+     * Parse inline markdown formatting (bold, italic, code, links)
+     */
+    parseInlineFormatting(text) {
+        // For now, return simple text. Full inline parsing can be added later
+        // This is complex due to nested formatting and would benefit from a proper parser
+        return [{
+            type: 'text',
+            text: { content: text }
+        }];
+    }
+
+    /**
      * Build content blocks for the Notion page
      */
     buildContentBlocks(pageData) {
         const blocks = [];
 
+        // For Pulse articles, add cover image right at the top if available
+        if (pageData.type === 'pulse_article' && pageData.coverImage) {
+            console.log('🖼️ Adding Pulse article cover image');
+            
+            // Add the cover image
+            if (pageData.coverImage.shareableUrl) {
+                // Extract streaming URL for Dropbox
+                let streamingUrl;
+                if (typeof pageData.coverImage.shareableUrl === 'object' && pageData.coverImage.shareableUrl.streamingUrl) {
+                    streamingUrl = pageData.coverImage.shareableUrl.streamingUrl;
+                } else if (typeof pageData.coverImage.shareableUrl === 'string') {
+                    streamingUrl = pageData.coverImage.shareableUrl
+                        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                        .replace('?dl=0', '');
+                }
+                
+                blocks.push({
+                    object: 'block',
+                    type: 'image',
+                    image: {
+                        type: 'external',
+                        external: {
+                            url: streamingUrl
+                        },
+                        caption: pageData.coverImage.caption ? [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: pageData.coverImage.caption
+                                }
+                            }
+                        ] : []
+                    }
+                });
+            } else if (pageData.coverImage.url) {
+                // Fallback: Add as callout if no shareable URL yet
+                blocks.push({
+                    object: 'block',
+                    type: 'callout',
+                    callout: {
+                        rich_text: [
+                            {
+                                type: 'text',
+                                text: {
+                                    content: `📸 Cover Image: ${pageData.coverImage.caption || 'Pulse Article Cover'}`
+                                }
+                            }
+                        ],
+                        icon: {
+                            emoji: '🖼️'
+                        },
+                        color: 'blue_background'
+                    }
+                });
+            }
+            
+            // Add spacing after cover image
+            blocks.push({
+                object: 'block',
+                type: 'paragraph',
+                paragraph: {
+                    rich_text: [{
+                        type: 'text',
+                        text: { content: ' ' }
+                    }]
+                }
+            });
+        }
+
         // Add post content as rich text
         if (pageData.content) {
-            // Split long content into paragraphs
-            const paragraphs = pageData.content.split('\\n\\n').filter(p => p.trim());
-            
-            paragraphs.forEach(paragraph => {
+            // Check if this is a Pulse article - use markdown parser
+            if (pageData.type === 'pulse_article') {
+                console.log('📝 Parsing Pulse article markdown to Notion blocks');
+                const markdownBlocks = this.parseMarkdownToNotionBlocks(pageData.content);
+                blocks.push(...markdownBlocks);
+            } else {
+                // Keep existing logic for feed posts
+                console.log('📄 Processing feed post content as paragraphs');
+                // Split long content into paragraphs
+                const paragraphs = pageData.content.split('\\n\\n').filter(p => p.trim());
+                
+                paragraphs.forEach(paragraph => {
                 // Notion has a 2000 character limit per text block
                 // Split long paragraphs into chunks
                 const maxLength = 2000;
@@ -372,6 +657,7 @@ class NotionClient {
                     }
                 }
             });
+            } // Close the else block for feed posts
         }
 
         // Add URLs/Links section if present
