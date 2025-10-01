@@ -1,6 +1,6 @@
 {
   "name": "notionally-local-app",
-  "version": "1.7.5",
+  "version": "1.8.0",
   "description": "Local processing app for Notionally - LinkedIn to Notion video saver",
   "main": "src/server.js",
   "scripts": {
@@ -19,7 +19,8 @@
     "check-versions": "node scripts/check-versions.js",
     "update-version": "node scripts/check-versions.js --update",
     "test-entities": "node scripts/test-html-entities.js",
-    "test": "npm run test-entities"
+    "test": "npm run test-entities",
+    "fetch-data-source-id": "node scripts/fetch-data-source-id.js"
   },
   "keywords": [
     "linkedin",
@@ -31,7 +32,7 @@
   "author": "Fredrik Matheson",
   "license": "MIT",
   "dependencies": {
-    "@notionhq/client": "^2.2.15",
+    "@notionhq/client": "^5.1.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",

@@ -5,8 +5,16 @@ class NotionClient {
         this.config = config;
         this.notion = new Client({
             auth: config.notion.apiKey,
+            notionVersion: config.notion.apiVersion || undefined, // v1.8.0: Optional API version
         });
         this.databaseId = config.notion.databaseId;
+        this.dataSourceId = config.notion.dataSourceId || null; // v1.8.0: Optional data source ID
+        this.apiVersion = config.notion.apiVersion || 'default';
+
+        // v1.8.0: Warn about v2.0.0 requirement
+        if (!this.dataSourceId && this.apiVersion === 'default') {
+            console.warn('⚠️  Notionally v2.0.0 will require a data source ID. Run setup to prepare for the upgrade.');
+        }
     }
     
     /**
@@ -15,6 +23,51 @@ class NotionClient {
      */
     isConfigured() {
         return !!(this.config.notion?.apiKey && this.databaseId);
+    }
+
+    /**
+     * Fetch data source ID for the configured database (v1.8.0)
+     * This prepares for Notion API 2025-09-03 which requires data source IDs
+     * @returns {Promise<string>} The data source ID
+     */
+    async fetchDataSourceId() {
+        console.log('🔍 Fetching data source ID for database...');
+
+        try {
+            // First, try to get the database to see if it has data source info
+            const database = await this.notion.databases.retrieve({
+                database_id: this.databaseId,
+            });
+
+            // Check if the database response includes data source information
+            // In the new API, databases are themselves data sources
+            if (database.id) {
+                this.dataSourceId = database.id;
+                console.log(`✅ Data source ID retrieved: ${this.dataSourceId}`);
+                console.log('💡 Save this ID in your config.json under notion.dataSourceId for v2.0.0');
+                return this.dataSourceId;
+            }
+
+            throw new Error('Could not determine data source ID');
+
+        } catch (error) {
+            console.error('❌ Failed to fetch data source ID:', error.message);
+            console.error('💡 This is OK for now but will be required in v2.0.0');
+            // For backward compatibility, use database ID as fallback
+            this.dataSourceId = this.databaseId;
+            return this.dataSourceId;
+        }
+    }
+
+    /**
+     * Ensure we have a data source ID (v1.8.0)
+     * Fetches if not already set
+     */
+    async ensureDataSourceId() {
+        if (!this.dataSourceId) {
+            await this.fetchDataSourceId();
+        }
+        return this.dataSourceId;
     }
 
     /**
