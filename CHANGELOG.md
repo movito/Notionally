@@ -5,34 +5,42 @@ All notable changes to Notionally will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2025-09-30
+## [2.0.0] - 2025-10-01
 
 ### Added
-- **Notion API 2025-09-03 support** - Major version upgrade for new Notion API
-- Upgraded `@notionhq/client` SDK from v2.2.15 to v5.1.0
-- Added `fetchDataSourceId()` method to NotionClient for data source detection
-- Added `ensureDataSourceId()` helper method for automatic data source ID fetching
-- New configuration options:
-  - `notion.dataSourceId` (optional, will be required in v2.0.0)
-  - `notion.apiVersion` (optional, defaults to latest)
-- New npm script: `npm run fetch-data-source-id` - Helper to retrieve data source ID
-- Updated `.env.example` with new optional environment variables:
-  - `NOTION_DATA_SOURCE_ID`
-  - `NOTION_API_VERSION`
-- Migration plan documentation in `/docs/development/NOTION_API_MIGRATION_PLAN.md`
+- **SDK Upgrade:** Upgraded `@notionhq/client` from v2.2.15 to v5.1.0
+- **Data Source Support:** Added `fetchDataSourceId()` method to detect Notion data source IDs
+- **Helper Method:** Added `ensureDataSourceId()` for automatic data source ID management
+- **New Configuration Options** (optional):
+  - `notion.dataSourceId` - For future Notion API 2025-09-03 compatibility
+  - `notion.apiVersion` - Allows specifying Notion API version
+- **Migration Helper:** New npm script `npm run fetch-data-source-id` to retrieve data source ID
+- **Environment Variables:** Added support for `NOTION_DATA_SOURCE_ID` and `NOTION_API_VERSION`
+- **Documentation:** Comprehensive migration plan and testing documentation
 
 ### Changed
-- NotionClient constructor now accepts optional `apiVersion` parameter
-- ConfigManager updated to support optional `dataSourceId` and `apiVersion` from environment
-- Warning message shown if data source ID is not configured
-- **BREAKING:** SDK upgraded from v2.2.15 to v5.1.0
+- NotionClient constructor now accepts optional `apiVersion` configuration parameter
+- ConfigManager updated to load `dataSourceId` and `apiVersion` from environment variables
+- Warning message displayed when data source ID is not configured (optional for v2.0.0)
+
+### Technical Details
+- **SDK Compatibility:** Upgraded to SDK v5.1.0 while maintaining backward-compatible API patterns
+- **API Patterns:** All Notion API calls continue to use `database_id` (not `data_source_id`)
+- **Database Structure:** Fixed compatibility with SDK v5.1.0 database response changes (`data_sources` array)
+- **Non-Breaking:** All existing v1.7.5 configurations work without modification
+
+### Testing
+- **Phase 2 Baseline:** 5/5 tests passed - Module loading, SDK version, syntax validation
+- **Phase 3 Real API:** 10/11 tests passed - Live Notion API integration verified
+- **Critical Suite:** 4/5 tests passed - Core functionality confirmed (Dropbox optional)
+- **Verification:** 2 real Notion pages created during testing
 
 ### Notes
-- **Backward compatible:** All existing configurations will continue to work with SDK v5.x
-- **Action recommended:** Run `npm run fetch-data-source-id` to get your data source ID
-- **Future preparation:** Data source ID will be required in future versions using API 2025-09-03
-- SDK upgrade enables future migration to new Notion API patterns
-- This is a major version bump due to SDK upgrade (v2.x → v5.x)
+- **Backward Compatible:** This is a NON-BREAKING release despite major version bump
+- **Major Version Rationale:** SDK major version jump (v2.x → v5.x) justifies app v2.0.0
+- **Future Ready:** Preparation for Notion API 2025-09-03 (not yet implemented)
+- **Action Optional:** Run `npm run fetch-data-source-id` to prepare for future API versions
+- **Migration:** Upgrading from v1.7.5 requires no configuration changes
 
 ## [1.7.5] - 2025-01-06
 

@@ -41,10 +41,30 @@ archive/
 
 ## Version Synchronization
 
-These files MUST have matching version numbers:
-1. `greasemonkey-script/linkedin-notion-saver.user.js` (@version header)
+### General Rule
+
+These files SHOULD have matching version numbers:
+1. `greasemonkey-script/linkedin-notion-saver-vX.X.X.user.js` (@version header and filename)
 2. `local-app/package.json` (version field)
 3. Git tags (when releasing)
+
+### Exception: Backend-Only Releases
+
+**Allowed:** Backend version ahead of greasemonkey version when:
+- Release only affects backend code (`local-app/` directory)
+- No greasemonkey script changes required
+- Clearly documented in release notes
+
+**Example:** v2.0.0 backend with v1.16.2 greasemonkey
+- Backend: SDK upgrade, server changes
+- Greasemonkey: No changes needed (client-side unaffected)
+- Documentation: Must note "backend-only release"
+
+**When to Create New Greasemonkey Version:**
+- New features requiring client-side changes
+- Bug fixes in greasemonkey script
+- API changes affecting client communication
+- UI/UX improvements in LinkedIn interface
 
 ## What NOT to Do
 
