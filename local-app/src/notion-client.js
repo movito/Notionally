@@ -1375,7 +1375,10 @@ class NotionClient {
             });
             
             console.log(`✅ Database accessible: "${database.title[0]?.plain_text || 'Untitled'}"`);
-            
+
+            // SDK v5.1.0: databases now have data_sources instead of direct properties
+            const dataSources = database.data_sources || [];
+
             return {
                 user: {
                     id: response.id,
@@ -1385,7 +1388,8 @@ class NotionClient {
                 database: {
                     id: database.id,
                     title: database.title[0]?.plain_text || 'Untitled',
-                    properties: Object.keys(database.properties)
+                    properties: dataSources.length,
+                    dataSources: dataSources
                 }
             };
             
