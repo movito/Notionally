@@ -5,10 +5,10 @@ All notable changes to Notionally will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.0] - 2025-09-30
+## [2.0.0] - 2025-09-30
 
 ### Added
-- **Notion API 2025-09-03 preparation** - Non-breaking preparation for upcoming API changes
+- **Notion API 2025-09-03 support** - Major version upgrade for new Notion API
 - Upgraded `@notionhq/client` SDK from v2.2.15 to v5.1.0
 - Added `fetchDataSourceId()` method to NotionClient for data source detection
 - Added `ensureDataSourceId()` helper method for automatic data source ID fetching
@@ -24,13 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - NotionClient constructor now accepts optional `apiVersion` parameter
 - ConfigManager updated to support optional `dataSourceId` and `apiVersion` from environment
-- Warning message shown if data source ID is not configured (preparing for v2.0.0)
+- Warning message shown if data source ID is not configured
+- **BREAKING:** SDK upgraded from v2.2.15 to v5.1.0
 
 ### Notes
-- **Backward compatible:** All existing configurations will continue to work
-- **Action recommended:** Run `npm run fetch-data-source-id` to prepare for v2.0.0
-- **v2.0.0 preview:** This release prepares for Notion API breaking changes in v2.0.0
-- No functional changes to existing features - pure preparation release
+- **Backward compatible:** All existing configurations will continue to work with SDK v5.x
+- **Action recommended:** Run `npm run fetch-data-source-id` to get your data source ID
+- **Future preparation:** Data source ID will be required in future versions using API 2025-09-03
+- SDK upgrade enables future migration to new Notion API patterns
+- This is a major version bump due to SDK upgrade (v2.x → v5.x)
 
 ## [1.7.5] - 2025-01-06
 

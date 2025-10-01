@@ -34,7 +34,7 @@ Notion is releasing a new API version (2025-09-03) with breaking changes to supp
 
 ### Phase 1: Preparation Release (v1.8.0) - NON-BREAKING
 
-**Branch:** `feature/v1.8.0-notion-api-prep`
+**Branch:** `feature/v2.0.0-notion-api-upgrade`
 
 **Goals:**
 - Upgrade SDK while maintaining backward compatibility
@@ -95,7 +95,7 @@ Notion is releasing a new API version (2025-09-03) with breaking changes to supp
 ```
 v1.7.5 (Current - Stable)
    │
-   ├── feature/v1.8.0-notion-api-prep
+   ├── feature/v2.0.0-notion-api-upgrade
    │   │
    │   └──> v1.8.0 (Preparation Release - Non-breaking)
    │        │ - SDK upgraded
@@ -113,7 +113,7 @@ v1.7.5 (Current - Stable)
 
 ## Branching Rules
 
-### feature/v1.8.0-notion-api-prep
+### feature/v2.0.0-notion-api-upgrade
 - **Base:** main (v1.7.5)
 - **Purpose:** Preparation, backward-compatible changes
 - **Merge to:** main → becomes v1.8.0
@@ -310,7 +310,7 @@ npm install
 
 ## Next Steps
 
-1. ✅ Create `feature/v1.8.0-notion-api-prep` branch
+1. ✅ Create `feature/v2.0.0-notion-api-upgrade` branch
 2. ⏳ Implement v1.8.0 changes
 3. ⏳ Test v1.8.0 thoroughly
 4. ⏳ Release v1.8.0

@@ -11,9 +11,9 @@ class NotionClient {
         this.dataSourceId = config.notion.dataSourceId || null; // v1.8.0: Optional data source ID
         this.apiVersion = config.notion.apiVersion || 'default';
 
-        // v1.8.0: Warn about v2.0.0 requirement
+        // v2.0.0: Warn about future requirement
         if (!this.dataSourceId && this.apiVersion === 'default') {
-            console.warn('⚠️  Notionally v2.0.0 will require a data source ID. Run setup to prepare for the upgrade.');
+            console.warn('⚠️  Future versions may require a data source ID. Run `npm run fetch-data-source-id` to prepare.');
         }
     }
     
@@ -26,7 +26,7 @@ class NotionClient {
     }
 
     /**
-     * Fetch data source ID for the configured database (v1.8.0)
+     * Fetch data source ID for the configured database (v2.0.0)
      * This prepares for Notion API 2025-09-03 which requires data source IDs
      * @returns {Promise<string>} The data source ID
      */
@@ -44,7 +44,7 @@ class NotionClient {
             if (database.id) {
                 this.dataSourceId = database.id;
                 console.log(`✅ Data source ID retrieved: ${this.dataSourceId}`);
-                console.log('💡 Save this ID in your config.json under notion.dataSourceId for v2.0.0');
+                console.log('💡 Save this ID in your config.json under notion.dataSourceId for future compatibility');
                 return this.dataSourceId;
             }
 
@@ -52,7 +52,7 @@ class NotionClient {
 
         } catch (error) {
             console.error('❌ Failed to fetch data source ID:', error.message);
-            console.error('💡 This is OK for now but will be required in v2.0.0');
+            console.error('💡 This is OK for now but may be required in future versions');
             // For backward compatibility, use database ID as fallback
             this.dataSourceId = this.databaseId;
             return this.dataSourceId;
@@ -60,7 +60,7 @@ class NotionClient {
     }
 
     /**
-     * Ensure we have a data source ID (v1.8.0)
+     * Ensure we have a data source ID (v2.0.0)
      * Fetches if not already set
      */
     async ensureDataSourceId() {

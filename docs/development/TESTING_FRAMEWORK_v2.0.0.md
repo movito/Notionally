@@ -1,9 +1,9 @@
-# Testing Framework for v1.8.0
+# Testing Framework for v2.0.0
 
 **Philosophy:** Build slowly and carefully, testing at every turn. Quality over speed.
 
 **Status:** In Progress
-**Branch:** `feature/v1.8.0-notion-api-prep`
+**Branch:** `feature/v2.0.0-notion-api-prep`
 **Date:** 2025-09-30
 
 ---
@@ -417,7 +417,7 @@ testPageCreation();
 
 **Steps:**
 1. Identify current production greasemonkey script
-2. Update @version header to 1.8.0
+2. Update @version header to 2.0.0
 3. Update filename to match version
 4. Update SCRIPT_VERSION constant
 5. Run `npm run check-versions`
@@ -466,9 +466,9 @@ npm run check-versions
 ```
 
 **Checklist:**
-- [ ] package.json: v1.8.0
-- [ ] greasemonkey script: v1.8.0
-- [ ] CHANGELOG: v1.8.0 entry exists
+- [ ] package.json: v2.0.0
+- [ ] greasemonkey script: v2.0.0
+- [ ] CHANGELOG: v2.0.0 entry exists
 - [ ] All versions match
 
 #### QA 6.2: All Tests Pass

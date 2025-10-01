@@ -54,7 +54,7 @@ class ConfigManager {
         if (process.env.NOTION_DATABASE_ID) {
             this.config.notion.databaseId = process.env.NOTION_DATABASE_ID;
         }
-        // v1.8.0: Optional data source ID and API version
+        // v2.0.0: Optional data source ID and API version
         if (process.env.NOTION_DATA_SOURCE_ID) {
             this.config.notion.dataSourceId = process.env.NOTION_DATA_SOURCE_ID;
         }
