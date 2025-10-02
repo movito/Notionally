@@ -59,21 +59,43 @@ async function fetchDataSourceId() {
             database_id: databaseId,
         });
 
-        // In Notion API 2025-09-03, the database ID is the data source ID
-        const dataSourceId = database.id;
         const databaseTitle = database.title[0]?.plain_text || 'Untitled';
-
         console.log('✅ Database found:', databaseTitle);
-        console.log('✅ Data Source ID:', dataSourceId);
+        console.log('   Database ID:', database.id);
+        console.log();
+
+        // In Notion API 2025-09-03, databases have a data_sources array
+        let dataSourceId;
+
+        if (database.data_sources && database.data_sources.length > 0) {
+            // Use the first data source (most databases have only one)
+            dataSourceId = database.data_sources[0].id;
+            console.log('✅ Data Source ID:', dataSourceId);
+            console.log(`   (Found ${database.data_sources.length} data source(s))`);
+
+            if (database.data_sources.length > 1) {
+                console.log('\n⚠️  Multiple data sources detected:');
+                database.data_sources.forEach((ds, i) => {
+                    console.log(`   [${i + 1}] ${ds.id}`);
+                });
+                console.log('   Using the first one. If you need a different one, update manually.');
+            }
+        } else {
+            // Fallback: older API behavior
+            dataSourceId = database.id;
+            console.log('⚠️  No data_sources array found');
+            console.log('   Using database ID as fallback:', dataSourceId);
+        }
+
         console.log();
 
         // Check if they're the same
         if (dataSourceId === databaseId) {
-            console.log('ℹ️  Your data source ID is the same as your database ID');
-            console.log('   This is typical for most Notion databases');
+            console.log('ℹ️  Data source ID matches database ID');
+            console.log('   This is the old-style database structure');
         } else {
-            console.log('ℹ️  Your data source ID differs from your database ID');
-            console.log('   This is typical for databases with multiple sources');
+            console.log('ℹ️  Data source ID differs from database ID');
+            console.log('   This is the new multi-source database structure');
         }
 
         console.log('\n📝 Next Steps:\n');

@@ -89,7 +89,7 @@ class NotionClient {
             // Build the page content blocks
             const contentBlocks = this.buildContentBlocks(pageData);
             
-            // Create the page (v3.0.0: Uses data_source_id)
+            // Create the page (v3.0.0: Uses data_source_id with correct ID from data_sources array)
             const response = await this.notion.pages.create({
                 parent: {
                     type: 'data_source_id',
