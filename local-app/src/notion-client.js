@@ -3,18 +3,25 @@ const { Client } = require('@notionhq/client');
 class NotionClient {
     constructor(config) {
         this.config = config;
+
+        // v3.0.0: Require data source ID
+        this.dataSourceId = config.notion.dataSourceId;
+        if (!this.dataSourceId) {
+            throw new Error(
+                '❌ dataSourceId is required in v3.0.0\n' +
+                '   Run: npm run fetch-data-source-id\n' +
+                '   Then add NOTION_DATA_SOURCE_ID to your config'
+            );
+        }
+
+        // v3.0.0: Default to API version 2025-09-03
         this.notion = new Client({
             auth: config.notion.apiKey,
-            notionVersion: config.notion.apiVersion || undefined, // v1.8.0: Optional API version
+            notionVersion: config.notion.apiVersion || '2025-09-03',
         });
-        this.databaseId = config.notion.databaseId;
-        this.dataSourceId = config.notion.dataSourceId || null; // v1.8.0: Optional data source ID
-        this.apiVersion = config.notion.apiVersion || 'default';
 
-        // v2.0.0: Warn about future requirement
-        if (!this.dataSourceId && this.apiVersion === 'default') {
-            console.warn('⚠️  Future versions may require a data source ID. Run `npm run fetch-data-source-id` to prepare.');
-        }
+        this.databaseId = config.notion.databaseId;
+        this.apiVersion = config.notion.apiVersion || '2025-09-03';
     }
     
     /**
@@ -26,8 +33,8 @@ class NotionClient {
     }
 
     /**
-     * Fetch data source ID for the configured database (v2.0.0)
-     * This prepares for Notion API 2025-09-03 which requires data source IDs
+     * Fetch data source ID for the configured database (v3.0.0)
+     * Required by Notion API 2025-09-03 for multi-source database support
      * @returns {Promise<string>} The data source ID
      */
     async fetchDataSourceId() {
@@ -60,8 +67,8 @@ class NotionClient {
     }
 
     /**
-     * Ensure we have a data source ID (v2.0.0)
-     * Fetches if not already set
+     * Ensure we have a data source ID (v3.0.0)
+     * Required - constructor will throw if not set
      */
     async ensureDataSourceId() {
         if (!this.dataSourceId) {
@@ -82,10 +89,11 @@ class NotionClient {
             // Build the page content blocks
             const contentBlocks = this.buildContentBlocks(pageData);
             
-            // Create the page
+            // Create the page (v3.0.0: Uses data_source_id)
             const response = await this.notion.pages.create({
                 parent: {
-                    database_id: this.databaseId,
+                    type: 'data_source_id',
+                    data_source_id: this.dataSourceId,
                 },
                 properties: {
                     // Using hybrid schema: existing fields + new Notionally fields
@@ -1108,10 +1116,11 @@ class NotionClient {
      */
     async findPageByUrl(url) {
         console.log(`🔍 Searching for Notion page with URL: ${url}`);
-        
+
         try {
-            const response = await this.notion.databases.query({
-                database_id: this.databaseId,
+            // v3.0.0: Use dataSources.query() instead of databases.query()
+            const response = await this.notion.dataSources.query({
+                data_source_id: this.dataSourceId,
                 filter: {
                     property: 'URL',
                     url: {
@@ -1428,8 +1437,9 @@ class NotionClient {
      */
     async findExistingPage(sourceUrl) {
         try {
-            const response = await this.notion.databases.query({
-                database_id: this.databaseId,
+            // v3.0.0: Use dataSources.query() instead of databases.query()
+            const response = await this.notion.dataSources.query({
+                data_source_id: this.dataSourceId,
                 filter: {
                     property: 'URL',
                     url: {
