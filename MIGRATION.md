@@ -372,6 +372,9 @@ npm start
 - 10/11 real API tests passed
 - 4/5 critical functionality tests passed
 - 2 real Notion pages created during testing
+- Tested upgrade path: v1.7.5 → v2.0.0 specifically verified
+
+*Note: Older version upgrades (v1.6.0, v1.5.0, etc.) should work but have not been explicitly tested.*
 
 ### Q: Will my data be affected?
 
