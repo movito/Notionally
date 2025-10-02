@@ -5,6 +5,92 @@ All notable changes to Notionally will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2025-10-02
+
+### ⚠️ BREAKING CHANGES
+
+**This is a BREAKING release that requires configuration updates.**
+
+- **Required:** `notion.dataSourceId` must now be configured
+- **Required:** Run `npm run fetch-data-source-id` before upgrading
+- **API Change:** Now uses Notion API version 2025-09-03 by default
+- **Not Compatible:** v2.0.0 configs without `dataSourceId` will not work
+
+### Added
+- **Notion API 2025-09-03:** Full implementation of multi-source database support
+- **New API Methods:** Using `dataSources.query()` instead of `databases.query()`
+- **Required Configuration:** `notion.dataSourceId` is now mandatory
+- **Default API Version:** Automatically uses Notion API version 2025-09-03
+- **Enhanced Validation:** ConfigManager validates presence of required `dataSourceId`
+- **Better Error Messages:** Clear instructions when `dataSourceId` is missing
+
+### Changed
+- **BREAKING:** `notion.dataSourceId` changed from optional to required
+- **BREAKING:** `pages.create()` now uses `data_source_id` instead of `database_id`
+- **BREAKING:** `findPageByUrl()` now uses `dataSources.query()` instead of `databases.query()`
+- **BREAKING:** `findExistingPage()` now uses `dataSources.query()` instead of `databases.query()`
+- NotionClient constructor now throws error if `dataSourceId` is missing
+- Default API version changed from `undefined` to `'2025-09-03'`
+- ConfigManager logs now include data source ID and API version
+
+### Migration from v2.0.0
+
+**Required Steps:**
+```bash
+# 1. Fetch your data source ID
+npm run fetch-data-source-id
+
+# 2. Add to your .env file:
+NOTION_DATA_SOURCE_ID=your_data_source_id_here
+
+# 3. Or add to config.json:
+{
+  "notion": {
+    "dataSourceId": "your_data_source_id_here"
+  }
+}
+
+# 4. Upgrade to v3.0.0
+git pull origin main
+cd local-app && npm install
+npm start
+```
+
+**Migration Difficulty:** ⭐⭐ Medium (10 minutes, config change required)
+
+### Rollback
+If you need to rollback to v2.0.0:
+```bash
+git checkout v2.0.0
+cd local-app && npm install
+npm start
+```
+
+### Technical Details
+- Uses Notion SDK v5.1.0 (unchanged from v2.0.0)
+- Implements `data_source_id` parent type in page creation
+- All database queries now use data source endpoints
+- Maintains backward compatibility with `databaseId` for reference
+- Full multi-source database support enabled
+
+### Testing
+- TBD: Unit tests for new API patterns
+- TBD: Integration tests with real Notion API
+- TBD: Migration tests from v2.0.0
+
+### Documentation
+- Added `/docs/development/V3.0.0_IMPLEMENTATION_PLAN.md`
+- Added `/docs/development/MIGRATION_v3.md` (pending)
+- Updated all code comments to reflect v3.0.0 changes
+
+### Notes
+- **Why Major Version:** Breaking configuration changes require major version bump
+- **Notion Requirement:** Notion may not enforce API 2025-09-03 yet, but we're ready
+- **Single User Impact:** As the only user, migration is straightforward
+- **Future Proof:** Fully prepared for when Notion enforces new API
+
+---
+
 ## [2.0.0] - 2025-10-01
 
 ### Added
