@@ -4,9 +4,9 @@
     "databaseId": "${NOTION_DATABASE_ID}",
     "dataSourceId": "${NOTION_DATA_SOURCE_ID}",
     "apiVersion": "2025-09-03",
-    "comment_1": "apiKey and databaseId are required",
-    "comment_2": "dataSourceId is optional for v2.0.0 but recommended for future compatibility",
-    "comment_3": "apiVersion is optional - defaults to latest Notion API version",
+    "comment_1": "apiKey, databaseId, and dataSourceId are REQUIRED in v3.0.0",
+    "comment_2": "Run 'npm run fetch-data-source-id' to get your dataSourceId",
+    "comment_3": "apiVersion is optional - defaults to 2025-09-03",
     "comment_4": "Set values in your .env file or directly here"
   },
   "dropbox": {

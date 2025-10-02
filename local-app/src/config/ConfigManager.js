@@ -54,7 +54,7 @@ class ConfigManager {
         if (process.env.NOTION_DATABASE_ID) {
             this.config.notion.databaseId = process.env.NOTION_DATABASE_ID;
         }
-        // v2.0.0: Optional data source ID and API version
+        // v3.0.0: Required data source ID, optional API version
         if (process.env.NOTION_DATA_SOURCE_ID) {
             this.config.notion.dataSourceId = process.env.NOTION_DATA_SOURCE_ID;
         }
@@ -75,20 +75,24 @@ class ConfigManager {
         const required = {
             'notion.apiKey': this.config.notion?.apiKey,
             'notion.databaseId': this.config.notion?.databaseId,
+            'notion.dataSourceId': this.config.notion?.dataSourceId, // v3.0.0: Required
             'dropbox.localPath': this.config.dropbox?.localPath,
             'server.port': this.config.server?.port,
             'server.host': this.config.server?.host
         };
-        
+
         const missing = [];
         for (const [key, value] of Object.entries(required)) {
             if (!value) {
                 missing.push(key);
             }
         }
-        
+
         if (missing.length > 0) {
-            throw new Error(`Missing required configuration: ${missing.join(', ')}`);
+            throw new Error(
+                `Missing required configuration: ${missing.join(', ')}\n` +
+                `For dataSourceId, run: npm run fetch-data-source-id`
+            );
         }
         
         // Validate port range
@@ -108,7 +112,9 @@ class ConfigManager {
         console.log('  Server:', `${this.config.server.host}:${this.config.server.port}`);
         console.log('  Dropbox path:', this.config.dropbox.localPath);
         console.log('  Notion database:', this.maskValue(this.config.notion.databaseId));
+        console.log('  Notion data source:', this.maskValue(this.config.notion.dataSourceId)); // v3.0.0
         console.log('  Notion API key:', this.maskValue(this.config.notion.apiKey));
+        console.log('  Notion API version:', this.config.notion.apiVersion || '2025-09-03'); // v3.0.0
         
         if (this.config.dropbox.refreshToken) {
             console.log('  Dropbox auth: Using refresh token');
