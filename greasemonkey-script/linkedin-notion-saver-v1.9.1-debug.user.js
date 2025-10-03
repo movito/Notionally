@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - LinkedIn Pulse Article Debugger
+// @name         notionally - LinkedIn Pulse Article Debugger
 // @namespace    http://tampermonkey.net/
 // @version      1.9.1
 // @description  Debug version to capture LinkedIn Pulse article dropdown behavior

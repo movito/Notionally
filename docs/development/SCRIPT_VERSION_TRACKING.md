@@ -2,7 +2,7 @@
 
 ## Overview
 
-Starting from v1.7.3, Notionally tracks which version of the Greasemonkey script was used to save each LinkedIn post. This helps with:
+Starting from v1.7.3, notionally tracks which version of the Greasemonkey script was used to save each LinkedIn post. This helps with:
 
 1. **Debugging**: Identify which posts might be affected by specific bugs
 2. **Data Quality**: Track improvements in text extraction across versions

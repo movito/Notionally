@@ -1,4 +1,4 @@
-# Notionally Development Roadmap
+# notionally Development Roadmap
 
 ## Current State: v1.0.1 (Protected & Stable)
 

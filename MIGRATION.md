@@ -443,8 +443,8 @@ npm run fetch-data-source-id
 
 ### Get Help
 
-- **Issues:** https://github.com/movito/Notionally/issues
-- **Discussions:** https://github.com/movito/Notionally/discussions
+- **Issues:** https://github.com/movito/notionally/issues
+- **Discussions:** https://github.com/movito/notionally/discussions
 - **Documentation:** `/docs` folder in repo
 
 ### Report Problems
@@ -476,4 +476,4 @@ If you find issues with v2.0.0:
 
 **Last Updated:** 2025-10-01
 **Version:** 2.0.0
-**Author:** Notionally Project
+**Author:** notionally Project

@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - LinkedIn to Notion Saver (DEBUG)
+// @name         notionally - LinkedIn to Notion Saver (DEBUG)
 // @namespace    http://tampermonkey.net/
 // @version      1.6.1-debug
 // @description  Debug version for comment extraction investigation

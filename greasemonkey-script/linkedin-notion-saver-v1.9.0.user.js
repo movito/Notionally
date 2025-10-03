@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - LinkedIn to Notion Saver (with Pulse Articles)
+// @name         notionally - LinkedIn to Notion Saver (with Pulse Articles)
 // @namespace    http://tampermonkey.net/
 // @version      1.9.0
 // @description  Save LinkedIn posts and Pulse articles directly to Notion
@@ -23,7 +23,7 @@
     'use strict';
     
     // Log script loading on every page
-    console.log('[Notionally v1.9.0] Script loaded on:', window.location.href);
+    console.log('[notionally v1.9.0] Script loaded on:', window.location.href);
     
     // ============ CONFIGURATION ============
     const CONFIG = {
@@ -36,12 +36,12 @@
     // ============ UTILITIES ============
     function log(...args) {
         if (CONFIG.debugMode) {
-            console.log('[Notionally]', ...args);
+            console.log('[notionally]', ...args);
         }
     }
     
     function error(...args) {
-        console.error('[Notionally]', ...args);
+        console.error('[notionally]', ...args);
     }
     
     // ============ PULSE ARTICLE DETECTION ============
@@ -465,7 +465,7 @@
     
     // ============ MAIN INITIALIZATION ============
     async function init() {
-        log('Initializing Notionally v1.9.0...');
+        log('Initializing notionally v1.9.0...');
         
         // Check if local server is running
         try {
@@ -524,7 +524,7 @@
             subtree: true
         });
         
-        log('Notionally v1.9.0 initialized successfully');
+        log('notionally v1.9.0 initialized successfully');
         log('Features enabled:', {
             feedPosts: true,
             pulseArticles: CONFIG.pulseArticleSupport,

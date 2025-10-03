@@ -92,8 +92,8 @@ LinkedIn video URLs include auth tokens:
 
 Check browser console for:
 ```
-[Notionally] Captured potential video URL: https://...
-[Notionally] Videos with stream URLs: 1/1
+[notionally] Captured potential video URL: https://...
+[notionally] Videos with stream URLs: 1/1
 ```
 
 Check server logs for:

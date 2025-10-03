@@ -1,4 +1,4 @@
-# Development Safeguards for Notionally
+# Development Safeguards for notionally
 
 ## Critical Working Features (DO NOT BREAK)
 

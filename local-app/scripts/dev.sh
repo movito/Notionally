@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Notionally Development Server Starter
+# notionally Development Server Starter
 # Automatically kills any existing process on port before starting
 
 PORT=${PORT:-8765}

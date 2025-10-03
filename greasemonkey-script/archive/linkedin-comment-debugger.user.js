@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - LinkedIn Comment Debugger
+// @name         notionally - LinkedIn Comment Debugger
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0-debug
 // @description  Enhanced debugging for LinkedIn comment detection

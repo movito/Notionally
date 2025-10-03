@@ -1,7 +1,7 @@
 # Feature Developer Brief - TASK-007
 
 ## Your Mission
-Implement safe security hardening measures for the Notionally app. These are LOW RISK improvements that enhance security without any chance of breaking LinkedIn integration.
+Implement safe security hardening measures for the notionally app. These are LOW RISK improvements that enhance security without any chance of breaking LinkedIn integration.
 
 ## Current State
 - Branch: `feature/v1.0.4-security-fixes-1` (already checked out)

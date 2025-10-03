@@ -8,7 +8,7 @@ status: active
 
 # Security Documentation
 
-Security audits, plans, and current protection measures for Notionally.
+Security audits, plans, and current protection measures for notionally.
 
 ## Documents
 

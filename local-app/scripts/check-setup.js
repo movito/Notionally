@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Setup checker for Notionally
+ * Setup checker for notionally
  * Validates configuration and environment variables
  */
 
@@ -9,7 +9,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
-console.log('\n🔍 Notionally Setup Checker\n');
+console.log('\n🔍 notionally Setup Checker\n');
 console.log('=' .repeat(50));
 
 let hasErrors = false;

@@ -47,7 +47,7 @@
 ### Step 1: Check Current Version
 
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 cat package.json | grep version
 ```
 
@@ -119,7 +119,7 @@ Option 2: In your config.json file:
 
 #### Option A: Using .env file (Recommended)
 
-Edit `/Users/broadcaster_one/Github/Notionally/local-app/.env`:
+Edit `/Users/broadcaster_one/Github/notionally/local-app/.env`:
 
 ```bash
 # Add this line:
@@ -131,7 +131,7 @@ NOTION_API_VERSION=2025-09-03
 
 #### Option B: Using config.json
 
-Edit `/Users/broadcaster_one/Github/Notionally/local-app/config.json`:
+Edit `/Users/broadcaster_one/Github/notionally/local-app/config.json`:
 
 ```json
 {
@@ -151,8 +151,8 @@ Edit `/Users/broadcaster_one/Github/Notionally/local-app/config.json`:
 ### Step 5: Upgrade to v3.0.0
 
 ```bash
-# Make sure you're in the Notionally directory
-cd /Users/broadcaster_one/Github/Notionally
+# Make sure you're in the notionally directory
+cd /Users/broadcaster_one/Github/notionally
 
 # Pull the latest changes
 git pull origin main
@@ -247,7 +247,7 @@ If you need to rollback:
 # Stop the server (Ctrl+C)
 
 # Checkout v2.0.0
-cd /Users/broadcaster_one/Github/Notionally
+cd /Users/broadcaster_one/Github/notionally
 git checkout v2.0.0
 
 # Restore old config
@@ -530,6 +530,6 @@ curl http://localhost:8765/test-notion
 
 **Migration Guide Version:** 1.0
 **Last Updated:** 2025-10-02
-**For:** Notionally v2.0.0 → v3.0.0
+**For:** notionally v2.0.0 → v3.0.0
 
 🎯 **Ready to migrate? Start with Step 1!**

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Clear port utility for Notionally
+ * Clear port utility for notionally
  * Automatically kills any process using the specified port
  */
 

@@ -13,7 +13,7 @@ Without the Dropbox API, images are saved locally but can't be embedded in Notio
 3. Choose:
    - **API**: Choose "Scoped access"
    - **Access type**: Choose "Full Dropbox"
-   - **Name**: Enter a unique name like "Notionally-YourName"
+   - **Name**: Enter a unique name like "notionally-YourName"
 4. Click "Create app"
 
 ## Step 2: Configure Permissions

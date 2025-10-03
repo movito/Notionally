@@ -1,4 +1,4 @@
-# Incremental Security Strategy for Notionally
+# Incremental Security Strategy for notionally
 
 ## Our Approach: Baby Steps with Testing
 

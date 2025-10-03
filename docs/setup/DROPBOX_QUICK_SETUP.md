@@ -8,7 +8,7 @@
 3. Choose:
    - **API**: Scoped access
    - **Access**: Full Dropbox
-   - **Name**: Notionally-YourName (must be unique)
+   - **Name**: notionally-YourName (must be unique)
 4. Click "Create app"
 
 ### Step 2: Configure Permissions

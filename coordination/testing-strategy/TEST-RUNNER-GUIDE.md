@@ -1,7 +1,7 @@
-# Test Runner Guide for Notionally
+# Test Runner Guide for notionally
 
 ## Overview
-This document provides essential information for test-runner agents to effectively validate features and maintain quality in the Notionally project.
+This document provides essential information for test-runner agents to effectively validate features and maintain quality in the notionally project.
 
 ## Quick Start
 

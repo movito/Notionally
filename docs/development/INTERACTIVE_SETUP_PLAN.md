@@ -122,7 +122,7 @@ Create `.notionally-setup` file to track setup progress:
 
 ### Step 1: Welcome Screen
 ```
-Welcome to Notionally! 🎉
+Welcome to notionally! 🎉
 
 Let's get you set up to save LinkedIn posts to Notion.
 
@@ -142,7 +142,7 @@ Step 1 of 4: Connect to Notion
    [Open Notion Integrations] (opens https://www.notion.so/my-integrations)
    
 2. Click "New Integration"
-   - Name: "Notionally"
+   - Name: "notionally"
    - Copy the API key
    
 3. Paste your API key:
@@ -150,7 +150,7 @@ Step 1 of 4: Connect to Notion
    
 4. Share your database with the integration:
    - Open your Notion database
-   - Click ••• → Connections → Add Connection → Notionally
+   - Click ••• → Connections → Add Connection → notionally
    
 5. Get your database ID:
    - Open database as full page
@@ -361,7 +361,7 @@ const inquirer = require('inquirer');
 const fs = require('fs-extra');
 
 async function runSetup() {
-  console.log('\n🎉 Welcome to Notionally Setup!\n');
+  console.log('\n🎉 Welcome to notionally Setup!\n');
   
   const answers = await inquirer.prompt([
     {

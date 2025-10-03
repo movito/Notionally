@@ -1,5 +1,5 @@
 /**
- * Smart credential detection for Notionally
+ * Smart credential detection for notionally
  * Checks multiple sources for existing configuration
  */
 

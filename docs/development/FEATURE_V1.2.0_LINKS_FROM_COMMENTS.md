@@ -17,7 +17,7 @@ LinkedIn's algorithm penalizes posts with external links, reducing their reach. 
 2. Adding a comment immediately after with "Link in comments 👇" 
 3. Including the actual link(s) in their own comment
 
-Currently, Notionally only captures the main post content, missing these valuable author-provided links.
+Currently, notionally only captures the main post content, missing these valuable author-provided links.
 
 ## Solution Strategy
 

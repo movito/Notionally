@@ -14,7 +14,7 @@ require('dotenv').config();
 
 async function fetchDataSourceId() {
     console.log('🔍 Fetching Data Source ID for Notion Database\n');
-    console.log('This will help prepare your config for Notionally v2.0.0\n');
+    console.log('This will help prepare your config for notionally v2.0.0\n');
 
     // Load config
     const configPath = path.join(__dirname, '..', 'config.json');
@@ -123,7 +123,7 @@ async function fetchDataSourceId() {
         console.log();
 
         console.log('✅ Configuration updated successfully!');
-        console.log('💡 This prepares you for Notionally v2.0.0');
+        console.log('💡 This prepares you for notionally v2.0.0');
         console.log();
 
         // Ask if they want to auto-update config.json

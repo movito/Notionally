@@ -96,7 +96,7 @@ class NotionClient {
                     data_source_id: this.dataSourceId,
                 },
                 properties: {
-                    // Using hybrid schema: existing fields + new Notionally fields
+                    // Using hybrid schema: existing fields + new notionally fields
                     'Name': {
                         title: [
                             {
@@ -131,7 +131,7 @@ class NotionClient {
                             }
                         ]
                     },
-                    // New Notionally-specific fields
+                    // New notionally-specific fields
                     'Author': {
                         rich_text: [
                             {
@@ -889,7 +889,7 @@ class NotionClient {
             {
                 type: 'text',
                 text: {
-                    content: `📊 Saved via Notionally on ${new Date().toLocaleString()}\n`
+                    content: `📊 Saved via notionally on ${new Date().toLocaleString()}\n`
                 }
             },
             {
@@ -1420,9 +1420,9 @@ class NotionClient {
         console.log('🧪 Creating test Notion page...');
         
         const testData = {
-            title: 'Test Page from Notionally',
-            content: 'This is a test page created by Notionally to verify the integration is working correctly.\\n\\nIf you can see this, everything is set up properly!',
-            author: 'Notionally Test',
+            title: 'Test Page from notionally',
+            content: 'This is a test page created by notionally to verify the integration is working correctly.\\n\\nIf you can see this, everything is set up properly!',
+            author: 'notionally Test',
             sourceUrl: 'https://github.com/yourusername/Notionally',
             timestamp: new Date().toISOString(),
             videos: [],

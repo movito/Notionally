@@ -1,4 +1,4 @@
-# Incremental Security Upgrade Plan for Notionally v1.0.1
+# Incremental Security Upgrade Plan for notionally v1.0.1
 
 ## Current State
 - Working v1.0.0 baseline

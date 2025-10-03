@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Notionally Server Management Script
+# notionally Server Management Script
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -11,12 +11,12 @@ PORT=8765
 
 case "$1" in
     start)
-        echo -e "${GREEN}🚀 Starting Notionally server...${NC}"
+        echo -e "${GREEN}🚀 Starting notionally server...${NC}"
         npm run dev
         ;;
     
     stop)
-        echo -e "${YELLOW}🛑 Stopping Notionally server...${NC}"
+        echo -e "${YELLOW}🛑 Stopping notionally server...${NC}"
         PID=$(lsof -i :$PORT | grep LISTEN | awk '{print $2}')
         if [ ! -z "$PID" ]; then
             kill $PID
@@ -27,7 +27,7 @@ case "$1" in
         ;;
     
     restart)
-        echo -e "${YELLOW}🔄 Restarting Notionally server...${NC}"
+        echo -e "${YELLOW}🔄 Restarting notionally server...${NC}"
         $0 stop
         sleep 1
         $0 start
@@ -51,7 +51,7 @@ case "$1" in
         ;;
     
     *)
-        echo "Notionally Server Manager"
+        echo "notionally Server Manager"
         echo ""
         echo "Usage: $0 {start|stop|restart|status|clean}"
         echo ""

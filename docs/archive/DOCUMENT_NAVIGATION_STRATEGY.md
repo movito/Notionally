@@ -24,7 +24,7 @@ status: active
 
 ### Layer 1: Central Index File (`/docs/INDEX.md`)
 ```markdown
-# Notionally Documentation Index
+# notionally Documentation Index
 
 ## Quick Links
 - [Architecture Overview](./architecture/CLAUDE.md)

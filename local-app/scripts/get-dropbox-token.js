@@ -30,7 +30,7 @@ async function getRefreshToken() {
             clientSecret = await question('Enter your App Secret: ');
         } else {
             clientId = 'lxx59je81bsuya4';
-            console.log('\n⚠️  Note: You\'ll need the app secret for the default Notionally app.');
+            console.log('\n⚠️  Note: You\'ll need the app secret for the default notionally app.');
             console.log('Contact the maintainer or create your own Dropbox app.\n');
             clientSecret = await question('Enter the App Secret: ');
         }

@@ -1,4 +1,4 @@
-# Versioning Standards for Notionally
+# Versioning Standards for notionally
 
 ## Core Principle: One Version, One Script
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Feature Developer Agent for Notionally
+# Feature Developer Agent for notionally
 # Purpose: Implement new features and fix bugs
 
 AGENT_NAME="feature-developer"
@@ -23,7 +23,7 @@ cat << 'EOF'
 AGENT ROLE: Feature Developer
 ============================
 
-You are the implementation specialist for the Notionally project.
+You are the implementation specialist for the notionally project.
 You write and modify code to add features and fix issues.
 
 RESPONSIBILITIES:
@@ -99,5 +99,5 @@ EOF
 
 echo
 echo -e "${GREEN}Agent instructions loaded.${NC}"
-echo -e "${YELLOW}Ready to develop features for Notionally.${NC}"
+echo -e "${YELLOW}Ready to develop features for notionally.${NC}"
 echo

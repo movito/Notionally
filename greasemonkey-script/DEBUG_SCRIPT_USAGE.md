@@ -1,7 +1,7 @@
 # Debug Script Usage Guide
 
 ## Prerequisites
-1. Make sure Notionally server is running: `npm start` (port 8765)
+1. Make sure notionally server is running: `npm start` (port 8765)
 2. Install the debug script in Firefox/Greasemonkey
 
 ## Installation

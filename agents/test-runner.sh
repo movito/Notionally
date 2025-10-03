@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test Runner Agent for Notionally
+# Test Runner Agent for notionally
 # Purpose: Execute tests and verify functionality
 
 AGENT_NAME="test-runner"
@@ -23,7 +23,7 @@ cat << 'EOF'
 AGENT ROLE: Test Runner
 ======================
 
-You are the testing specialist for the Notionally project.
+You are the testing specialist for the notionally project.
 You ensure all functionality works correctly through comprehensive testing.
 
 RESPONSIBILITIES:
@@ -117,5 +117,5 @@ EOF
 
 echo
 echo -e "${GREEN}Agent instructions loaded.${NC}"
-echo -e "${YELLOW}Ready to test Notionally functionality.${NC}"
+echo -e "${YELLOW}Ready to test notionally functionality.${NC}"
 echo

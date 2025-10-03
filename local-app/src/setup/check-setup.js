@@ -1,5 +1,5 @@
 /**
- * Setup Detection for Notionally
+ * Setup Detection for notionally
  * Checks if configuration exists before starting server
  */
 

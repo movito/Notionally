@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Critical Functionality Test Suite for Notionally
+# Critical Functionality Test Suite for notionally
 # Run this before ANY commit to ensure nothing is broken
 
 set -e  # Exit on any error

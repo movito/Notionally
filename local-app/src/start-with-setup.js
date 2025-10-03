@@ -27,7 +27,7 @@ async function main() {
   
   if (!hasValidConfig) {
     // No credentials found anywhere
-    console.log(chalk.cyan('Welcome to Notionally! Let\'s get you set up.\n'));
+    console.log(chalk.cyan('Welcome to notionally! Let\'s get you set up.\n'));
     
     // Run interactive setup
     const { runSetup } = require('./setup/interactive-setup');
@@ -41,7 +41,7 @@ async function main() {
       
     } catch (err) {
       console.log(chalk.red('\n❌ Setup was not completed.'));
-      console.log(chalk.yellow('Run `npm run setup` to configure Notionally.\n'));
+      console.log(chalk.yellow('Run `npm run setup` to configure notionally.\n'));
       process.exit(1);
     }
   } else {

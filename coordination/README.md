@@ -1,6 +1,6 @@
 # Coordination Folder
 
-This folder contains all project coordination documentation for Notionally.
+This folder contains all project coordination documentation for notionally.
 
 ## Structure
 

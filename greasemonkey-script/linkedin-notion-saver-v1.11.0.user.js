@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - LinkedIn to Notion Saver (with Investigation)
+// @name         notionally - LinkedIn to Notion Saver (with Investigation)
 // @namespace    http://tampermonkey.net/
 // @version      1.11.0
 // @description  v1.11.0 - Enhanced Pulse article detection with direct button monitoring
@@ -31,34 +31,34 @@
     'use strict';
     
     // Log script loading on every page
-    console.log('[Notionally v1.11.0] Script loaded on:', window.location.href);
+    console.log('[notionally v1.11.0] Script loaded on:', window.location.href);
     
     // Check if we're on a LinkedIn redirect page
     if (window.location.hostname === 'www.linkedin.com' && 
         (window.location.pathname.includes('/redir/') || 
          window.location.pathname.includes('/safety/go'))) {
         
-        console.log('[Notionally] ✅ Redirect page detected!');
-        console.log('[Notionally] Full URL:', window.location.href);
-        console.log('[Notionally] Pathname:', window.location.pathname);
+        console.log('[notionally] ✅ Redirect page detected!');
+        console.log('[notionally] Full URL:', window.location.href);
+        console.log('[notionally] Pathname:', window.location.pathname);
         
         // Look for the actual destination URL on the page
         const findDestinationUrl = () => {
-            console.log('[Notionally] findDestinationUrl called');
+            console.log('[notionally] findDestinationUrl called');
             
             // Log all anchors on the page for debugging
             const allAnchors = document.querySelectorAll('a[href]');
-            console.log('[Notionally] Total anchors found:', allAnchors.length);
+            console.log('[notionally] Total anchors found:', allAnchors.length);
             allAnchors.forEach((a, index) => {
                 if (!a.href.includes('linkedin.com')) {
-                    console.log(`[Notionally] Non-LinkedIn anchor ${index}:`, a.href, 'data-tracking:', a.getAttribute('data-tracking-control-name'));
+                    console.log(`[notionally] Non-LinkedIn anchor ${index}:`, a.href, 'data-tracking:', a.getAttribute('data-tracking-control-name'));
                 }
             });
             // LinkedIn shows the destination URL in an anchor tag with specific attributes
             // Priority 1: Look for the button with external_url_click tracking
             const externalUrlButton = document.querySelector('a[data-tracking-control-name="external_url_click"]');
             if (externalUrlButton && externalUrlButton.href && !externalUrlButton.href.includes('linkedin.com')) {
-                console.log('[Notionally] Found destination URL in external link button:', externalUrlButton.href);
+                console.log('[notionally] Found destination URL in external link button:', externalUrlButton.href);
                 localStorage.setItem('notionally_last_redirect_url', externalUrlButton.href);
                 localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
                 return externalUrlButton.href;
@@ -68,7 +68,7 @@
             const artdecoButtons = document.querySelectorAll('a.artdeco-button[href]');
             for (const button of artdecoButtons) {
                 if (button.href && !button.href.includes('linkedin.com') && button.href.startsWith('http')) {
-                    console.log('[Notionally] Found destination URL in button:', button.href);
+                    console.log('[notionally] Found destination URL in button:', button.href);
                     localStorage.setItem('notionally_last_redirect_url', button.href);
                     localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
                     return button.href;
@@ -80,7 +80,7 @@
             for (const elem of urlElements) {
                 const href = elem.href;
                 if (href && !href.includes('linkedin.com') && !href.includes('lnkd.in') && href.startsWith('http')) {
-                    console.log('[Notionally] Found destination URL:', href);
+                    console.log('[notionally] Found destination URL:', href);
                     
                     // Store it for the main script to retrieve
                     localStorage.setItem('notionally_last_redirect_url', href);
@@ -94,7 +94,7 @@
             const pageText = document.body.innerText;
             const urlMatch = pageText.match(/https?:\/\/(?!.*linkedin\.com)[^\s]+/);
             if (urlMatch) {
-                console.log('[Notionally] Found URL in page text:', urlMatch[0]);
+                console.log('[notionally] Found URL in page text:', urlMatch[0]);
                 localStorage.setItem('notionally_last_redirect_url', urlMatch[0]);
                 localStorage.setItem('notionally_last_redirect_time', Date.now().toString());
                 return urlMatch[0];
@@ -103,16 +103,16 @@
         
         // Try multiple times as the page loads
         // LinkedIn redirect pages may take a moment to render
-        console.log('[Notionally] Starting URL capture attempts...');
+        console.log('[notionally] Starting URL capture attempts...');
         const attempts = [0, 100, 300, 500, 800, 1200, 1800, 2500];
         attempts.forEach(delay => {
             setTimeout(() => {
-                console.log(`[Notionally] Attempt at ${delay}ms`);
+                console.log(`[notionally] Attempt at ${delay}ms`);
                 const url = findDestinationUrl();
                 if (url) {
-                    console.log(`[Notionally] ✅ URL captured after ${delay}ms: ${url}`);
+                    console.log(`[notionally] ✅ URL captured after ${delay}ms: ${url}`);
                 } else {
-                    console.log(`[Notionally] ❌ No URL found after ${delay}ms`);
+                    console.log(`[notionally] ❌ No URL found after ${delay}ms`);
                 }
             }, delay);
         });
@@ -147,7 +147,7 @@
     const originalLog = console.log;
     function collectingLog(...args) {
         // Call original console.log
-        originalLog('[Notionally]', ...args);
+        originalLog('[notionally]', ...args);
         
         // Collect log for sending to server
         const timestamp = new Date().toISOString();
@@ -238,7 +238,7 @@
     };
     
     const error = (...args) => {
-        console.error('[Notionally]', ...args);
+        console.error('[notionally]', ...args);
         // Also collect errors
         const timestamp = new Date().toISOString();
         const message = args.map(arg => {
@@ -1041,14 +1041,14 @@
                                     
                                     if (!resolved) {
                                         // Fallback: Check if our redirect page script captured the URL
-                                        log('[Notionally] Polling did not resolve, checking localStorage...');
+                                        log('[notionally] Polling did not resolve, checking localStorage...');
                                         const capturedUrl = localStorage.getItem('notionally_last_redirect_url');
                                         const captureTime = localStorage.getItem('notionally_last_redirect_time');
-                                        log(`[Notionally] localStorage check - URL: ${capturedUrl}, Time: ${captureTime}`);
+                                        log(`[notionally] localStorage check - URL: ${capturedUrl}, Time: ${captureTime}`);
                                         
                                         if (capturedUrl && captureTime) {
                                             const timeDiff = Date.now() - parseInt(captureTime);
-                                            log(`[Notionally] Time difference: ${timeDiff}ms`);
+                                            log(`[notionally] Time difference: ${timeDiff}ms`);
                                             if (timeDiff < 10000) { // Within last 10 seconds
                                                 finalUrl = capturedUrl;
                                                 resolved = true;
@@ -1058,10 +1058,10 @@
                                                 localStorage.removeItem('notionally_last_redirect_url');
                                                 localStorage.removeItem('notionally_last_redirect_time');
                                             } else {
-                                                log('[Notionally] ❌ Captured URL is too old (>10s)');
+                                                log('[notionally] ❌ Captured URL is too old (>10s)');
                                             }
                                         } else {
-                                            log('[Notionally] ❌ No URL captured in localStorage');
+                                            log('[notionally] ❌ No URL captured in localStorage');
                                         }
                                     }
                                     
@@ -1522,7 +1522,7 @@
             }
             
         } catch (error) {
-            console.error('[Notionally Investigation] Error:', error);
+            console.error('[notionally Investigation] Error:', error);
             showToast('❌ Investigation failed: ' + error.message, 'error');
         }
     }
@@ -1776,7 +1776,7 @@
     
     // Initialize the script
     async function init() {
-        log('Initializing Notionally...');
+        log('Initializing notionally...');
         
         // Check if local server is running
         const serverRunning = await checkServerStatus();
@@ -1905,7 +1905,7 @@
                         // Capture menu HTML for debugging (if enabled)
                         if (CONFIG.captureMenuHTML) {
                             setTimeout(() => {
-                                console.log('[Notionally] Dropdown menu HTML captured (enable captureMenuHTML in config to see)');
+                                console.log('[notionally] Dropdown menu HTML captured (enable captureMenuHTML in config to see)');
                             }, 200);
                         }
                         
@@ -2055,7 +2055,7 @@
                 }
             };
             
-            console.log('%c🔍 Notionally Investigation Mode Active', 'color: #667eea; font-weight: bold');
+            console.log('%c🔍 notionally Investigation Mode Active', 'color: #667eea; font-weight: bold');
             console.log('Available commands:');
             console.log('  window.notionally.analyzeCurrentPost() - Analyze hovered post');
             console.log('  window.notionally.analyzeAllPosts() - Analyze all visible posts');
@@ -2080,7 +2080,7 @@
             }
         }, 1000);
         
-        log('Notionally initialized successfully');
+        log('notionally initialized successfully');
         log('Features enabled:', {
             feedPosts: true,
             pulseArticles: CONFIG.pulseArticleSupport,

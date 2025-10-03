@@ -1,5 +1,5 @@
 /**
- * Notionally Server - LinkedIn to Notion Content Saver
+ * notionally Server - LinkedIn to Notion Content Saver
  * Modular architecture with service layer for better maintainability
  */
 
@@ -613,7 +613,7 @@ const HOST = process.env.HOST || config.get('server.host') || 'localhost';
 
 const server = app.listen(PORT, HOST, () => {
     console.log('');
-    console.log('🚀 Notionally Server Started');
+    console.log('🚀 notionally Server Started');
     console.log('=' .repeat(50));
     console.log(`📡 Server: http://${HOST}:${PORT}`);
     console.log(`📂 Dropbox: ${config.get('dropbox.localPath')}`);

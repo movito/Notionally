@@ -8,7 +8,7 @@ status: active
 
 # Development Documentation
 
-Guidelines, safeguards, and best practices for developing Notionally.
+Guidelines, safeguards, and best practices for developing notionally.
 
 ## Documents
 

@@ -27,7 +27,7 @@ Phase 3 validated SDK v5.1.0 upgrade through real API testing. All tests passed 
 ### Test Execution
 
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 node tests/test-sdk-v5-connection.js
 ```
 
@@ -284,7 +284,7 @@ Phase 3 complete and successful. Ready to proceed to:
 
 **Test Report Generated:** 2025-10-01
 **Tester:** Claude Code
-**Test Environment:** /Users/broadcaster_one/Github/Notionally/local-app
+**Test Environment:** /Users/broadcaster_one/Github/notionally/local-app
 **Branch:** feature/v2.0.0-notion-api-upgrade
 **SDK Version:** @notionhq/client v5.1.0
 **Test Status:** ✅ COMPLETE - ALL CRITICAL TESTS PASSED

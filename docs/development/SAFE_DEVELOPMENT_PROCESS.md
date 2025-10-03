@@ -1,4 +1,4 @@
-# Safe Development Process for Notionally
+# Safe Development Process for notionally
 
 ## The Three Commandments
 

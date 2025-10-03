@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Notionally will be documented in this file.
+All notable changes to notionally will be documented in this file.
 
 ## [2.0.0] - 2025-01-09
 

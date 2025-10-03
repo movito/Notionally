@@ -1,14 +1,14 @@
 ---
-title: Notionally Documentation Index
+title: notionally Documentation Index
 version: 1.0.0
 last_updated: 2025-01-10
 category: navigation
 status: active
 ---
 
-# Notionally Documentation Index
+# notionally Documentation Index
 
-Welcome to the Notionally documentation. This index provides quick access to all project documentation.
+Welcome to the notionally documentation. This index provides quick access to all project documentation.
 
 ## 🚀 Quick Links
 

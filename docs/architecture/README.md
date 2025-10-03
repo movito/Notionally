@@ -8,7 +8,7 @@ status: active
 
 # Architecture Documentation
 
-This directory contains core architecture and design documents for the Notionally project.
+This directory contains core architecture and design documents for the notionally project.
 
 ## Documents
 

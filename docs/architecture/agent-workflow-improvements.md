@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive strategy to improve agent coordination workflows in the Notionally project, focusing on context efficiency, reduced manual coordination, and sustainable development practices. Based on current industry best practices (2024-2025), we propose a phased approach combining structured task protocols, intelligent memory management, and progressive automation.
+This document outlines a comprehensive strategy to improve agent coordination workflows in the notionally project, focusing on context efficiency, reduced manual coordination, and sustainable development practices. Based on current industry best practices (2024-2025), we propose a phased approach combining structured task protocols, intelligent memory management, and progressive automation.
 
 ## Current State Analysis
 

@@ -55,7 +55,7 @@ function debugLog(category, level, message, data = null) {
     if (!DEBUG_CONFIG.categories[category]) return;
     if (level > DEBUG_CONFIG.verbosity) return;
     
-    const prefix = `[Notionally:${category}]`;
+    const prefix = `[notionally:${category}]`;
     const levelIcon = ['❌', '⚠️', 'ℹ️', '🔍', '📝'][level - 1];
     
     console.log(`${prefix} ${levelIcon} ${message}`);
@@ -452,8 +452,8 @@ function collectCommentData() {
     // Save to clipboard for analysis
     const dataStr = JSON.stringify(collectedData, null, 2);
     navigator.clipboard.writeText(dataStr).then(() => {
-        console.log('[Notionally] Comment data copied to clipboard!');
-        console.log('[Notionally] Paste into a file for analysis');
+        console.log('[notionally] Comment data copied to clipboard!');
+        console.log('[notionally] Paste into a file for analysis');
     });
     
     return collectedData;
@@ -593,7 +593,7 @@ window.notionally_debug = {
     }
 };
 
-console.log('[Notionally Debug] Commands available:');
+console.log('[notionally Debug] Commands available:');
 console.log('- notionally_debug.collectData()');
 console.log('- notionally_debug.analyzePost(index)');
 console.log('- notionally_debug.traceAuthors(index)');

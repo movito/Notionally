@@ -1,4 +1,4 @@
-# Notionally Project Status
+# notionally Project Status
 
 ## Current Branch: feature/v1.0.5
 **Date**: 2025-09-03

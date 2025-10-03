@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - Pulse Article Debug v1.11.1
+// @name         notionally - Pulse Article Debug v1.11.1
 // @namespace    http://tampermonkey.net/
 // @version      1.11.1-debug
 // @description  Debug version to find Pulse article buttons

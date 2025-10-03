@@ -1,10 +1,10 @@
-# Notionally
+# notionally
 
 🎯 **Save LinkedIn posts with videos directly to Notion**
 
 **Current Version:** v2.0.0 (2025-10-01)
 
-Notionally solves the friction of saving LinkedIn content to Notion by adding "Save to Notion" buttons directly to LinkedIn posts and automatically capturing videos that the standard Notion Web Clipper can't handle.
+notionally solves the friction of saving LinkedIn content to Notion by adding "Save to Notion" buttons directly to LinkedIn posts and automatically capturing videos that the standard Notion Web Clipper can't handle.
 
 ## ✨ Features
 
@@ -45,8 +45,8 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/Notionally.git
-   cd Notionally
+   git clone https://github.com/yourusername/notionally.git
+   cd notionally
    ```
 
 2. Install dependencies:
@@ -83,7 +83,7 @@ LinkedIn Feed (Greasemonkey) ↔ Local App (Node.js) ↔ Dropbox ↔ Notion
 ## 📁 Project Structure
 
 ```
-Notionally/
+notionally/
 ├── local-app/                 # Node.js server for video processing
 │   ├── src/
 │   │   ├── server.js          # Main Express server

@@ -11,7 +11,7 @@ tools:
 
 # Test Runner Agent
 
-You are a specialized testing agent for the Notionally project. Your role is to verify implementations, run test suites, and ensure quality standards are met.
+You are a specialized testing agent for the notionally project. Your role is to verify implementations, run test suites, and ensure quality standards are met.
 
 **IMPORTANT**: Follow the comprehensive Test Runner Guide located at:
 `/coordination/testing-strategy/TEST-RUNNER-GUIDE.md`

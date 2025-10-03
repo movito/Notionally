@@ -222,7 +222,7 @@ open('http://localhost:8765/install-script');
 
 ## Recommendation
 
-### For Notionally v1.1.0: **Start with CLI, Plan for Web UI**
+### For notionally v1.1.0: **Start with CLI, Plan for Web UI**
 
 **Rationale:**
 1. **Quick Win**: Get interactive setup shipped fast

@@ -1,7 +1,7 @@
 {
   "name": "notionally-local-app",
   "version": "3.0.0",
-  "description": "Local processing app for Notionally - LinkedIn to Notion video saver",
+  "description": "Local processing app for notionally - LinkedIn to Notion video saver",
   "main": "src/server.js",
   "scripts": {
     "start": "./scripts/start.sh",

@@ -1,4 +1,4 @@
-# Notionally Protection Summary
+# notionally Protection Summary
 
 ## Current State: PROTECTED ✅
 

@@ -245,7 +245,7 @@ npm run check-versions
 
 **Test 2.2a: NotionClient Module Loading**
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 node -e "const NC = require('./src/notion-client.js'); console.log('✅ NotionClient loaded');"
 ```
 
@@ -260,7 +260,7 @@ node -e "const NC = require('./src/notion-client.js'); console.log('✅ NotionCl
 
 **Test 2.2b: ConfigManager Module Loading**
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 node -e "const CM = require('./src/config/ConfigManager.js'); console.log('✅ ConfigManager loaded');"
 ```
 
@@ -285,14 +285,14 @@ node -e "const CM = require('./src/config/ConfigManager.js'); console.log('✅ C
 ### Test Execution
 
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 npm list @notionhq/client
 ```
 
 ### Output
 
 ```
-notionally-local-app@2.0.0 /Users/broadcaster_one/Github/Notionally/local-app
+notionally-local-app@2.0.0 /Users/broadcaster_one/Github/notionally/local-app
 └── @notionhq/client@5.1.0
 ```
 
@@ -314,7 +314,7 @@ notionally-local-app@2.0.0 /Users/broadcaster_one/Github/Notionally/local-app
 
 **Test 2.4a: NotionClient Syntax Check**
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 node --check src/notion-client.js
 ```
 
@@ -326,7 +326,7 @@ node --check src/notion-client.js
 
 **Test 2.4b: ConfigManager Syntax Check**
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 node --check src/config/ConfigManager.js
 ```
 
@@ -345,7 +345,7 @@ node --check src/config/ConfigManager.js
 ### Test Execution
 
 ```bash
-cd /Users/broadcaster_one/Github/Notionally/local-app
+cd /Users/broadcaster_one/Github/notionally/local-app
 node -e "
 const NotionClient = require('./src/notion-client.js');
 
@@ -455,4 +455,4 @@ Phase 2 baseline testing complete. Ready to proceed to Phase 3 (Integration Test
 
 **Test Report Generated:** 2025-10-01
 **Tester:** Claude Code
-**Test Environment:** /Users/broadcaster_one/Github/Notionally/local-app
+**Test Environment:** /Users/broadcaster_one/Github/notionally/local-app

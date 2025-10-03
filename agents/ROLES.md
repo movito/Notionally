@@ -1,4 +1,4 @@
-# Agent Roles for Notionally
+# Agent Roles for notionally
 
 ## To use a role:
 Add this to your prompt: "Act as [role-name]"

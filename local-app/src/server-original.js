@@ -838,7 +838,7 @@ app.use('*', (req, res) => {
 
 // Start server with error handling
 const server = app.listen(port, config.server.host, () => {
-    console.log('🚀 Notionally Local App Started');
+    console.log('🚀 notionally Local App Started');
     console.log(`📡 Server running at http://${config.server.host}:${port}`);
     console.log(`📂 Dropbox folder: ${config.dropbox.localPath}`);
     console.log('🔗 Notion integration ready');

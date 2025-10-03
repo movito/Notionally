@@ -41,7 +41,7 @@ Every script MUST include these elements in the header:
 
 ```javascript
 // ==UserScript==
-// @name         Notionally - [Description]
+// @name         notionally - [Description]
 // @namespace    http://tampermonkey.net/
 // @version      MAJOR.MINOR.PATCH
 // @description  [Brief description]

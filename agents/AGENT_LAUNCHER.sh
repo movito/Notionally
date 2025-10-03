@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Notionally Multi-Agent Launcher v2.0.0
-# Launch specialized agents for the Notionally project
+# notionally Multi-Agent Launcher v2.0.0
+# Launch specialized agents for the notionally project
 
 AGENTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$AGENTS_DIR")"
@@ -24,7 +24,7 @@ declare -A AGENTS=(
 # Display header
 display_header() {
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}   Notionally Multi-Agent System v2.0.0${NC}"
+    echo -e "${BLUE}   notionally Multi-Agent System v2.0.0${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo
 }
@@ -112,7 +112,7 @@ main_menu() {
 
 # Check if running from correct directory
 if [[ ! -f "$PROJECT_ROOT/local-app/package.json" ]]; then
-    echo -e "${RED}Error: This script must be run from the Notionally project${NC}"
+    echo -e "${RED}Error: This script must be run from the notionally project${NC}"
     exit 1
 fi
 

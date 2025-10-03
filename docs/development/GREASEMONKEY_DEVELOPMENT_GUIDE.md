@@ -9,13 +9,13 @@ status: active
 # Greasemonkey Script Development Guide
 
 ## Overview
-This guide explains how to develop, test, and deploy Greasemonkey scripts for Notionally, specifically for the v1.2.0 links-from-comments feature.
+This guide explains how to develop, test, and deploy Greasemonkey scripts for notionally, specifically for the v1.2.0 links-from-comments feature.
 
 ## Prerequisites
 
 1. **Firefox Browser** (recommended) or Chrome with Tampermonkey
 2. **Greasemonkey Extension** installed from Firefox Add-ons
-3. **Local Notionally server** running on port 8765
+3. **Local notionally server** running on port 8765
 4. **LinkedIn account** for testing
 
 ## Development Workflow
@@ -33,19 +33,19 @@ This guide explains how to develop, test, and deploy Greasemonkey scripts for No
 1. Open Greasemonkey dashboard (click monkey icon → "Manage scripts")
 2. Click "New user script" or "+"
 3. Copy contents from `greasemonkey-script/linkedin-notion-saver.user.js`
-4. Save as "Notionally - LinkedIn to Notion Saver"
+4. Save as "notionally - LinkedIn to Notion Saver"
 
 ### 2. Creating Debug Version
 
 #### A. Duplicate for Development
-1. In Greasemonkey dashboard, find the Notionally script
+1. In Greasemonkey dashboard, find the notionally script
 2. Click "Edit" to open in editor
-3. Save As → "Notionally - DEBUG"
+3. Save As → "notionally - DEBUG"
 4. Update the header:
 
 ```javascript
 // ==UserScript==
-// @name         Notionally - DEBUG - Links from Comments
+// @name         notionally - DEBUG - Links from Comments
 // @namespace    http://tampermonkey.net/
 // @version      1.6.1-debug
 // @description  Debug version for comment extraction investigation
@@ -86,8 +86,8 @@ const DEBUG_CONFIG = {
 
 // Override production logging if in debug mode
 if (DEBUG_MODE) {
-    console.log(`[Notionally] Debug mode enabled - Version ${DEBUG_VERSION}`);
-    console.log('[Notionally] Debug config:', DEBUG_CONFIG);
+    console.log(`[notionally] Debug mode enabled - Version ${DEBUG_VERSION}`);
+    console.log('[notionally] Debug config:', DEBUG_CONFIG);
 }
 ```
 
@@ -137,7 +137,7 @@ function createDebugPanel() {
             z-index: 10000;
             max-width: 400px;
         ">
-            <h3 style="margin: 0 0 10px 0;">🔍 Notionally Debug</h3>
+            <h3 style="margin: 0 0 10px 0;">🔍 notionally Debug</h3>
             <div id="notionally-debug-info">Ready</div>
             <div style="margin-top: 10px;">
                 <button onclick="notionally_debug.collectData()" style="margin-right: 5px;">Collect Data</button>
@@ -233,7 +233,7 @@ cp greasemonkey-script/linkedin-notion-saver.user.js \
 #### Issue: Script Not Loading
 ```javascript
 // Check if script is active
-console.log('[Notionally] Script loaded:', typeof extractPostData === 'function');
+console.log('[notionally] Script loaded:', typeof extractPostData === 'function');
 
 // Check for conflicts
 console.log('Other scripts:', GM_info.script.matches);
@@ -347,7 +347,7 @@ If issues occur in production:
 // Intercept fetch requests
 const originalFetch = window.fetch;
 window.fetch = function(...args) {
-    console.log('[Notionally] Fetch:', args[0]);
+    console.log('[notionally] Fetch:', args[0]);
     return originalFetch.apply(this, args);
 };
 ```

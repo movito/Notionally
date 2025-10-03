@@ -1,4 +1,4 @@
-# Notionally Greasemonkey Scripts
+# notionally Greasemonkey Scripts
 
 ## ✅ Current Status: v1.13.0 WORKS! 
 

@@ -142,7 +142,7 @@ MutationObserver is powerful but dangerous:
 Instead of monolithic script, use plugins:
 
 ```javascript
-class NotionallyCore {
+class notionallyCore {
     constructor() {
         this.plugins = [];
     }

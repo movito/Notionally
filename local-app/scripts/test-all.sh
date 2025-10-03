@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Comprehensive Test Suite for Notionally
+# Comprehensive Test Suite for notionally
 # Runs all available tests for test-runner agent
 
-echo "🧪 Notionally Comprehensive Test Suite"
+echo "🧪 notionally Comprehensive Test Suite"
 echo "======================================="
 echo "Version: v1.1.0"
 echo "Date: $(date)"

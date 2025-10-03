@@ -1,15 +1,15 @@
 ---
-title: Notionally - Project Context for Claude
+title: notionally - Project Context for Claude
 version: 2.0.0
 last_updated: 2025-01-10
 category: architecture
 status: active
 ---
 
-# Notionally - Project Context for Claude
+# notionally - Project Context for Claude
 
 ## Project Overview
-Notionally is a tool that captures LinkedIn posts (including embedded videos) and saves them directly to Notion. It addresses the limitation of Notion's Web Clipper which cannot handle video content from LinkedIn posts.
+notionally is a tool that captures LinkedIn posts (including embedded videos) and saves them directly to Notion. It addresses the limitation of Notion's Web Clipper which cannot handle video content from LinkedIn posts.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ LinkedIn Feed → Greasemonkey Script → Local Node.js Server → Dropbox → N
 5. **Notion Client** (`local-app/src/notion-client.js`)
    - Creates Notion pages with LinkedIn post content
    - Embeds videos using Dropbox shareable links
-   - Maps to existing Notion database schema with additional Notionally-specific fields
+   - Maps to existing Notion database schema with additional notionally-specific fields
 
 ## Notion Database Schema
 
@@ -58,7 +58,7 @@ LinkedIn Feed → Greasemonkey Script → Local Node.js Server → Dropbox → N
 - **Type** (select): Set to "LinkedIn Post"
 - **Tags** (multi_select): LinkedIn, Video (if applicable), Author name
 
-### Notionally-Specific Fields
+### notionally-Specific Fields
 - **Author** (rich_text): Post author name
 - **Has Video** (checkbox): Whether post contains video
 - **Video Count** (number): Number of videos in post

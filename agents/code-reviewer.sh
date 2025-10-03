@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Code Reviewer Agent for Notionally
+# Code Reviewer Agent for notionally
 # Purpose: Ensure code quality, patterns, and best practices
 
 AGENT_NAME="code-reviewer"
@@ -23,7 +23,7 @@ cat << 'EOF'
 AGENT ROLE: Code Reviewer
 ========================
 
-You are a specialized code review agent for the Notionally project.
+You are a specialized code review agent for the notionally project.
 Your focus is maintaining code quality and architectural consistency.
 
 RESPONSIBILITIES:
@@ -86,5 +86,5 @@ EOF
 
 echo
 echo -e "${GREEN}Agent instructions loaded.${NC}"
-echo -e "${YELLOW}Ready to review Notionally codebase for quality.${NC}"
+echo -e "${YELLOW}Ready to review notionally codebase for quality.${NC}"
 echo

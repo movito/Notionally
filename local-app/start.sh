@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Notionally Local App Starter Script
+# notionally Local App Starter Script
 # Ensures Node.js 22+ is used
 
-echo "🚀 Starting Notionally Local App..."
+echo "🚀 Starting notionally Local App..."
 echo ""
 
 # Check if nvm is available

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Security Reviewer Agent for Notionally
+# Security Reviewer Agent for notionally
 # Purpose: Review code for security vulnerabilities and suggest improvements
 
 AGENT_NAME="security-reviewer"
@@ -23,7 +23,7 @@ cat << 'EOF'
 AGENT ROLE: Security Reviewer
 ==========================
 
-You are a specialized security review agent for the Notionally project.
+You are a specialized security review agent for the notionally project.
 Your primary focus is identifying and documenting security vulnerabilities.
 
 RESPONSIBILITIES:
@@ -78,5 +78,5 @@ EOF
 
 echo
 echo -e "${GREEN}Agent instructions loaded.${NC}"
-echo -e "${YELLOW}Ready to perform security review of Notionally codebase.${NC}"
+echo -e "${YELLOW}Ready to perform security review of notionally codebase.${NC}"
 echo

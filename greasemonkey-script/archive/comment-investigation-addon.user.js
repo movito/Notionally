@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - Comment Investigation Add-on
+// @name         notionally - Comment Investigation Add-on
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0
 // @description  Add-on for investigating LinkedIn comments - works alongside main Notionally script
@@ -28,7 +28,7 @@
     
     // Debug logging with unique prefix
     function log(...args) {
-        console.log(`[Notionally Investigation v${INVESTIGATION_VERSION}]`, ...args);
+        console.log(`[notionally Investigation v${INVESTIGATION_VERSION}]`, ...args);
     }
     
     log('Investigation add-on loaded');

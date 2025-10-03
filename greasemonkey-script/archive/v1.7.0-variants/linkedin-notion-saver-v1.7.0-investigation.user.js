@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Notionally - Investigation Mode
+// @name         notionally - Investigation Mode
 // @namespace    http://tampermonkey.net/
 // @version      1.7.0-investigation
 // @description  Investigation version with comment extraction debugging
@@ -27,7 +27,7 @@
     
     // Debug logging
     function log(...args) {
-        console.log('[Notionally Investigation]', ...args);
+        console.log('[notionally Investigation]', ...args);
     }
     
     // ============================================

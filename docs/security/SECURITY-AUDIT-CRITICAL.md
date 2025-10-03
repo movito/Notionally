@@ -2,7 +2,7 @@
 
 **Date:** January 9, 2025  
 **Severity:** CRITICAL  
-**Project:** Notionally  
+**Project:** notionally  
 
 ## ⚠️ CRITICAL SECURITY ISSUES DISCOVERED
 
@@ -354,7 +354,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Notionally API',
+      title: 'notionally API',
       version: '2.0.0',
     },
   },

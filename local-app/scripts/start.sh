@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Notionally Production Server Starter
+# notionally Production Server Starter
 # Automatically kills any existing process on port before starting
 
 PORT=${PORT:-8765}
@@ -27,7 +27,7 @@ else
     echo -e "${GREEN}✅ Port $PORT is available${NC}"
 fi
 
-echo -e "${GREEN}🚀 Starting Notionally server on port $PORT...${NC}"
+echo -e "${GREEN}🚀 Starting notionally server on port $PORT...${NC}"
 echo ""
 
 # Start the server

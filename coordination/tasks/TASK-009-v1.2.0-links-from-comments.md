@@ -18,7 +18,7 @@ LinkedIn penalizes posts with external links by reducing their reach. Authors co
 2. Immediately commenting with "Link in comments 👇"
 3. Including actual links in their comment
 
-Currently, Notionally only captures the main post, missing these valuable links.
+Currently, notionally only captures the main post, missing these valuable links.
 
 ## Requirements
 

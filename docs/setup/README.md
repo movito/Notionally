@@ -8,7 +8,7 @@ status: active
 
 # Setup and Configuration Documentation
 
-Installation, setup, and configuration guides for Notionally.
+Installation, setup, and configuration guides for notionally.
 
 ## Documents
 
@@ -46,7 +46,7 @@ Installation, setup, and configuration guides for Notionally.
 1. **Clone and Install**
 ```bash
 git clone https://github.com/yourusername/Notionally.git
-cd Notionally/local-app
+cd notionally/local-app
 npm install
 ```
 

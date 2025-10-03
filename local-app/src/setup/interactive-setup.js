@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Interactive Setup Wizard for Notionally
+ * Interactive Setup Wizard for notionally
  * For technical users comfortable with CLI
  */
 
@@ -54,7 +54,7 @@ function showWelcome() {
   console.log(bold.cyan(`
 ╔══════════════════════════════════════════╗
 ║                                          ║
-║        Welcome to Notionally Setup       ║
+║        Welcome to notionally Setup       ║
 ║                                          ║
 ║    Save LinkedIn posts to Notion 🚀      ║
 ║                                          ║
@@ -102,7 +102,7 @@ async function setupNotion() {
   console.log('First, create a Notion integration:');
   console.log(info('1. Open: https://www.notion.so/my-integrations'));
   console.log(info('2. Click "New Integration"'));
-  console.log(info('3. Name it "Notionally" and copy the API key\n'));
+  console.log(info('3. Name it "notionally" and copy the API key\n'));
   
   const notionAnswers = await inquirer.prompt([
     {
