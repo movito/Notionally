@@ -655,7 +655,7 @@ class NotionClient {
                 // Keep existing logic for feed posts
                 console.log('📄 Processing feed post content as paragraphs');
                 // Split long content into paragraphs
-                const paragraphs = pageData.content.split('\\n\\n').filter(p => p.trim());
+                const paragraphs = pageData.content.split('\n\n').filter(p => p.trim());
                 
                 paragraphs.forEach(paragraph => {
                 // Notion has a 2000 character limit per text block
@@ -685,19 +685,22 @@ class NotionClient {
                         // Try to split at a sentence or word boundary
                         let splitPoint = maxLength;
                         if (remainingText.length > maxLength) {
-                            // Look for sentence end
-                            const sentenceEnd = remainingText.lastIndexOf('. ', maxLength);
+                            // Look for sentence end (search up to maxLength-2 to account for '. ' being 2 chars)
+                            const sentenceEnd = remainingText.lastIndexOf('. ', maxLength - 2);
                             if (sentenceEnd > maxLength * 0.7) {
                                 splitPoint = sentenceEnd + 1;
                             } else {
                                 // Look for word boundary
-                                const wordEnd = remainingText.lastIndexOf(' ', maxLength);
+                                const wordEnd = remainingText.lastIndexOf(' ', maxLength - 1);
                                 if (wordEnd > maxLength * 0.7) {
                                     splitPoint = wordEnd;
                                 }
                             }
                         }
-                        
+
+                        // Ensure splitPoint never exceeds maxLength
+                        splitPoint = Math.min(splitPoint, maxLength);
+
                         const chunk = remainingText.substring(0, splitPoint).trim();
                         remainingText = remainingText.substring(splitPoint).trim();
                         
